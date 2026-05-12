@@ -34,6 +34,8 @@ export default {
     areastats: '地区统计',
     dashboard: '平台统计',
     Account: '账号/IP管理',
+    renew: '账号续费',
+    billingPackages: '收费套餐',
 
     download: '数据下载',
     log: '日记管理',
@@ -239,7 +241,8 @@ export default {
     logOut: '退出登录',
     profile: '个人中心',
     theme: '换肤',
-    size: '布局大小'
+    size: '布局大小',
+    renew: '点击续费'
   },
   login: {
     title: 'HAM互联',

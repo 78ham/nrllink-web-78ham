@@ -34,6 +34,8 @@ export default {
     areastats: 'Area Statistics',
     dashboard: 'Platform Statistics',
     Account: 'Account/IP Management',
+    renew: 'Renew Account',
+    billingPackages: 'Billing Packages',
 
     download: 'Data Download',
     log: 'Log Management',
@@ -239,7 +241,8 @@ export default {
     logOut: 'Log Out',
     profile: 'Profile',
     theme: 'Theme',
-    size: 'Layout Size'
+    size: 'Layout Size',
+    renew: 'Click to renew'
   },
   login: {
     title: 'HAM Interconnect',

@@ -189,6 +189,26 @@ export const asyncRoutes = [
   },
 
   {
+    path: '/renew',
+    component: Layout,
+    redirect: '/renew/index',
+    hidden: true,
+    meta: { requiresBilling: true },
+    children: [{
+      path: 'index',
+      component: () =>
+        import('@/views/renew/index.vue'),
+      name: 'Renew',
+      meta: {
+        title: 'renew',
+        icon: 'money',
+        roles: ['ham'],
+        requiresBilling: true
+      }
+    }]
+  },
+
+  {
     path: '/setup',
     component: Layout,
     redirect: '/setup/users',
@@ -241,6 +261,16 @@ export const asyncRoutes = [
         meta: {
           title: 'register',
           roles: ['admin'] // or you can only set roles in sub nav
+        }
+      },
+      {
+        path: 'billing-packages',
+        component: () =>
+          import('@/views/setup/billing-packages.vue'),
+        name: 'BillingPackages',
+        meta: {
+          title: 'billingPackages',
+          roles: ['admin']
         }
       },
       {

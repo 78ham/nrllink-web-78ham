@@ -17,6 +17,7 @@ declare module 'vue' {
     DragSelect: typeof import('./components/DragSelect/index.vue')['default']
     DropdownMenu: typeof import('./components/Share/DropdownMenu.vue')['default']
     Dropzone: typeof import('./components/Dropzone/index.vue')['default']
+    ElAlert: typeof import('element-plus/es')['ElAlert']
     ElBreadcrumb: typeof import('element-plus/es')['ElBreadcrumb']
     ElBreadcrumbItem: typeof import('element-plus/es')['ElBreadcrumbItem']
     ElButton: typeof import('element-plus/es')['ElButton']

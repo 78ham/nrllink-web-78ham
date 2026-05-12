@@ -15,18 +15,33 @@ function hasPermission(roles, route) {
 }
 
 /**
+ * Use meta.requiresBilling to hide billing-related routes when the
+ * server has not enabled the paid renew feature.
+ * @param billingEnabled
+ * @param route
+ */
+function billingAllowed(billingEnabled, route) {
+  if (route.meta && route.meta.requiresBilling) {
+    return !!billingEnabled
+  }
+  return true
+}
+
+/**
  * Filter asynchronous routing tables by recursion
  * @param routes asyncRoutes
- * @param roles
+ * @param roles  array of roles, or null to skip the role check (admin)
+ * @param billingEnabled
  */
-export function filterAsyncRoutes(routes, roles) {
+export function filterAsyncRoutes(routes, roles, billingEnabled) {
   const res = []
 
   routes.forEach(route => {
     const tmp = { ...route }
-    if (hasPermission(roles, tmp)) {
+    const rolePassed = roles === null || hasPermission(roles, tmp)
+    if (rolePassed && billingAllowed(billingEnabled, tmp)) {
       if (tmp.children) {
-        tmp.children = filterAsyncRoutes(tmp.children, roles)
+        tmp.children = filterAsyncRoutes(tmp.children, roles, billingEnabled)
       }
       res.push(tmp)
     }
@@ -41,13 +56,9 @@ export const usePermissionStore = defineStore('permission', {
     addRoutes: []
   }),
   actions: {
-    generateRoutes(roles) {
-      let accessedRoutes
-      if (roles.includes('admin')) {
-        accessedRoutes = asyncRoutes || []
-      } else {
-        accessedRoutes = filterAsyncRoutes(asyncRoutes, roles)
-      }
+    generateRoutes(roles, billingEnabled = false) {
+      const roleFilter = roles.includes('admin') ? null : roles
+      const accessedRoutes = filterAsyncRoutes(asyncRoutes || [], roleFilter, billingEnabled)
       this.addRoutes = accessedRoutes
       this.routes = constantRoutes.concat(accessedRoutes)
       return accessedRoutes

@@ -159,6 +159,12 @@
           </template>
         </el-table-column>
 
+        <el-table-column label="到期时间" width="170" align="center">
+          <template #default="scope">
+            <span>{{ scope.row.expire_time || '未设置' }}</span>
+          </template>
+        </el-table-column>
+
         <el-table-column :label="$t('employee.status')" width="100" align="center">
           <template #default="scope">
             <el-tag :class="statusClass(scope.row.status)" class="user-status-tag">{{ statusFilter(scope.row.status) }}</el-tag>
@@ -212,6 +218,7 @@
           <div class="users-card__row"><span class="users-card__label">{{ $t('employee.birthday') }}</span><span class="users-card__value">{{ item.birthday || '--' }}</span></div>
           <div class="users-card__row users-card__row--stack"><span class="users-card__label">{{ $t('employee.address') }}</span><p class="users-card__note">{{ item.address || '--' }}</p></div>
           <div class="users-card__row"><span class="users-card__label">{{ $t('employee.last_login_time') }}</span><span class="users-card__value">{{ item.last_login_time || '--' }}</span></div>
+          <div class="users-card__row"><span class="users-card__label">到期时间</span><span class="users-card__value">{{ item.expire_time || '未设置' }}</span></div>
           <div class="users-card__row users-card__row--stack"><span class="users-card__label">{{ $t('employee.msg') }}</span><div class="tag-wrap"><el-tag v-if="item.recharge_msg" class="msg-tag msg-tag-bas">BAS</el-tag><el-tag v-if="item.sign_msg" class="msg-tag msg-tag-app">APP</el-tag><span v-if="!item.recharge_msg && !item.sign_msg" class="table-empty-value">--</span></div></div>
         </div>
         <div class="users-card__actions">
@@ -263,6 +270,15 @@
             value-format="YYYY-MM-DD"
             type="date"
             placeholder="请选择生日"
+          />
+        </el-form-item>
+
+        <el-form-item label="账号到期" prop="expire_time">
+          <el-date-picker
+            v-model="temp.expire_time"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            type="datetime"
+            placeholder="请选择账号到期时间"
           />
         </el-form-item>
 
@@ -378,6 +394,7 @@ export default {
         dmrid: '',
         mdcid: '',
         gird: '',
+        expire_time: '',
         alarm_msg: false
       },
       roles: [],
@@ -482,6 +499,7 @@ export default {
         dmrid: '',
         mdcid: '',
         gird: '',
+        expire_time: '',
         alarm_msg: false
       }
     },

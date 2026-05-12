@@ -13,6 +13,15 @@
       <template v-if="device!=='mobile'">
         <div class="right-menu-item">{{ name }}</div>
         <div class="right-menu-item">{{ callsign }}</div>
+        <button
+          v-if="billingEnabled"
+          class="expire-toggle right-menu-item hover-effect"
+          :class="`expire-toggle--${expireLevel}`"
+          :title="$t('navbar.renew')"
+          @click="goRenew"
+        >
+          {{ expireText }}
+        </button>
 
         <button class="lang-toggle right-menu-item hover-effect" @click="toggleLanguage">
           {{ language === 'zh' ? 'EN' : '中' }}
@@ -100,6 +109,24 @@ export default {
     const name = computed(() => userStore.name)
     const callsign = computed(() => userStore.callsign)
     const avatar = computed(() => userStore.avatar)
+    const billingEnabled = computed(() => userStore.billing_enabled)
+    const expireText = computed(() => {
+      const v = userStore.expire_time
+      if (!v) return '--'
+      const m = String(v).match(/^\d{4}-\d{2}-\d{2}/)
+      return m ? m[0] : String(v)
+    })
+    // 距到期 <= 1 周或已过期：红色(danger)；<= 1 个月：黄色(warning)；其余：正常(ok)
+    const expireLevel = computed(() => {
+      const v = userStore.expire_time
+      if (!v) return 'ok'
+      const t = new Date(String(v).replace(' ', 'T')).getTime()
+      if (Number.isNaN(t)) return 'ok'
+      const days = (t - Date.now()) / 86400000
+      if (days <= 7) return 'danger'
+      if (days <= 30) return 'warning'
+      return 'ok'
+    })
     const platformThemeKey = computed(() => settingsStore.platformThemeKey)
     const currentTheme = computed(() => themes[platformThemeKey.value] || themes.default)
 
@@ -123,6 +150,10 @@ export default {
       router.push(`/login?redirect=${window.location.pathname}`)
     }
 
+    const goRenew = () => {
+      router.push('/renew/index')
+    }
+
     return {
       sidebar,
       device,
@@ -130,12 +161,16 @@ export default {
       name,
       callsign,
       avatar,
+      billingEnabled,
+      expireText,
+      expireLevel,
       platformThemeKey,
       currentTheme,
       toggleSideBar,
       toggleLanguage,
       switchTheme,
-      logout
+      logout,
+      goRenew
     }
   }
 }
@@ -272,6 +307,42 @@ export default {
       &:hover {
         border-color: var(--platform-border-strong);
         color: var(--platform-ink);
+      }
+    }
+
+    .expire-toggle {
+      appearance: none;
+      border: 1px solid var(--platform-border);
+      border-radius: 999px;
+      background: var(--platform-surface);
+      color: var(--platform-ink-dim);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 0 14px;
+      height: 36px;
+      margin: 0 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      transition: all 0.2s ease;
+
+      &:hover {
+        border-color: var(--platform-border-strong);
+        color: var(--platform-ink);
+      }
+
+      &.expire-toggle--warning {
+        color: #ffe08a;
+        border-color: rgba(255, 196, 61, 0.45);
+        background: rgba(89, 66, 17, 0.28);
+      }
+
+      &.expire-toggle--danger {
+        color: #ffb7c8;
+        border-color: rgba(255, 116, 145, 0.45);
+        background: rgba(89, 28, 45, 0.28);
       }
     }
 
