@@ -44,7 +44,6 @@
             <h3 class="ann-title">{{ ann.title }}</h3>
           </div>
           <p v-if="ann.summary" class="ann-summary">{{ ann.summary }}</p>
-          <div v-if="ann.content" class="ann-content" v-html="ann.content" />
           <footer class="ann-meta">
             <time>{{ ann.publish_time }}</time>
           </footer>

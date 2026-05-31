@@ -65,7 +65,6 @@
         style="width: 100%"
         @sort-change="sortChange"
       >
-      >
         <el-table-column fixed :label="$t('Account.id')" prop="id" sortable="custom" align="center" width="110">
           <template #default="scope">
             <span>{{ scope.row.id }}</span>
@@ -1233,7 +1232,7 @@ export default {
         // this.handleFilter()
 
         this.listLoading = false
-      })
+      }).catch(() => { this.listLoading = false })
     },
 
     normalizeChanName(chanName) {

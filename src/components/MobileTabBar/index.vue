@@ -28,9 +28,9 @@ export default {
 
     const tabs = [
       { path: '/dashboard', icon: '🏠', label: 'route.dashboard', fallback: '首页' },
-      { path: '/pub/totaldevices', icon: '📡', label: 'route.totaldevices', fallback: '设备' },
-      { path: '/pub/groups', icon: '👥', label: 'route.grouproom', fallback: '群组' },
-      { path: '/pub/relay', icon: '🗼', label: 'route.relay', fallback: '中继' },
+      { path: '/public/totaldevices', icon: '📡', label: 'route.totaldevices', fallback: '设备' },
+      { path: '/public/groups', icon: '👥', label: 'route.grouproom', fallback: '群组' },
+      { path: '/public/relay', icon: '🗼', label: 'route.relay', fallback: '中继' },
       { path: '/profile/index', icon: '👤', label: 'route.profile', fallback: '我的' }
     ]
 

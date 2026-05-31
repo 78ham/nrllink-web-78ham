@@ -68,6 +68,15 @@
           </template>
         </el-dropdown>
       </template>
+      <template v-if="device==='mobile'">
+        <img :src="avatar+'?imageView2/1/w/80/h/80'" class="mobile-avatar">
+        <button class="lang-toggle right-menu-item hover-effect" @click="toggleLanguage">
+          {{ language === 'zh' ? 'EN' : '中' }}
+        </button>
+        <button class="mobile-logout right-menu-item hover-effect" @click="logout">
+          <el-icon><SwitchButton /></el-icon>
+        </button>
+      </template>
     </div>
   </div>
 </template>
@@ -85,13 +94,14 @@ import Hamburger from '@/components/Hamburger/index.vue'
 import { computed } from 'vue'
 import { setI18nLanguage } from '@/lang'
 import router from '@/router'
-import { Check } from '@element-plus/icons-vue'
+import { Check, SwitchButton } from '@element-plus/icons-vue'
 
 export default {
   components: {
     Breadcrumb,
     Hamburger,
-    Check
+    Check,
+    SwitchButton
   },
   data() {
     return {
@@ -404,6 +414,26 @@ export default {
           font-size: 12px;
         }
       }
+    }
+
+    .mobile-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .mobile-logout {
+      appearance: none;
+      border: none;
+      background: transparent;
+      color: var(--platform-ink-dim);
+      cursor: pointer;
+      font-size: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 8px;
     }
   }
 }

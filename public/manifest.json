@@ -59,14 +59,14 @@
     {
       "name": "设备列表",
       "short_name": "设备",
-      "url": "/#/pub/totaldevices",
-      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
+      "url": "/#/public/totaldevices",
+      "icons": [{ "src": "/icons/icon-96x96.svg", "sizes": "96x96", "type": "image/svg+xml" }]
     },
     {
       "name": "群组",
       "short_name": "群组",
-      "url": "/#/pub/groups",
-      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
+      "url": "/#/public/groups",
+      "icons": [{ "src": "/icons/icon-96x96.svg", "sizes": "96x96", "type": "image/svg+xml" }]
     }
   ]
 }

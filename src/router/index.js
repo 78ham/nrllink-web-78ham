@@ -136,7 +136,7 @@ export const asyncRoutes = [
   {
     path: '/public',
     component: Layout,
-    redirect: '/pub/device',
+    redirect: '/public/totaldevices',
     alwaysShow: true, // will always show the root menu
     name: 'devgroup',
     meta: {

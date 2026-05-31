@@ -183,12 +183,6 @@ export default {
   },
 
   created() {
-    if (this.device === 'mobile') {
-      this.showtable = false
-    } else {
-      this.showtable = true
-    }
-
     this.syncDialogScreenMode()
     this.getList()
 
@@ -222,7 +216,7 @@ export default {
           ...group,
           devlist: Array.isArray(group.devlist) ? group.devlist : []
         }))
-      })
+      }).catch(() => {})
     },
 
     handleFilter() {
@@ -349,12 +343,7 @@ export default {
     },
 
     hasindevlist(id, devlist) {
-      for (const i in devlist) {
-        if (devlist[i].id === id) {
-          return true
-        }
-      }
-      return false
+      return Object.values(devlist || {}).some(item => item.id === id)
     },
 
     hasin(id, array) {

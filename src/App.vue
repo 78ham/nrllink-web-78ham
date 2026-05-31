@@ -1,6 +1,6 @@
 <template>
   <el-config-provider :size="elementSize" :locale="elementLocale">
-    <div id="app" :class="{ 'is-mobile': isMobile }">
+    <div id="app">
       <router-view />
     </div>
   </el-config-provider>
@@ -12,7 +12,6 @@ import elementEnLocale from 'element-plus/es/locale/lang/en'
 import elementZhLocale from 'element-plus/es/locale/lang/zh-cn'
 import { mapState } from 'pinia'
 import { useAppStore } from '@/store/modules/app'
-import { computed } from 'vue'
 
 export default {
   name: 'App',
@@ -33,7 +32,7 @@ export default {
       return this.language === 'zh' ? elementZhLocale : elementEnLocale
     },
     isMobile() {
-      return this.$attrs && false // placeholder
+      return false
     }
   },
   mounted() {
@@ -42,11 +41,7 @@ export default {
   methods: {
     registerServiceWorker() {
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').catch(() => {
-            // SW registration failed, ignore silently
-          })
-        })
+        navigator.serviceWorker.register('/sw.js').catch(() => {})
       }
     }
   }
