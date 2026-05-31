@@ -67,6 +67,9 @@ export default defineConfig(({ mode }) => {
             }
             return undefined
           }
+        },
+        input: {
+          main: 'index.html'
         }
       },
       chunkSizeWarningLimit: 800

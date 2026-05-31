@@ -19,5 +19,7 @@ selenium-debug.log
 *.sln
 *.local
 .yarn
+.claude
+.codex
 
 yarn.lock

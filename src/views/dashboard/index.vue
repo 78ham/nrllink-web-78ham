@@ -31,6 +31,26 @@
         </div>
       </section>
 
+      <!-- Homepage announcements from CMS -->
+      <section v-if="announcements.length" class="dashboard-announcements">
+        <article
+          v-for="ann in announcements"
+          :key="ann.id"
+          class="announcement-card"
+        >
+          <div class="ann-header">
+            <span v-if="ann.is_pinned" class="ann-pin">置顶</span>
+            <span class="ann-type">{{ annTypeLabel(ann.type) }}</span>
+            <h3 class="ann-title">{{ ann.title }}</h3>
+          </div>
+          <p v-if="ann.summary" class="ann-summary">{{ ann.summary }}</p>
+          <div v-if="ann.content" class="ann-content" v-html="ann.content" />
+          <footer class="ann-meta">
+            <time>{{ ann.publish_time }}</time>
+          </footer>
+        </article>
+      </section>
+
       <section class="dashboard-grid">
         <div class="monitor-panel-content">
           <realtime-monitor-panel @stats-change="handleMonitorStatsChange" />
@@ -42,6 +62,7 @@
 
 <script>
 import { fetchTotalStats } from '@/api/dataquery'
+import { fetchHomepageAnnouncements } from '@/api/homepage'
 import RealtimeMonitorPanel from '@/components/platform/RealtimeMonitorPanel.vue'
 
 export default {
@@ -57,7 +78,8 @@ export default {
         totalSubs: 0,
         connectedClients: 0,
         onlineDevices: 0
-      }
+      },
+      announcements: []
     }
   },
   computed: {
@@ -67,17 +89,31 @@ export default {
   },
   created() {
     this.initializeDashboard()
+    this.loadAnnouncements()
   },
   methods: {
     async initializeDashboard() {
       try {
         const statsResponse = await fetchTotalStats(this.listQuery)
         const totalStats = statsResponse && statsResponse.data && statsResponse.data.items ? statsResponse.data.items : {}
-
         this.list = totalStats
       } catch (error) {
         console.error('Failed to initialize dashboard:', error)
       }
+    },
+    async loadAnnouncements() {
+      try {
+        const res = await fetchHomepageAnnouncements({ limit: 5 })
+        if (res && res.data && res.data.items) {
+          this.announcements = res.data.items
+        }
+      } catch (e) {
+        // Homepage API not available, ignore silently
+      }
+    },
+    annTypeLabel(type) {
+      const labels = { 1: '公告', 2: '新闻', 3: '更新' }
+      return labels[type] || '公告'
     },
     handleMonitorStatsChange(stats) {
       this.liveStats = {
@@ -205,6 +241,74 @@ export default {
   line-height: 1.35;
 }
 
+// Announcements
+.dashboard-announcements {
+  margin-bottom: 24px;
+}
+
+.announcement-card {
+  border-radius: 18px;
+  background: var(--platform-surface);
+  border: 1px solid var(--platform-border);
+  padding: 16px 20px;
+  margin-bottom: 12px;
+  backdrop-filter: blur(8px);
+}
+
+.ann-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.ann-pin {
+  background: rgba(255, 59, 48, 0.2);
+  color: #ff6b6b;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.ann-type {
+  background: var(--platform-accent-16);
+  color: var(--platform-accent);
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.ann-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--platform-ink);
+}
+
+.ann-summary {
+  color: var(--platform-ink-dim);
+  font-size: 13px;
+  margin: 0 0 8px;
+  line-height: 1.5;
+}
+
+.ann-content {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--platform-ink-dim);
+}
+
+.ann-meta {
+  margin-top: 8px;
+  time {
+    font-size: 12px;
+    color: var(--platform-ink-dim);
+    opacity: 0.6;
+  }
+}
+
 @media (max-width: 1320px) {
   .hero-side {
     align-items: center;
@@ -255,6 +359,15 @@ export default {
   .unified-stat-card strong {
     min-height: 50px;
     font-size: 24px;
+  }
+
+  .announcement-card {
+    border-radius: 14px;
+    padding: 12px 14px;
+  }
+
+  .ann-title {
+    font-size: 14px;
   }
 }
 

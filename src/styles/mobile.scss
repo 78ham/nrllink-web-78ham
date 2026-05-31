@@ -1,0 +1,312 @@
+// Mobile-specific global styles
+// Touch-optimized sizes, responsive utilities, safe-area support
+
+// === Breakpoint variables ===
+$mobile-breakpoint: 768px;
+$tablet-breakpoint: 1024px;
+
+// === Mobile-first touch targets ===
+@media (pointer: coarse) {
+  // Minimum 44px touch targets on touch devices
+  .el-button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .el-checkbox__inner,
+  .el-radio__inner {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .el-switch {
+    min-height: 32px;
+  }
+
+  .el-switch__core {
+    min-height: 28px;
+    min-width: 48px;
+  }
+
+  .el-select-dropdown__item {
+    min-height: 44px;
+    line-height: 44px;
+  }
+
+  .el-table td.el-table__cell {
+    padding: 12px 0;
+  }
+
+  .el-pagination button {
+    min-width: 36px;
+    min-height: 36px;
+  }
+
+  .el-pager li {
+    min-width: 36px;
+    min-height: 36px;
+    line-height: 36px;
+  }
+}
+
+// === Mobile layout adjustments ===
+@media (max-width: #{$mobile-breakpoint - 1}) {
+  // Sidebar hidden on mobile (handled by ResizeMixin)
+  .sidebar-container {
+    position: fixed !important;
+    z-index: 1001;
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  // Main container takes full width on mobile
+  .main-container {
+    margin-left: 0 !important;
+    width: 100% !important;
+    min-height: 100vh;
+    min-height: 100dvh;
+    // Bottom padding for tabbar
+    padding-bottom: calc(56px + var(--sab, 0px)) !important;
+  }
+
+  .app-wrapper {
+    // Prevent horizontal overflow
+    overflow-x: hidden;
+  }
+
+  // App container mobile padding
+  .app-container {
+    padding: 12px !important;
+  }
+
+  // Navbar mobile
+  .navbar {
+    .breadcrumb-container {
+      display: none;
+    }
+
+    .right-menu {
+      .right-menu-item:not(.avatar-container) {
+        display: none !important;
+      }
+    }
+  }
+
+  // Tags view mobile - scroll horizontally
+  .tags-view-container {
+    .tags-view-wrapper {
+      .tags-view-item {
+        padding: 0 8px !important;
+        font-size: 12px;
+      }
+    }
+  }
+
+  // Dialogs full-width on mobile
+  .el-dialog {
+    width: 92vw !important;
+    max-width: 92vw !important;
+    margin: 8vh auto !important;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  .el-dialog__body {
+    max-height: calc(80vh - 120px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  // Drawer full-width on mobile
+  .el-drawer {
+    width: 85vw !important;
+    max-width: 85vw !important;
+  }
+
+  // Filter container mobile
+  .filter-container {
+    .filter-item {
+      width: 100% !important;
+      margin-right: 0 !important;
+      margin-bottom: 8px;
+
+      .el-input,
+      .el-select {
+        width: 100% !important;
+      }
+    }
+  }
+
+  // Table horizontal scroll
+  .el-table {
+    width: 100% !important;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+
+    .el-table__body-wrapper {
+      overflow-x: auto;
+    }
+  }
+
+  // Cards full width
+  .platform-theme-card {
+    border-radius: 16px !important;
+    margin-bottom: 12px;
+  }
+
+  // Unified stat cards mobile
+  .unified-stat-card {
+    min-height: 90px !important;
+    padding: 10px 8px !important;
+    border-radius: 14px !important;
+
+    strong {
+      font-size: 20px !important;
+      min-height: 36px !important;
+    }
+
+    span {
+      font-size: 11px !important;
+    }
+  }
+
+  // Message box mobile
+  .el-message-box {
+    width: 88vw !important;
+    max-width: 88vw !important;
+  }
+
+  // Notification mobile
+  .el-notification {
+    width: 88vw !important;
+    right: 6vw !important;
+    left: 6vw !important;
+  }
+
+  // Dropdown mobile
+  .el-dropdown-menu {
+    min-width: 120px;
+  }
+}
+
+// === Tablet adjustments ===
+@media (min-width: #{$mobile-breakpoint}) and (max-width: #{$tablet-breakpoint - 1}) {
+  .app-container {
+    padding: 16px;
+  }
+
+  .el-dialog {
+    width: 70vw !important;
+    max-width: 70vw !important;
+  }
+}
+
+// === PWA standalone mode adjustments ===
+@media (display-mode: standalone) {
+  .mobile-tabbar {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}
+
+// === Orientation-specific ===
+@media (orientation: landscape) and (max-height: 500px) {
+  .dashboard-home::before,
+  .dashboard-home::after {
+    display: none;
+  }
+
+  .unified-stat-card {
+    min-height: 80px;
+  }
+}
+
+// === Scrollbar styling for mobile ===
+@media (max-width: #{$mobile-breakpoint - 1}) {
+  ::-webkit-scrollbar {
+    width: 3px;
+    height: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+// === Pull-to-refresh visual hint ===
+.ptr-hint {
+  text-align: center;
+  padding: 8px;
+  color: var(--platform-ink-dim);
+  font-size: 12px;
+}
+
+// === Swipe action ===
+.swipe-actions {
+  display: flex;
+  gap: 4px;
+
+  .swipe-action {
+    min-width: 64px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+
+    &--danger {
+      background: rgba(220, 38, 38, 0.15);
+      color: #fca5a5;
+    }
+
+    &--primary {
+      background: rgba(59, 130, 246, 0.15);
+      color: #93c5fd;
+    }
+  }
+}
+
+// === Mobile-specific utility classes ===
+.mobile-only {
+  display: none;
+
+  @media (max-width: #{$mobile-breakpoint - 1}) {
+    display: block;
+  }
+}
+
+.desktop-only {
+  display: block;
+
+  @media (max-width: #{$mobile-breakpoint - 1}) {
+    display: none !important;
+  }
+}
+
+// === Animate page transitions on mobile ===
+@media (max-width: #{$mobile-breakpoint - 1}) {
+  .app-main {
+    > div {
+      animation: mobileFadeIn 0.2s ease-out;
+    }
+  }
+
+  @keyframes mobileFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}

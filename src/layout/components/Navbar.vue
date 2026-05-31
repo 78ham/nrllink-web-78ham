@@ -11,11 +11,11 @@
 
     <div class="right-menu">
       <template v-if="device!=='mobile'">
-        <div class="right-menu-item">{{ name }}</div>
-        <div class="right-menu-item">{{ callsign }}</div>
+        <div class="right-menu-item desktop-only">{{ name }}</div>
+        <div class="right-menu-item desktop-only">{{ callsign }}</div>
         <button
           v-if="billingEnabled"
-          class="expire-toggle right-menu-item hover-effect"
+          class="expire-toggle right-menu-item hover-effect desktop-only"
           :class="`expire-toggle--${expireLevel}`"
           :title="$t('navbar.renew')"
           @click="goRenew"
@@ -23,11 +23,11 @@
           {{ expireText }}
         </button>
 
-        <button class="lang-toggle right-menu-item hover-effect" @click="toggleLanguage">
+        <button class="lang-toggle right-menu-item hover-effect desktop-only" @click="toggleLanguage">
           {{ language === 'zh' ? 'EN' : '中' }}
         </button>
 
-        <el-dropdown class="theme-picker-container right-menu-item hover-effect" trigger="click" popper-class="platform-theme-user-dropdown">
+        <el-dropdown class="theme-picker-container right-menu-item hover-effect desktop-only" trigger="click" popper-class="platform-theme-user-dropdown">
           <div class="theme-trigger">
             <span class="theme-icon">{{ currentTheme.icon }}</span>
             <span class="theme-name">{{ currentTheme.name }}</span>

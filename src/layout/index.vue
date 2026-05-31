@@ -1,23 +1,22 @@
 <template>
   <div :class="classObj" class="app-wrapper">
     <div v-if="device==='mobile'&&sidebar.opened" class="drawer-bg" @click="handleClickOutside" />
-    <sidebar class="sidebar-container" />
-    <div :class="{hasTagsView:needTagsView}" class="main-container">
+    <sidebar v-if="device!=='mobile'" class="sidebar-container" />
+    <div :class="{'hasTagsView':needTagsView,'is-mobile':device==='mobile'}" class="main-container">
       <div :class="{'fixed-header':fixedHeader}">
         <navbar />
-        <tags-view v-if="needTagsView" />
+        <tags-view v-if="needTagsView && device!=='mobile'" />
       </div>
       <app-main />
-      <!-- <right-panel v-if="showSettings">
-        <settings />
-      </right-panel> -->
     </div>
+    <mobile-tab-bar />
   </div>
 </template>
 
 <script>
 // import RightPanel from '@/components/RightPanel'
 import { AppMain, Navbar, Sidebar, TagsView } from './components'
+import MobileTabBar from '@/components/MobileTabBar/index.vue'
 import ResizeMixin from './mixin/ResizeHandler'
 import { mapState } from 'pinia'
 import { useAppStore } from '@/store/modules/app'
@@ -31,14 +30,15 @@ export default {
     // RightPanel,
     // Settings,
     Sidebar,
-    TagsView
+    TagsView,
+    MobileTabBar
   },
   mixins: [ResizeMixin],
   computed: {
     ...mapState(useAppStore, ['sidebar', 'device']),
     ...mapState(useSettingsStore, ['showSettings', 'tagsView', 'fixedHeader']),
     needTagsView() {
-      return this.tagsView
+      return this.tagsView && this.device !== 'mobile'
     },
     classObj() {
       return {
@@ -66,6 +66,7 @@ export default {
   @include clearfix;
   position: relative;
   height: 100vh;
+  height: 100dvh;
   width: 100%;
   overflow: hidden;
 
@@ -83,6 +84,16 @@ export default {
   height: 100%;
   position: absolute;
   z-index: 999;
+}
+
+.main-container {
+  &.is-mobile {
+    margin-left: 0 !important;
+    width: 100% !important;
+    padding-bottom: calc(56px + var(--sab, 0px));
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 .fixed-header {

@@ -1,7 +1,7 @@
 {
-    "name": "sandong-manager",
-    "version": "4.0.1",
-    "description": "HAM互联",
+    "name": "nrllink-web-78ham",
+    "version": "4.1.0",
+    "description": "HAM互联 - NRL无线电网络互联系统",
     "author": "CaoCheng <cao@live.com>",
     "license": "MIT",
     "scripts": {
