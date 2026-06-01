@@ -91,11 +91,11 @@ export const useTagsViewStore = defineStore('tagsView', {
       return [...this.cachedViews]
     },
     updateVisitedView(view) {
-      for (let v of this.visitedViews) {
-        if (v.path === view.path) {
-          v = Object.assign(v, view)
-          break
-        }
+      const idx = this.visitedViews.findIndex(v => v.path === view.path)
+      if (idx >= 0) {
+        this.visitedViews[idx] = Object.assign({}, this.visitedViews[idx], view)
+      }
+    }
       }
     }
   }

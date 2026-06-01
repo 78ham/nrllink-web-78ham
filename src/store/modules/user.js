@@ -81,6 +81,11 @@ export const useUserStore = defineStore('user', {
       removeToken()
     },
     async changeRoles(role) {
+      // DEV only: role switching for testing
+      if (import.meta.env.PROD) {
+        console.warn('[DEV] changeRoles is development-only, ignoring in production')
+        return []
+      }
       const token = `${role}-token`
       this.token = token
       setToken(token)
