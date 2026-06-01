@@ -117,6 +117,7 @@ export default {
     channelLabel: 'Channel',
     channelName: 'Channel {channel} Name',
     rfTypeLabel: 'RF Type',
+    codecCaps: 'Codec Capabilities',
     change: 'Parameters',
     dmrid: 'DMR-ID',
     bind: 'Bind',

@@ -239,6 +239,16 @@
           </template>
         </el-table-column>
 
+        <el-table-column :label="$t('device.codecCaps')" prop="supported_codecs" width="140px" align="center">
+          <template #default="scope">
+            <div class="codec-tags">
+              <el-tag v-if="scope.row.supported_codecs & 1" size="small" type="info" class="codec-tag">G.711</el-tag>
+              <el-tag v-if="scope.row.supported_codecs & 2" size="small" type="warning" class="codec-tag">Opus</el-tag>
+              <el-tag v-if="scope.row.supported_codecs & 4" size="small" type="success" class="codec-tag">Codec2</el-tag>
+            </div>
+          </template>
+        </el-table-column>
+
         <el-table-column :label="$t('device.totalTraffic')" prop="traffic" width="120px" align="center" :sortable="true">
           <template #default="scope">
             <span>{{ formatFileSize(scope.row.traffic) }}</span>
@@ -289,6 +299,15 @@
           <div class="info-row">
             <span class="label">{{ $t('device.model') }}:</span>
             <span class="value">{{ ValueFilter(item.dev_model, DevModelOptions) }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">{{ $t('device.codecCaps') }}:</span>
+            <span class="value">
+              <el-tag v-if="item.supported_codecs & 1" size="small" type="info">G.711</el-tag>
+              <el-tag v-if="item.supported_codecs & 2" size="small" type="warning">Opus</el-tag>
+              <el-tag v-if="item.supported_codecs & 4" size="small" type="success">Codec2</el-tag>
+              <template v-if="!item.supported_codecs">-</template>
+            </span>
           </div>
           <div class="info-row">
             <span class="label">{{ $t('device.priority') }}:</span>

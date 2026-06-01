@@ -118,6 +118,7 @@ export default {
     channelLabel: '信道',
     channelName: '频道{channel}名称',
     rfTypeLabel: '射频类型',
+    codecCaps: '编码支持',
     change: '参数',
     status: '状态',
     receive: '接收',

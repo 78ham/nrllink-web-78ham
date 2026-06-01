@@ -2,7 +2,7 @@
 
 基于 **Vue 3** + **Vite** + **Element Plus** + **Pinia** 的 NRL 无线电网络互联系统管理前端。
 
-**版本**: 4.1.0 | **作者**: CaoCheng <cao@live.com> | **许可证**: MIT
+**原作**: BH4RPN (BG4VKI) | **78ham 二次开发** | **版本**: 4.1.0 | **许可证**: MIT
 
 ---
 
@@ -1066,6 +1066,34 @@ box-sizing: border-box
   {"type":"recent_calls","recent_calls":[...]}
   {"type":"stats","total_subs":5,"connected_clients":3,"online_devices":10}
 ```
+
+### Codec2 WASM 音频解码
+
+前端通过 Web Worker + Emscripten WASM 实现浏览器端 Codec2 音频实时解码，支持 5 种码率模式（700C/1300/1600/2400/3200 bps），无需服务器端转码即可在浏览器中播放超低码率数字语音。
+
+**解码流水线**:
+
+```
+NRL WebSocket Binary帧 → Codec2 Worker → 解码为 Float32 PCM → AudioContext 播放
+```
+
+**构建 Codec2 WASM** (`scripts/build-codec2-wasm.sh`):
+
+```bash
+# 需要安装 emsdk (Emscripten)
+cd scripts
+./build-codec2-wasm.sh
+# 产物: public/wasm/codec2.js + public/wasm/codec2.wasm
+```
+
+**编码器架构** (`src/workers/`):
+
+| 文件 | 编码 | 说明 |
+|------|------|------|
+| `alawDecode.worker.js` | G.711 A-law | 查表法解码, 256条目表 |
+| (计划) `codec2Decode.worker.js` | Codec2 全系列 | WASM 解码, 5种码率可选 |
+
+
 
 ### Dashboard WebSocket测试 (chat.vue)
 
