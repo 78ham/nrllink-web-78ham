@@ -24,7 +24,7 @@ export function queryDevice(data) {
   })
 }
 
-export function bingDevice(data) {
+export function bindDevice(data) {
   return request({
     url: '/device/binddevice',
     method: 'post',

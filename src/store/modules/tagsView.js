@@ -96,7 +96,5 @@ export const useTagsViewStore = defineStore('tagsView', {
         this.visitedViews[idx] = Object.assign({}, this.visitedViews[idx], view)
       }
     }
-      }
-    }
   }
 })

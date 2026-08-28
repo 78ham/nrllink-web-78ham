@@ -81,7 +81,11 @@
   --sidebar-sub-hover: #1a3050;
 }
 
-*, *::before, *::after {
+.platform-theme-page,
+.platform-theme-card,
+.platform-theme-dialog,
+.platform-theme-select-dropdown,
+.sidebar-container {
   transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
@@ -471,20 +475,11 @@ body, html {
   border-radius: 24px !important;
 }
 
-.platform-theme-dialog.el-dialog .el-dialog__header,
-.platform-theme-dialog.el-dialog .el-dialog__footer,
 .platform-theme-dialog .el-dialog__header,
 .platform-theme-dialog .el-dialog__footer {
   border-color: var(--platform-border-light) !important;
 }
 
-.platform-theme-dialog.el-dialog .el-dialog__body,
-.platform-theme-dialog.el-dialog .el-form-item__label,
-.platform-theme-dialog.el-dialog .el-radio__label,
-.platform-theme-dialog.el-dialog .el-collapse-item__header,
-.platform-theme-dialog.el-dialog .el-collapse-item__content,
-.platform-theme-dialog.el-dialog .el-input-number__decrease,
-.platform-theme-dialog.el-dialog .el-input-number__increase,
 .platform-theme-dialog .el-dialog__body,
 .platform-theme-dialog .el-form-item__label,
 .platform-theme-dialog .el-radio__label,
@@ -501,19 +496,16 @@ body, html {
   backdrop-filter: blur(8px);
 }
 
-.platform-theme-dialog.el-dialog .el-dialog__header,
 .platform-theme-dialog .el-dialog__header {
   padding: 22px 24px 18px !important;
   background: var(--platform-surface-94);
 }
 
-.platform-theme-dialog.el-dialog .el-dialog__body,
 .platform-theme-dialog .el-dialog__body {
   padding: 22px 24px !important;
   background: transparent !important;
 }
 
-.platform-theme-dialog.el-dialog .el-dialog__footer,
 .platform-theme-dialog .el-dialog__footer {
   padding: 16px 24px 22px !important;
   background: var(--platform-surface-68);
@@ -947,20 +939,5 @@ body, html {
     flex-shrink: 0;
     margin-left: auto;
     color: var(--platform-accent);
-  }
-}
-
-@media (max-width: 768px) {
-  .platform-theme-page .pagination-container .el-pagination__sizes {
-    min-width: 112px;
-  }
-
-  .platform-theme-page .pagination-container .btn-prev,
-  .platform-theme-page .pagination-container .btn-next,
-  .platform-theme-page .pagination-container .el-pager li {
-    min-width: 34px;
-    height: 34px;
-    line-height: 32px;
-    margin: 0 !important;
   }
 }

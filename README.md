@@ -453,7 +453,7 @@ res.code === 50008|50012|50014 → Token错误, 弹窗提示重新登录
 | `fetchDeviceList(data)` | POST | `/device/db/list` | 查询设备列表(分页/筛选) |
 | `fetchMyDeviceList(data)` | POST | `/device/mydevlist` | 我的设备 |
 | `queryDevice(data)` | POST | `/device/query` | 查询设备参数(EEPROM) |
-| `bingDevice(data)` | POST | `/device/binddevice` | 绑定设备 |
+| `bindDevice(data)` | POST | `/device/binddevice` | 绑定设备 |
 | `changeDeviceAT(data)` | POST | `/device/at` | AT指令 |
 | `changeDeviceParm(data)` | POST | `/device/change` | 修改设备参数 |
 | `changeDevice1w(data)` | POST | `/device/change1w` | 修改1W模块 |

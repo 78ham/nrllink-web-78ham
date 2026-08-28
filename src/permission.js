@@ -86,8 +86,14 @@ router.beforeEach(async(to, from, next) => {
   }
 })
 
+let appliedPlatformTheme = null
+
 router.afterEach(() => {
   const settingsStore = useSettingsStore(pinia)
-  setPlatformTheme(settingsStore.platformThemeKey)
+  // only touch the DOM when the theme actually changed, not on every navigation
+  if (settingsStore.platformThemeKey !== appliedPlatformTheme) {
+    appliedPlatformTheme = settingsStore.platformThemeKey
+    setPlatformTheme(appliedPlatformTheme)
+  }
   NProgress.done()
 })

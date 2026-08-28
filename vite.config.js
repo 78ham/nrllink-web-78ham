@@ -60,9 +60,21 @@ export default defineConfig(({ mode }) => {
           manualChunks(id) {
             if (id.includes('node_modules')) {
               if (id.includes('/xlsx/')) return 'xlsx'
-              if (id.includes('/element-plus/')) return 'element-plus'
               if (id.includes('/echarts/')) return 'echarts'
+              if (id.includes('/element-plus/')) return 'element-plus'
               if (id.includes('/codemirror/')) return 'codemirror'
+              // Vue core runtime gets its own chunk for stable long-term caching
+              if (
+                id.includes('/@vue/') ||
+                id.includes('/vue/') ||
+                id.includes('/vue-router/') ||
+                id.includes('/vue-demi/') ||
+                id.includes('/pinia/') ||
+                id.includes('/vue-i18n/') ||
+                id.includes('/@intlify/')
+              ) {
+                return 'vue-core'
+              }
               return 'vendor'
             }
             return undefined

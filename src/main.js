@@ -17,6 +17,22 @@ import {
   Upload
 } from '@element-plus/icons-vue'
 
+// unplugin-vue-components does not resolve @element-plus/icons-vue,
+// so the icons used in templates are registered globally here.
+const globalIcons = {
+  CaretBottom,
+  Clock,
+  Close,
+  Delete,
+  Document,
+  Download,
+  Edit,
+  Search,
+  Setting,
+  Share,
+  Upload
+}
+
 import '@/styles/index.scss' // global css
 
 import App from './App.vue'
@@ -47,17 +63,9 @@ import * as filters from './filters' // global filters
 
 const app = createApp(App)
 
-app.component('CaretBottom', CaretBottom)
-app.component('Clock', Clock)
-app.component('Close', Close)
-app.component('Delete', Delete)
-app.component('Document', Document)
-app.component('Download', Download)
-app.component('Edit', Edit)
-app.component('Search', Search)
-app.component('Setting', Setting)
-app.component('Share', Share)
-app.component('Upload', Upload)
+Object.entries(globalIcons).forEach(([name, component]) => {
+  app.component(name, component)
+})
 
 setupStore(app)
 setupIcons(app)

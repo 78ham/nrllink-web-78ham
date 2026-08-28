@@ -3,12 +3,6 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 /* Layout */
 import Layout from '@/layout/index.vue'
 
-/* Router Modules */
-// import componentsRouter from './modules/components'
-// import chartsRouter from './modules/charts'
-// import tableRouter from './modules/table'
-// import nestedRouter from './modules/nested'
-
 /**
  * Note: sub-menu only appear when route children.length >= 1
  * Detail see: https://panjiachen.github.io/vue-element-admin-site/guide/essentials/router-and-nav.html
@@ -109,30 +103,6 @@ export const constantRoutes = [{
  * the routes that need to be dynamically loaded based on user roles
  */
 export const asyncRoutes = [
-
-  // {
-
-  // path: '/month',
-  // component: Layout,
-  // redirect: 'monty',
-  // meta: {
-  //   title: 'month',
-  //   icon: 'dashboard',
-  //   affix: true,
-  //   noCache: true,
-  //   roles: ['ham'] // you can set roles in root nav
-  // },
-
-  // children: [{
-  //   path: '/chat',
-  //   component: () =>
-  //     import ('@/views/dashboard/chat'),
-
-  //   name: 'chat',
-  //   meta: { title: 'chat', icon: 'user', noCache: true }
-  // }]
-  // },
-
   {
     path: '/public',
     component: Layout,
@@ -164,16 +134,6 @@ export const asyncRoutes = [
         roles: ['ham']
       }
     },
-    // {
-    //   path: 'mydevices',
-    //   component: () =>
-    //     import ('@/views/pub/mydevice'),
-    //   name: 'mydevices',
-    //   meta: {
-    //     title: 'mydevices',
-    //     roles: ['ham']
-    //   }
-    // },
     {
       path: 'relay',
       component: () =>
@@ -321,13 +281,16 @@ const router = createRouter({
   scrollBehavior: () => ({ top: 0 })
 })
 
+const constantRouteNames = new Set(
+  constantRoutes.flatMap(route => [route.name, ...(route.children || []).map(child => child.name)].filter(Boolean))
+)
+
 export function resetRouter() {
-  const newRouter = createRouter({
-    history: createWebHashHistory(),
-    routes: constantRoutes,
-    scrollBehavior: () => ({ top: 0 })
+  router.getRoutes().forEach(route => {
+    if (route.name && !constantRouteNames.has(route.name)) {
+      router.removeRoute(route.name)
+    }
   })
-  router.matcher = newRouter.matcher
 }
 
 export default router

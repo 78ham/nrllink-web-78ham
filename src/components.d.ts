@@ -74,6 +74,7 @@ declare module 'vue' {
     MarkdownEditor: typeof import('./components/MarkdownEditor/index.vue')['default']
     MDinput: typeof import('./components/MDinput/index.vue')['default']
     MixChart: typeof import('./components/Charts/MixChart.vue')['default']
+    MobileTabBar: typeof import('./components/MobileTabBar/index.vue')['default']
     Pagination: typeof import('./components/Pagination/index.vue')['default']
     PanThumb: typeof import('./components/PanThumb/index.vue')['default']
     RealtimeMonitorPanel: typeof import('./components/platform/RealtimeMonitorPanel.vue')['default']
