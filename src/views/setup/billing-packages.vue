@@ -4,29 +4,31 @@
       <el-button type="primary" @click="handleCreate">新增套餐</el-button>
     </div>
 
-    <el-table v-loading="loading" :data="list" border fit>
-      <el-table-column label="序号" prop="id" width="80" align="center" />
+    <div class="table-responsive">
+      <el-table v-loading="loading" :data="list" border fit>
+      <el-table-column label="序号" prop="id" min-width="80" align="center" />
       <el-table-column label="套餐名称" prop="name" min-width="160" />
-      <el-table-column label="月份" prop="months" width="100" align="center" />
-      <el-table-column label="月单价" width="120" align="center">
+      <el-table-column label="月份" prop="months" min-width="100" align="center" />
+      <el-table-column label="月单价" min-width="120" align="center">
         <template #default="{ row }">{{ formatMoney(row.unit_price_cents) }}</template>
       </el-table-column>
-      <el-table-column label="套餐价格" width="130" align="center">
+      <el-table-column label="套餐价格" min-width="130" align="center">
         <template #default="{ row }">{{ formatMoney(row.price_cents) }}</template>
       </el-table-column>
-      <el-table-column label="状态" width="100" align="center">
+      <el-table-column label="状态" min-width="100" align="center">
         <template #default="{ row }">
           <el-tag :type="row.status === 1 ? 'success' : 'info'">{{ row.status === 1 ? '启用' : '停用' }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="备注" prop="note" min-width="180" />
-      <el-table-column label="动作" width="180" align="center">
+      <el-table-column label="动作" min-width="180" align="center">
         <template #default="{ row }">
           <el-button size="small" type="primary" plain @click="handleUpdate(row)">编辑</el-button>
           <el-button size="small" type="danger" plain @click="handleDelete(row)">停用</el-button>
         </template>
       </el-table-column>
-    </el-table>
+      </el-table>
+    </div>
 
     <el-dialog v-model="dialogVisible" :title="dialogStatus === 'create' ? '新增套餐' : '编辑套餐'" class="platform-theme-dialog">
       <el-form ref="dataForm" :model="temp" :rules="rules" label-width="120px">
@@ -167,4 +169,5 @@ export default {
   display: flex;
   justify-content: flex-end;
 }
+.table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 </style>

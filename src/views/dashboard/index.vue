@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="dashboard-home">
     <div class="dashboard-shell">
       <section class="dashboard-hero">

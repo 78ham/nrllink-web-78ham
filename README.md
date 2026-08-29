@@ -1224,15 +1224,17 @@ parent/
 cd nrllink-web-78ham
 docker compose up -d
 
-# Access: http://localhost (Nginx)
+# Access: http://localhost:7891 (Nginx；生产建议放反代后，容器仅暴露 127.0.0.1:7891:80)
 # Backend API proxied via Nginx -> nrllink:9000
 ```
 
 #### Standalone frontend image
 
-```
-docker build -t nrllink-web .
-docker run -d -p 80:80 --link nrllink-server:nrllink nrllink-web
+镜像由 GitHub Actions 在推送到 `main` 分支或打 `v*` tag 时自动构建并发布到 `ghcr.io/78ham/nrllink-web:latest`，一般无需本地 `docker build`。
+
+```bash
+# 推荐：容器 80 端口仅暴露到本机 7891，前面再放反代（Caddy/Nginx）处理 80/443
+docker run -d -p 127.0.0.1:7891:80 --link nrllink-server:nrllink ghcr.io/78ham/nrllink-web:latest
 ```
 
 > Frontend Nginx proxies API requests to backend container. WebSocket also proxied.

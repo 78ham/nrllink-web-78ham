@@ -1,24 +1,29 @@
 services:
   web:
-    image: 78ham/nrllink-web:latest
-    build: .
+    image: ghcr.io/78ham/nrllink-web:latest
     container_name: nrllink-web
     ports:
-      - "80:80"
+      - "127.0.0.1:7891:80"
     depends_on:
       nrllink:
         condition: service_healthy
+    networks:
+      - nrllink-net
     restart: unless-stopped
 
   nrllink:
-    image: 78ham/nrllink:latest
-    build: ../nrllink-78ham
+    image: ghcr.io/78ham/nrllink:latest
     container_name: nrllink-server
+    environment:
+      - NRL_DBFILE=/nrllink/data/udphub.sqlite3
     ports:
+      - "127.0.0.1:9000:9000"
       - "60050:60050/udp"
     volumes:
       - nrllink-data:/nrllink/data
-      - ../nrllink-78ham/udphub.yaml:/nrllink/udphub/udphub.yaml:ro
+      - ./udphub.yaml:/nrllink/udphub/udphub.yaml:ro
+    networks:
+      - nrllink-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:9000/platform/info"]
@@ -27,6 +32,10 @@ services:
       retries: 3
       start_period: 10s
 
+networks:
+  nrllink-net:
+    name: nrllink-net
+    driver: bridge
+
 volumes:
   nrllink-data:
-

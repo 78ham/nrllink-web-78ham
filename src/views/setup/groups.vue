@@ -34,7 +34,7 @@
       </button>
     </div>
 
-    <div v-if="showtable" class="table-shell">
+    <div v-if="showtable" class="table-shell table-responsive">
       <el-table
         :key="tableKey"
         v-loading="listLoading"
@@ -46,7 +46,7 @@
         style="width: 100%"
         @sort-change="sortChange"
       >
-        <el-table-column :label="$t('Account.id')" prop="id" sortable="custom" align="center" width="80">
+        <el-table-column :label="$t('Account.id')" prop="id" sortable="custom" align="center" min-width="80">
           <template #default="scope">
             <span>{{ scope.row.id }}</span>
           </template>
@@ -58,7 +58,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('group.type')" width="120" align="center">
+        <el-table-column :label="$t('group.type')" min-width="120" align="center">
           <template #default="scope">
             <el-tag class="group-type-tag">{{ ValueFilter(scope.row.type, groupTypeOptions) || '--' }}</el-tag>
           </template>
@@ -77,19 +77,19 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="创建者" width="100" align="center">
+        <el-table-column label="创建者" min-width="100" align="center">
           <template #default="scope">
             <el-tag class="owner-callsign-tag">{{ scope.row.callsign || '--' }}</el-tag>
           </template>
         </el-table-column>
  
-        <el-table-column :label="$t('device.createTime')" width="140" align="center">
+        <el-table-column :label="$t('device.createTime')" min-width="140" align="center">
           <template #default="scope">
             <span>{{ parseTime(scope.row.create_time) || '--' }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('device.updateTime')" width="140" align="center">
+        <el-table-column :label="$t('device.updateTime')" min-width="140" align="center">
           <template #default="scope">
             <span>{{ parseTime(scope.row.update_time) || '--' }}</span>
           </template>
@@ -499,7 +499,8 @@ export default {
     margin-right: 0;
 
     &.search-input {
-      width: 320px;
+      width: 100%;
+      max-width: 320px;
     }
 
     &.action-btn {
@@ -861,4 +862,5 @@ export default {
     margin: 0 !important;
   }
 }
+.table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 </style>

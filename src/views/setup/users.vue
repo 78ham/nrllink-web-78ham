@@ -65,7 +65,7 @@
       </button>
     </div>
 
-    <div v-if="showtable" class="table-shell">
+    <div v-if="showtable" class="table-shell table-responsive">
       <el-table
         :key="tableKey"
         v-loading="listLoading"
@@ -76,37 +76,37 @@
         style="width: 100%"
         @sort-change="sortChange"
       >
-        <el-table-column :label="$t('employee.id')" prop="id" sortable="custom" align="center" width="80">
+        <el-table-column :label="$t('employee.id')" prop="id" sortable="custom" align="center" min-width="80">
           <template #default="scope">
             <span>{{ scope.row.id }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('employee.callsign')" width="150" align="center">
+        <el-table-column :label="$t('employee.callsign')" min-width="150" align="center">
           <template #default="scope">
             <el-tag class="callsign-tag">{{ scope.row.callsign || '--' }}</el-tag>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('employee.dmrid')" width="120" align="center">
+        <el-table-column :label="$t('employee.dmrid')" min-width="120" align="center">
           <template #default="scope">
             <div class="metric-pill">{{ scope.row.dmrid || '--' }}</div>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('employee.mdcid')" width="120" align="center">
+        <el-table-column :label="$t('employee.mdcid')" min-width="120" align="center">
           <template #default="scope">
             <div class="metric-pill">{{ scope.row.mdcid || '--' }}</div>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('employee.name')" width="140" align="center">
+        <el-table-column :label="$t('employee.name')" min-width="140" align="center">
           <template #default="scope">
             <div class="primary-cell">{{ scope.row.name || '--' }}</div>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('Account.avatar')" width="90" align="center">
+        <el-table-column :label="$t('Account.avatar')" min-width="90" align="center">
           <template #default="scope">
             <div class="avatar-shell">
               <img class="user-avatar" :src="scope.row.avatar" alt="avatar">
@@ -123,25 +123,25 @@
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('Account.nickname')" width="160" align="center">
+        <el-table-column :label="$t('Account.nickname')" min-width="160" align="center">
           <template #default="scope">
             <span>{{ scope.row.nickname && scope.row.nickname.length ? scope.row.nickname : '未绑定' }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('employee.phone')" width="130" align="center">
+        <el-table-column :label="$t('employee.phone')" min-width="130" align="center">
           <template #default="scope">
             <span>{{ scope.row.phone || '--' }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('Account.sex')" width="80" align="center">
+        <el-table-column :label="$t('Account.sex')" min-width="80" align="center">
           <template #default="scope">
             <el-tag class="sex-tag">{{ SexFilter(scope.row.sex) }}</el-tag>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('employee.birthday')" width="130" align="center">
+        <el-table-column :label="$t('employee.birthday')" min-width="130" align="center">
           <template #default="scope">
             <span>{{ scope.row.birthday || '--' }}</span>
           </template>
@@ -153,25 +153,25 @@
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('employee.last_login_time')" width="170" align="center">
+        <el-table-column :label="$t('employee.last_login_time')" min-width="170" align="center">
           <template #default="scope">
             <span>{{ scope.row.last_login_time || '--' }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column label="到期时间" width="170" align="center">
+        <el-table-column label="到期时间" min-width="170" align="center">
           <template #default="scope">
             <span>{{ scope.row.expire_time || '未设置' }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('employee.status')" width="100" align="center">
+        <el-table-column :label="$t('employee.status')" min-width="100" align="center">
           <template #default="scope">
             <el-tag :class="statusClass(scope.row.status)" class="user-status-tag">{{ statusFilter(scope.row.status) }}</el-tag>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('employee.msg')" width="150" align="center">
+        <el-table-column :label="$t('employee.msg')" min-width="150" align="center">
           <template #default="scope">
             <div class="tag-wrap">
               <el-tag v-if="scope.row.recharge_msg" class="msg-tag msg-tag-bas">BAS</el-tag>
@@ -181,7 +181,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('employee.actions')" align="center" width="210" class-name="small-padding fixed-width">
+        <el-table-column :label="$t('employee.actions')" align="center" min-width="210" class-name="small-padding fixed-width">
           <template #default="{ row }">
             <el-button type="primary" plain size="small" class="compact-btn user-edit-btn" @click="handleUpdate(row)">
               {{ $t('employee.edit') }}
@@ -880,4 +880,5 @@ export default {
     margin: 0 !important;
   }
 }
+.table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 </style>

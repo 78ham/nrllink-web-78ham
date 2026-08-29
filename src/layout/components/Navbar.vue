@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="navbar">
     <hamburger
       id="hamburger-container"
@@ -289,8 +289,8 @@ export default {
 
   .hamburger-container {
     line-height: 46px;
+    flex: 0 0 auto;
     height: 100%;
-    float: left;
     cursor: pointer;
     transition: background 0.3s;
     -webkit-tap-highlight-color: transparent;
@@ -301,7 +301,9 @@ export default {
   }
 
   .breadcrumb-container {
-    float: left;
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
   }
 
   .errLog-container {
@@ -310,7 +312,9 @@ export default {
   }
 
   .right-menu {
-    float: right;
+    margin-left: auto;
+    flex: 0 0 auto;
+    min-width: 0;
     height: 100%;
     display: flex;
     align-items: center;

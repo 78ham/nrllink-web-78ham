@@ -51,7 +51,7 @@
       </button>
     </div>
 
-    <div v-if="showtable" class="table-shell">
+    <div v-if="showtable" class="table-shell table-responsive">
       <el-table
         :key="tableKey"
         v-loading="listLoading"
@@ -67,14 +67,14 @@
           prop="id"
           sortable="custom"
           align="center"
-          width="80"
+          min-width="80"
         >
           <template #default="scope">
             <span>{{ scope.row.id }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('operator_log.timestamp')" width="220" align="center">
+        <el-table-column :label="$t('operator_log.timestamp')" min-width="220" align="center">
           <template #default="scope">
             <div class="mono-cell">{{ scope.row.timestamp || '--' }}</div>
           </template>
@@ -84,12 +84,12 @@
             <div class="content-cell">{{ scope.row.content || '--' }}</div>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('operator_log.event_type')" width="180" align="center">
+        <el-table-column :label="$t('operator_log.event_type')" min-width="180" align="center">
           <template #default="scope">
             <el-tag class="event-type-tag">{{ scope.row.event_type || '--' }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column :label="$t('operator_log.operator')" width="150" align="center">
+        <el-table-column :label="$t('operator_log.operator')" min-width="150" align="center">
           <template #default="scope">
             <el-tag class="operator-tag">{{ scope.row.operator || '--' }}</el-tag>
           </template>
@@ -371,4 +371,5 @@ export default {
     font-size: 14px;
   }
 }
+.table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 </style>

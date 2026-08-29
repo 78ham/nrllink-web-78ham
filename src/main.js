@@ -33,7 +33,9 @@ const globalIcons = {
   Upload
 }
 
-import '@/styles/index.scss' // global css
+import '@/styles/index.scss'
+import '@/fonts/manrope.css' // local Manrope font
+// global css
 
 import App from './App.vue'
 import router from './router'

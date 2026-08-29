@@ -914,7 +914,8 @@ export default {
     left: 0;
     right: 0;
     margin: auto;
-    width: 600px;
+    width: 100%;
+    max-width: 600px;
     height: 330px;
     padding: 25px;
     background-color: #fff;

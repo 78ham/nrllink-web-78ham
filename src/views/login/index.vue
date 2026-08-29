@@ -2,10 +2,11 @@
   <div class="login-container">
     <div ref="topbar" class="topbar" :class="{ 'topbar-stacked': topbarStacked }">
       <div ref="brandBlock" class="brand-block">
-        <img src="/images/logo.png" alt="Logo" class="topbar-logo">
+        <img :src="logo_url || '/images/logo.png'" alt="Logo" class="topbar-logo">
         <div class="brand-text">
           <h1>{{ title }}</h1>
           <p>{{ $t('login.brandDesc') }}</p>
+          <p v-if="login_slogan" class="login-slogan">{{ login_slogan }}</p>
         </div>
       </div>
 
@@ -346,6 +347,7 @@ export default {
     }
     return {
       title: 'HAM互联',
+      logo_url: '',
       cs_qr_url: '',
       icp: '',
       tech_support: '',
@@ -477,6 +479,7 @@ export default {
       this.tech_support = response.data.items.tech_support
       this.copyright = response.data.items.copyright
       this.login_slogan = response.data.items.login_slogan
+      this.logo_url = response.data.items.logourl || ''
 
       if (response.data.items.language === 'en') {
         setI18nLanguage('en')
@@ -1278,6 +1281,13 @@ export default {
       color: var(--platform-ink-dim);
       font-size: 14px;
       letter-spacing: 0.4px;
+    }
+
+    .login-slogan {
+      margin: 6px 0 0;
+      color: var(--platform-ink-dim);
+      font-size: clamp(13px, 1.4vw, 16px);
+      opacity: 0.85;
     }
   }
 

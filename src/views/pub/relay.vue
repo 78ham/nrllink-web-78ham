@@ -52,7 +52,7 @@
 
     </div>
 
-    <div v-if="showtable" class="table-shell">
+    <div v-if="showtable" class="table-shell table-responsive">
       <el-table
         :key="tableKey"
         v-loading="listLoading"
@@ -68,7 +68,7 @@
           prop="id"
           sortable="custom"
           align="center"
-          width="80"
+          min-width="80"
         >
           <template #default="scope">
             <span>{{ scope.row.id }}</span>
@@ -77,7 +77,7 @@
 
         <el-table-column
           :label="$t('relay.name')"
-          width="150px"
+          min-width="150"
           align="center"
         >
           <template #default="scope">
@@ -89,7 +89,7 @@
 
         <el-table-column
           :label="$t('relay.up_freq')"
-          width="110px"
+          min-width="110"
           align="center"
         >
           <template #default="scope">
@@ -101,7 +101,7 @@
 
         <el-table-column
           :label="$t('relay.down_freq')"
-          width="110px"
+          min-width="110"
           align="center"
         >
           <template #default="scope">
@@ -113,7 +113,7 @@
 
         <el-table-column
           label="发射哑音"
-          width="110px"
+          min-width="110"
           align="center"
         >
           <template #default="scope">
@@ -123,7 +123,7 @@
 
         <el-table-column
           label="接收哑音"
-          width="110px"
+          min-width="110"
           align="center"
         >
           <template #default="scope">
@@ -133,7 +133,7 @@
 
         <el-table-column
           :label="$t('relay.ower_callsign')"
-          width="150px"
+          min-width="150"
           align="center"
         >
           <template #default="scope">
@@ -143,7 +143,7 @@
 
         <el-table-column
           :label="$t('device.status')"
-          width="110px"
+          min-width="110"
           align="center"
         >
           <template #default="scope">
@@ -155,7 +155,7 @@
 
         <el-table-column
           :label="$t('device.createTime')"
-          width="160px"
+          min-width="160"
           align="center"
         >
           <template #default="scope">
@@ -165,7 +165,7 @@
 
         <el-table-column
           :label="$t('device.updateTime')"
-          width="160px"
+          min-width="160"
           align="center"
         >
           <template #default="scope">
@@ -656,7 +656,8 @@ export default {
     }
 
     &.owner-input {
-      width: 320px;
+      width: 100%;
+      max-width: 320px;
     }
 
     &.action-btn {
@@ -1003,4 +1004,5 @@ export default {
     margin: 0 !important;
   }
 }
+.table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 </style>

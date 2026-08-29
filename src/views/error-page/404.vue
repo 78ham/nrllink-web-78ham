@@ -42,12 +42,14 @@ export default {
 .wscn-http404 {
   position: relative;
   width: 1200px;
+  max-width: 100%;
   padding: 0 50px;
   overflow: hidden;
   .pic-404 {
     position: relative;
     float: left;
     width: 600px;
+    max-width: 100%;
     overflow: hidden;
     &__parent {
       width: 100%;

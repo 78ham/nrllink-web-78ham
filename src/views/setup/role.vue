@@ -16,17 +16,17 @@
       </button>
     </div>
 
-    <div v-if="showtable" class="table-shell roles-table-shell">
+    <div v-if="showtable" class="table-shell roles-table-shell table-responsive">
       <el-table :data="rolesList" border style="width: 100%">
-        <el-table-column align="center" label="序号" width="100">
+        <el-table-column align="center" label="序号" min-width="100">
           <template #default="scope">{{ scope.row.id }}</template>
         </el-table-column>
-        <el-table-column align="center" label="角色关键字" width="220">
+        <el-table-column align="center" label="角色关键字" min-width="220">
           <template #default="scope">
             <el-tag class="role-key-tag">{{ scope.row.key }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column align="center" label="角色名称" width="220">
+        <el-table-column align="center" label="角色名称" min-width="220">
           <template #default="scope">
             <div class="role-name-cell">{{ scope.row.name }}</div>
           </template>
@@ -36,7 +36,7 @@
             <div class="role-description-cell">{{ scope.row.description || '--' }}</div>
           </template>
         </el-table-column>
-        <el-table-column align="center" label="操作" width="220">
+        <el-table-column align="center" label="操作" min-width="220">
           <template #default="scope">
             <el-button
               type="primary"
@@ -447,4 +447,5 @@ export default {
   .role-card__actions { justify-content: stretch; flex-direction: column; gap: 8px; }
   .role-card__actions .compact-btn { width: 100%; margin: 0 !important; }
 }
+.table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 </style>

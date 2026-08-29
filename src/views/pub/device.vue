@@ -54,7 +54,7 @@
 
     </div>
 
-    <div v-if="showtable" class="table-shell">
+    <div v-if="showtable" class="table-shell table-responsive">
       <el-table
         :key="tableKey"
         v-loading="listLoading"
@@ -65,7 +65,7 @@
         style="width: 100%"
         @sort-change="sortChange"
       >
-        <el-table-column fixed :label="$t('Account.id')" prop="id" sortable="custom" align="center" width="110">
+        <el-table-column fixed :label="$t('Account.id')" prop="id" sortable="custom" align="center" min-width="110">
           <template #default="scope">
             <span>{{ scope.row.id }}</span>
           </template>
@@ -75,7 +75,7 @@
               fixed
               prop="callsign"
               :label="$t('device.callsign')"
-              width="150px"
+              min-width="150"
           align="center"
           :sortable="true"
         >
@@ -89,7 +89,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="dmrid" :label="$t('device.dmrid')" width="100px" align="center" :sortable="true">
+        <el-table-column prop="dmrid" :label="$t('device.dmrid')" min-width="100" align="center" :sortable="true">
           <template #default="scope">
             <div class="tag-wrap">
               <el-tag :type="scope.row.is_online ? 'primary' : 'info'">{{ scope.row.dmrid }}
@@ -98,7 +98,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('device.status')" prop="status" width="170px" align="center">
+        <el-table-column :label="$t('device.status')" prop="status" min-width="170" align="center">
           <template #default="scope">
             <div class="status-actions">
               <el-button
@@ -124,25 +124,25 @@
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('device.priority')" prop="priority" width="100px" align="center" :sortable="true">
+        <el-table-column :label="$t('device.priority')" prop="priority" min-width="100" align="center" :sortable="true">
           <template #default="scope">
             <span>{{ scope.row.priority }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('device.name')" prop="name" width="220px" align="center" :sortable="true">
+        <el-table-column :label="$t('device.name')" prop="name" min-width="220" align="center" :sortable="true">
           <template #default="scope">
             <span>{{ scope.row.ssid === 200 && scope.row.name === '' ? $t('device.serverLink') : scope.row.name }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('device.qth')" prop="qth" width="220px" align="center" :sortable="true">
+        <el-table-column :label="$t('device.qth')" prop="qth" min-width="220" align="center" :sortable="true">
           <template #default="scope">
             <span>{{ scope.row.qth }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('device.currentGroup')" prop="group_id" width="180px" align="center" :sortable="true">
+        <el-table-column :label="$t('device.currentGroup')" prop="group_id" min-width="180" align="center" :sortable="true">
           <template #default="scope">
             <span v-if="scope.row.group_id > 0 && scope.row.group_id < 999">
               {{ $t('device.personalRoom') }}{{ scope.row.group_id }}</span>
@@ -155,7 +155,7 @@
         <el-table-column
           :label="$t('Account.actions')"
           align="center"
-          width="320px"
+          min-width="320"
           class-name="small-padding fixed-width"
         >
           <template #default="{ row }">
@@ -201,13 +201,13 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="dev_rf_type" :label="$t('device.rfTypeLabel')" width="140px" align="center" :sortable="true">
+        <el-table-column prop="dev_rf_type" :label="$t('device.rfTypeLabel')" min-width="140" align="center" :sortable="true">
           <template #default="scope">
             <span>{{ ValueFilter(scope.row.rf_type, DevRFtypeOptions) }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column prop="tunner" :label="$t('device.channelFrequency')" width="190px" align="center">
+        <el-table-column prop="tunner" :label="$t('device.channelFrequency')" min-width="190" align="center">
           <template #default="scope">
             <div v-if="scope.row.device_parm" class="tag-wrap">
               <el-tag v-if="scope.row.rf_type == 1">
@@ -227,19 +227,19 @@
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('device.model')" prop="dev_model" width="150px" align="center" :sortable="true">
+        <el-table-column :label="$t('device.model')" prop="dev_model" min-width="150" align="center" :sortable="true">
           <template #default="scope">
             <span>{{ ValueFilter(scope.row.dev_model, DevModelOptions) }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('device.totalVoiceTime')" prop="voice_time" width="120px" align="center" :sortable="true">
+        <el-table-column :label="$t('device.totalVoiceTime')" prop="voice_time" min-width="120" align="center" :sortable="true">
           <template #default="scope">
             <span>{{ formatVoiceTime(scope.row.voice_time) }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('device.codecCaps')" prop="supported_codecs" width="140px" align="center">
+        <el-table-column :label="$t('device.codecCaps')" prop="supported_codecs" min-width="140" align="center">
           <template #default="scope">
             <div class="codec-tags">
               <el-tag v-if="scope.row.supported_codecs & 1" size="small" type="info" class="codec-tag">G.711</el-tag>
@@ -249,19 +249,19 @@
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('device.totalTraffic')" prop="traffic" width="120px" align="center" :sortable="true">
+        <el-table-column :label="$t('device.totalTraffic')" prop="traffic" min-width="120" align="center" :sortable="true">
           <template #default="scope">
             <span>{{ formatFileSize(scope.row.traffic) }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('device.lastVoiceDuration')" prop="last_voice_duration" width="150px" align="center" :sortable="true">
+        <el-table-column :label="$t('device.lastVoiceDuration')" prop="last_voice_duration" min-width="150" align="center" :sortable="true">
           <template #default="scope">
             <span>{{ formatVoiceTime(scope.row.last_voice_duration) }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('device.lastVoiceTime')" prop="last_voice_end_time" width="160px" align="center" :sortable="true">
+        <el-table-column :label="$t('device.lastVoiceTime')" prop="last_voice_end_time" min-width="160" align="center" :sortable="true">
           <template #default="scope">
             <span>{{ parseTime(scope.row.last_voice_end_time) }}</span>
           </template>
@@ -1802,6 +1802,8 @@ export default {
 .table-shell {
   padding: 10px;
 }
+
+.table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
 .device-page {
   .compact-btn {

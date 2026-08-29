@@ -465,6 +465,7 @@ body,
     position: fixed;
     inset: -40% auto auto -20%;
     width: 640px;
+    max-width: 100%;
     height: 640px;
     background: radial-gradient(circle, var(--platform-accent) 0%, var(--platform-accent) 0%, transparent 70%);
     filter: blur(4px);
@@ -477,6 +478,7 @@ body,
     right: -20%;
     bottom: -30%;
     width: 720px;
+    max-width: 100%;
     height: 720px;
     background: radial-gradient(circle, var(--platform-accent-2) 0%, var(--platform-accent-2) 0%, transparent 70%);
     filter: blur(6px);

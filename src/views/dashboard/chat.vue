@@ -10,7 +10,7 @@
     <el-input
       v-model="msgitem"
       :placeholder="$t('device.msg')"
-      style="width: 320px"
+      style="width: 100%; max-width: 320px;"
       class="filter-item"
       clearable
       @keyup.enter="websocketsend(msgitem)"

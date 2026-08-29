@@ -45,7 +45,7 @@
 import { registerServer } from '@/api/server'
 import { ElMessage } from 'element-plus'
 
-const initialForm = () => ({ name: '', server_type: 0, ip_addr: '', dns_name: '', udp_port: '60051', note: '' })
+const initialForm = () => ({ name: '', server_type: '', ip_addr: '', dns_name: '', udp_port: '60051', note: '' })
 
 export default {
  name: 'ServerRegistrationPage',
@@ -58,8 +58,9 @@ export default {
 
    submitting: false,
    form: initialForm(),
-   rules: {
-    name: [{ required: true, message: this.$t('serverRegistration.nameRequired'), trigger: 'blur' }],
+    rules: {
+     name: [{ required: true, message: this.$t('serverRegistration.nameRequired'), trigger: 'blur' }],
+     server_type: [{ required: true, message: '请选择服务器类型', trigger: 'change' }],
     ip_addr: [{ validator: endpointValidator, trigger: 'blur' }],
     dns_name: [{ validator: endpointValidator, trigger: 'blur' }],
     udp_port: [

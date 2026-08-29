@@ -26,7 +26,7 @@
       </button>
     </div>
 
-    <div v-if="showtable" class="table-shell">
+    <div v-if="showtable" class="table-shell table-responsive">
       <el-table
         :key="tableKey"
         v-loading="listLoading"
@@ -38,7 +38,7 @@
         style="width: 100%"
         @sort-change="sortChange"
       >
-        <el-table-column :label="$t('Account.id')" prop="id" sortable="custom" align="center" width="80">
+        <el-table-column :label="$t('Account.id')" prop="id" sortable="custom" align="center" min-width="80">
           <template #default="scope">
             <span>{{ scope.row.id }}</span>
           </template>
@@ -50,49 +50,49 @@
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('server.server_type')" width="130" align="center">
+        <el-table-column :label="$t('server.server_type')" min-width="130" align="center">
           <template #default="scope">
             <el-tag class="server-type-tag">{{ serverTypeLabel(scope.row.server_type) }}</el-tag>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('server.cpu_type')" width="140" align="center">
+        <el-table-column :label="$t('server.cpu_type')" min-width="140" align="center">
           <template #default="scope">
             <span>{{ scope.row.cpu_type || '--' }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('server.mem_size')" width="150" align="center">
+        <el-table-column :label="$t('server.mem_size')" min-width="150" align="center">
           <template #default="scope">
             <div class="metric-pill">{{ scope.row.mem_size || '--' }}</div>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('server.input_rate')" width="130" align="center">
+        <el-table-column :label="$t('server.input_rate')" min-width="130" align="center">
           <template #default="scope">
             <div class="metric-pill">{{ scope.row.input_rate || '--' }}</div>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('server.output_rate')" width="130" align="center">
+        <el-table-column :label="$t('server.output_rate')" min-width="130" align="center">
           <template #default="scope">
             <div class="metric-pill">{{ scope.row.output_rate || '--' }}</div>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('server.netcard')" width="150" align="center">
+        <el-table-column :label="$t('server.netcard')" min-width="150" align="center">
           <template #default="scope">
             <span>{{ scope.row.netcard || '--' }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('server.iptype')" width="120" align="center">
+        <el-table-column :label="$t('server.iptype')" min-width="120" align="center">
           <template #default="scope">
             <el-tag class="server-ip-tag">{{ scope.row.ip_type || '--' }}</el-tag>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('server.ip_addr')" width="150" align="center">
+        <el-table-column :label="$t('server.ip_addr')" min-width="150" align="center">
           <template #default="scope">
             <div class="mono-cell">{{ scope.row.ip_addr || '--' }}</div>
           </template>
@@ -104,25 +104,25 @@
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('server.udp_port')" width="110" align="center">
+        <el-table-column :label="$t('server.udp_port')" min-width="110" align="center">
           <template #default="scope">
             <div class="metric-pill">{{ scope.row.udp_port || '--' }}</div>
           </template>
         </el-table-column>
 
-        <el-table-column label="所有者" width="110" align="center">
+        <el-table-column label="所有者" min-width="110" align="center">
           <template #default="scope">
             <span>{{ scope.row.ower_id || '--' }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column label="所有者呼号" width="150" align="center">
+        <el-table-column label="所有者呼号" min-width="150" align="center">
           <template #default="scope">
             <el-tag class="owner-tag">{{ scope.row.ower_callsign || '--' }}</el-tag>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('server.status')" width="110" align="center">
+        <el-table-column :label="$t('server.status')" min-width="110" align="center">
           <template #default="scope">
             <el-tag :class="statusClass(scope.row.status)" class="server-status-tag">
               {{ statusLabel(scope.row.status) }}
@@ -130,13 +130,13 @@
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('device.createTime')" width="160" align="center">
+        <el-table-column :label="$t('device.createTime')" min-width="160" align="center">
           <template #default="scope">
             <span>{{ parseTime(scope.row.create_time) || '--' }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('device.updateTime')" width="160" align="center">
+        <el-table-column :label="$t('device.updateTime')" min-width="160" align="center">
           <template #default="scope">
             <span>{{ parseTime(scope.row.update_time) || '--' }}</span>
           </template>
@@ -148,7 +148,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('device.bind')" align="center" class-name="small-padding fixed-width" width="200">
+        <el-table-column :label="$t('device.bind')" align="center" class-name="small-padding fixed-width" min-width="200">
           <template #default="{ row }">
             <el-button size="small" type="primary" plain class="compact-btn server-edit-btn" @click="handleUpdate(row)">
               {{ $t('device.edit') }}
@@ -720,4 +720,5 @@ export default {
     margin: 0 !important;
   }
 }
+.table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 </style>

@@ -48,7 +48,7 @@
       </button>
     </div>
 
-    <div v-if="showtable" class="table-shell">
+    <div v-if="showtable" class="table-shell table-responsive">
       <el-table
         :key="tableKey"
         v-loading="listLoading"
@@ -59,25 +59,25 @@
         style="width: 100%"
         @sort-change="sortChange"
       >
-        <el-table-column :label="$t('employee.id')" prop="id" sortable="custom" align="center" width="80">
+        <el-table-column :label="$t('employee.id')" prop="id" sortable="custom" align="center" min-width="80">
           <template #default="scope">
             <span>{{ scope.row.id }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('employee.callsign')" width="150" align="center">
+        <el-table-column :label="$t('employee.callsign')" min-width="150" align="center">
           <template #default="scope">
             <el-tag class="callsign-tag">{{ scope.row.callsign || '--' }}</el-tag>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('employee.name')" width="140" align="center">
+        <el-table-column :label="$t('employee.name')" min-width="140" align="center">
           <template #default="scope">
             <div class="primary-cell">{{ scope.row.name || '--' }}</div>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('employee.phone')" width="140" align="center">
+        <el-table-column :label="$t('employee.phone')" min-width="140" align="center">
           <template #default="scope">
             <span>{{ scope.row.phone || '--' }}</span>
           </template>
@@ -95,19 +95,19 @@
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('register.create_time')" width="180" align="center">
+        <el-table-column :label="$t('register.create_time')" min-width="180" align="center">
           <template #default="scope">
             <span>{{ scope.row.create_time || '--' }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('register.update_time')" width="180" align="center">
+        <el-table-column :label="$t('register.update_time')" min-width="180" align="center">
           <template #default="scope">
             <span>{{ scope.row.update_time || '--' }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column :label="$t('employee.status')" width="130" align="center">
+        <el-table-column :label="$t('employee.status')" min-width="130" align="center">
           <template #default="scope">
             <el-tag :class="statusClass(scope.row.status)" class="register-status-tag">
               {{ statusFilter(scope.row.status) }}
@@ -124,7 +124,7 @@
         <el-table-column
           :label="$t('employee.actions')"
           align="center"
-          width="220"
+          min-width="220"
           class-name="small-padding fixed-width"
         >
           <template #default="{ row }">
@@ -736,4 +736,5 @@ export default {
   .register-card__actions { justify-content: stretch; flex-direction: column; gap: 8px; }
   .register-card__actions .compact-btn { width: 100%; margin: 0 !important; }
 }
+.table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 </style>
