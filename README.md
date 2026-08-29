@@ -280,6 +280,8 @@ nrllink-web-78ham/
 | `/setup` | `register` | setup/register | admin | 注册审批(审核/拒绝) |
 | `/setup` | `billing-packages` | setup/billing-packages | admin | 计费套餐管理 |
 | `/setup` | `roles` | setup/role | admin | 角色与路由权限管理 |
+| `/setup` | `site-settings` | setup/site-settings | admin | 站点设置-维护登录页与平台展示信息 |
+| `/server-register` | `index` | server-register/index | ham | 服务器登记-提交服务器信息等待审核 |
 
 #### 日志路由 (roles: ['admin'])
 
@@ -565,7 +567,7 @@ res.code === 50008|50012|50014 → Token错误, 弹窗提示重新登录
 
 | 模块 | 接口数 | 关键函数 |
 |------|--------|----------|
-| `platform.js` | 2 | `getplatforminfo()`, `fetchPlatformList()` |
+| `platform.js` | 4 | `getplatforminfo()`, `fetchPlatformList()`, `fetchSiteSettings()`, `updateSiteSettings()` |
 | `dataquery.js` | 2 | `fetchAccountList()`, `fetchTotalStats()` |
 | `weixin.js` | 3 | `phonecode()`, `fetchWeiXinMsgByOpenID()`, `fetchWeiXinMsgContent()` |
 | `operatorlog.js` | 1 | `fetchOperatorLogList()` |
@@ -611,6 +613,16 @@ res.code === 50008|50012|50014 → Token错误, 弹窗提示重新登录
 │  实时监控面板 (RealtimeMonitorPanel)                    │
 └──────────────────────────────────────────────────────┘
 ```
+
+### 站点设置 (`views/setup/site-settings.vue`)
+
+管理员页面，维护登录页与平台对外展示信息。字段包括：平台名称、Logo地址、ICP备案号、默认语言、登录页副标题、技术支持、版权信息、联系邮箱、联系呼号、社区二维码地址。
+表单双列布局，保存后自动刷新。后端通过 /platform/site-settings 接口持久化到 site_settings 表。
+
+### 服务器登记 (`views/server-register/index.vue`)
+
+普通用户页面，提交服务器信息等待管理员审核。字段包括：服务器名称（必填）、服务器类型（下拉选择）、IP地址、DNS名称、UDP端口（默认60051）、备注。
+归属信息（callsign/user_id）自动从登录 Token 中提取，状态默认为 2（等待管理员审核）。
 
 ### 设备管理 (`views/pub/device.vue`)
 
@@ -1197,6 +1209,33 @@ location / {
 | 测试 | Vitest | |
 | 代码检查 | ESLint | |
 | SVG优化 | SVGO | |
+
+
+### Docker
+
+#### docker-compose (Recommended)
+
+Place both repos under the same parent directory:
+```
+parent/
+  nrllink-78ham/       # Backend
+  nrllink-web-78ham/   # Frontend
+
+cd nrllink-web-78ham
+docker compose up -d
+
+# Access: http://localhost (Nginx)
+# Backend API proxied via Nginx -> nrllink:9000
+```
+
+#### Standalone frontend image
+
+```
+docker build -t nrllink-web .
+docker run -d -p 80:80 --link nrllink-server:nrllink nrllink-web
+```
+
+> Frontend Nginx proxies API requests to backend container. WebSocket also proxied.
 
 ---
 
