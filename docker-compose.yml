@@ -1,5 +1,6 @@
 services:
   web:
+    image: 78ham/nrllink-web:latest
     build: .
     container_name: nrllink-web
     ports:
@@ -10,6 +11,7 @@ services:
     restart: unless-stopped
 
   nrllink:
+    image: 78ham/nrllink:latest
     build: ../nrllink-78ham
     container_name: nrllink-server
     ports:
@@ -27,3 +29,4 @@ services:
 
 volumes:
   nrllink-data:
+
