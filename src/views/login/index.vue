@@ -294,15 +294,19 @@
     </transition>
 
     <!-- Footer -->
-    <div v-if="icp !== ''" class="bottom_footer">
+    <div v-if="icp !== '' || tech_support !== '' || copyright !== ''" class="bottom_footer">
       <div class="footer-content">
-        <a href="https://beian.miit.gov.cn" target="_blank">工信部ICP备案号：{{ icp }}</a>
-        <span class="separator">|</span>
-        <span>技术支持：BH4TDV BG6FCS BA4RN BA1GM BH4TIH BD4VKI BA4QAO</span>
-        <span class="copyright">Copyright © 2017-2022 BH4RPN 版权所有</span>
+        <template v-if="icp !== ''">
+          <a href="https://beian.miit.gov.cn" target="_blank">工信部ICP备案号：{{ icp }}</a>
+        </template>
+        <template v-if="icp !== '' && tech_support !== ''">
+          <span class="separator">|</span>
+        </template>
+        <span v-if="tech_support !== ''">{{ tech_support }}</span>
+        <span v-if="copyright !== ''" class="copyright">{{ copyright }}</span>
       </div>
     </div>
-  </div>
+    </div>
 </template>
 
 <script>
@@ -344,6 +348,9 @@ export default {
       title: 'HAM互联',
       cs_qr_url: '',
       icp: '',
+      tech_support: '',
+      copyright: '',
+      login_slogan: '',
       themes,
       loginForm: {
         username: '',
@@ -467,6 +474,9 @@ export default {
       this.title = response.data.items.name
       this.cs_qr_url = response.data.items.cs_qr_url
       this.icp = response.data.items.icp
+      this.tech_support = response.data.items.tech_support
+      this.copyright = response.data.items.copyright
+      this.login_slogan = response.data.items.login_slogan
 
       if (response.data.items.language === 'en') {
         setI18nLanguage('en')
@@ -1476,7 +1486,7 @@ export default {
   .content-wrapper.desktop-panels {
     display: block;
     position: relative;
-    min-height: 780px;
+    min-height: clamp(560px, 72vh, 780px);
   }
 
   .left-column,
@@ -2188,7 +2198,7 @@ export default {
     }
 
     .topbar-logo {
-      width: 212px;
+      width: clamp(168px, 13vw, 212px);
     }
 
     .brand-text {
@@ -2247,7 +2257,7 @@ export default {
     }
 
     .topbar-logo {
-      width: 200px;
+      width: clamp(156px, 18vw, 200px);
     }
 
     .brand-text {
@@ -2318,7 +2328,7 @@ export default {
     }
 
     .topbar-logo {
-      width: 200px;
+      width: clamp(148px, 24vw, 188px);
       display: block;
       margin: 0 auto;
     }
@@ -2500,7 +2510,7 @@ export default {
     }
 
     .topbar-logo {
-      width: 200px;
+      width: clamp(132px, 42vw, 176px);
     }
 
     .brand-text {
@@ -2668,7 +2678,33 @@ export default {
     }
   }
 
-  /* Overlay Styles */
+  @media (max-width: 420px) {
+  .topbar-logo {
+   width: min(156px, 46vw);
+  }
+
+  .brand-text h1 {
+   font-size: clamp(20px, 7vw, 26px);
+   overflow-wrap: anywhere;
+  }
+
+  .topbar-actions {
+   gap: 8px;
+  }
+
+  .topbar-button {
+   padding: 0 13px;
+  }
+
+  .bottom_footer .footer-content {
+   padding-left: 10px;
+   padding-right: 10px;
+   text-align: center;
+   overflow-wrap: anywhere;
+  }
+ }
+
+ /* Overlay Styles */
   .overlay {
     position: fixed;
     top: 0;

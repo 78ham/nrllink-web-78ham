@@ -39,7 +39,9 @@ export default {
 
     download: '数据下载',
     log: '日记管理',
-    setup: '系统设置',
+    siteSettings: '站点设置',
+  serverRegistration: '登记我的服务器',
+  setup: '系统设置',
     operatorlog: '操作日记',
     guide: '引导页',
     permission: '权限测试页',
@@ -70,6 +72,32 @@ export default {
     i18n: '国际化',
     externalLink: '外链',
     profile: '个人中心'
+  },
+  siteSettings: {
+    title: '站点设置',
+    description: '统一维护登录页与平台对外展示信息。',
+    save: '保存设置',
+    saved: '站点设置已保存',
+    platformName: '平台名称',
+    logoUrl: 'Logo 地址',
+    icp: 'ICP备案号',
+    language: '默认语言',
+    loginSlogan: '登录页副标题',
+    techSupport: '技术支持',
+    copyright: '版权信息',
+    contactMail: '联系邮箱',
+    contactCallsign: '联系呼号',
+    qrUrl: '社区二维码地址'
+  },
+  serverRegistration: {
+    title: '登记我的服务器',
+    description: '提交后服务器默认关闭，等待管理员审核。归属信息将自动使用当前登录账号。',
+    submit: '提交登记',
+    endpointRequired: 'IP 地址和域名至少填写一项',
+    nameRequired: '请输入服务器名称',
+    portRequired: '请输入 UDP 端口',
+    portInvalid: '请输入 1 至 65535 的有效端口',
+    success: '服务器登记成功，等待管理员审核'
   },
   server: {
     server_name: '服务器名称',

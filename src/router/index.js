@@ -234,6 +234,16 @@ export const asyncRoutes = [
         }
       },
       {
+        path: 'site-settings',
+        component: () =>
+          import('@/views/setup/site-settings.vue'),
+        name: 'SiteSettings',
+        meta: {
+          title: 'siteSettings',
+          roles: ['admin']
+        }
+      },
+      {
         path: 'roles',
         component: () =>
           import('@/views/setup/role.vue'),
@@ -245,6 +255,19 @@ export const asyncRoutes = [
       }
 
     ]
+  },
+
+  {
+    path: '/server-register',
+    component: Layout,
+    redirect: '/server-register/index',
+    children: [{
+      path: 'index',
+      component: () =>
+        import('@/views/server-register/index.vue'),
+      name: 'ServerRegistration',
+      meta: { title: 'serverRegistration', icon: 'edit', roles: ['ham'] }
+    }]
   },
 
   {

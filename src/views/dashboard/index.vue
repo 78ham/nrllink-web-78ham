@@ -327,6 +327,12 @@ export default {
   }
 }
 
+@media (max-width: 1023px) {
+ .monitor-panel-content {
+  min-height: 480px;
+ }
+}
+
 @media (max-width: 767px) {
   .dashboard-shell {
     width: min(100%, calc(100% - 24px));

@@ -634,6 +634,9 @@ export default {
 
 .table-shell {
   padding: 10px;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .setup-users-page {

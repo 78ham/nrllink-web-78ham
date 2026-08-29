@@ -1,0 +1,14 @@
+.git
+.codex
+.playwright-cli
+output
+node_modules
+dist
+.vscode
+.idea
+*.log
+_patch*.py
+_*.py
+.dockerignore
+docker-compose*.yml
+README.md

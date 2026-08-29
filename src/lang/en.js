@@ -39,7 +39,9 @@ export default {
 
     download: 'Data Download',
     log: 'Log Management',
-    setup: 'System Settings',
+    siteSettings: 'Site Settings',
+  serverRegistration: 'Register My Server',
+  setup: 'System Settings',
     operatorlog: 'Operation Log',
     guide: 'Guide Page',
     permission: 'Permission Test Page',
@@ -70,6 +72,32 @@ export default {
     i18n: 'Internationalization',
     externalLink: 'External Link',
     profile: 'Profile'
+  },
+  siteSettings: {
+    title: 'Site Settings',
+    description: 'Manage the public information shown on the login page and platform.',
+    save: 'Save Settings',
+    saved: 'Site settings saved',
+    platformName: 'Platform Name',
+    logoUrl: 'Logo URL',
+    icp: 'ICP Filing',
+    language: 'Default Language',
+    loginSlogan: 'Login Subtitle',
+    techSupport: 'Technical Support',
+    copyright: 'Copyright',
+    contactMail: 'Contact Email',
+    contactCallsign: 'Contact Callsign',
+    qrUrl: 'Community QR Code URL'
+  },
+  serverRegistration: {
+    title: 'Register My Server',
+    description: 'The server remains disabled until an administrator reviews it. Ownership is assigned to your account automatically.',
+    submit: 'Submit Registration',
+    endpointRequired: 'Enter either an IP address or a domain name',
+    nameRequired: 'Enter a server name',
+    portRequired: 'Enter the UDP port',
+    portInvalid: 'Enter a valid port from 1 to 65535',
+    success: 'Server registered and awaiting administrator review'
   },
   server: {
     server_name: 'Server Name',

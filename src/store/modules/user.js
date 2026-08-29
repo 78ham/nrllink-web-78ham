@@ -56,23 +56,28 @@ export const useUserStore = defineStore('user', {
       return data
     },
     async logout() {
-      await logout(this.token)
-      this.token = ''
-      this.roles = []
-      this.id = 0
-      this.name = ''
-      this.phone = ''
-      this.callsign = ''
-      this.dmrid = ''
-      this.mdcid = ''
-      this.status = 0
-      this.expire_time = ''
-      this.package_type = 0
-      this.billing_enabled = false
-      this.avatar = ''
-      this.introduction = ''
-      removeToken()
-      resetRouter()
+      try {
+        await logout(this.token)
+      } finally {
+        // 无论后端是否成功，都清理本地会话，避免 token 残留
+        this.token = ''
+        this.roles = []
+        this.routes = []
+        this.id = 0
+        this.name = ''
+        this.phone = ''
+        this.callsign = ''
+        this.dmrid = ''
+        this.mdcid = ''
+        this.status = 0
+        this.expire_time = ''
+        this.package_type = 0
+        this.billing_enabled = false
+        this.avatar = ''
+        this.introduction = ''
+        removeToken()
+        resetRouter()
+      }
     },
     resetToken() {
       this.token = ''

@@ -156,7 +156,12 @@ export default {
     }
 
     const logout = async () => {
-      await userStore.logout()
+      try {
+        await userStore.logout()
+      } catch (e) {
+        console.warn('logout api error, clearing local session anyway:', e)
+      }
+      // 无论后端是否成功，都跳转到登录页
       router.push(`/login?redirect=${window.location.pathname}`)
     }
 
@@ -232,6 +237,45 @@ export default {
     text-decoration: none;
   }
 }
+
+@media (max-width: 1100px) {
+ .navbar .right-menu {
+  gap: 2px;
+ }
+
+ .navbar .right-menu .right-menu-item {
+  padding-left: 5px;
+  padding-right: 5px;
+  font-size: 15px;
+ }
+
+ .navbar .right-menu .theme-picker-container .theme-trigger {
+  padding-left: 8px;
+  padding-right: 8px;
+ }
+
+ .navbar .right-menu .avatar-container {
+  margin-right: 24px;
+ }
+}
+
+@media (max-width: 767px) {
+ .navbar {
+  padding: 0 8px;
+ }
+
+ .navbar .hamburger-container,
+ .navbar .breadcrumb-container {
+  display: none;
+ }
+
+ .navbar .right-menu {
+  width: 100%;
+  justify-content: flex-end;
+  gap: 6px;
+ }
+}
+
 </style>
 
 <style lang="scss" scoped>

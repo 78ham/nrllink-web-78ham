@@ -14,3 +14,19 @@ export function fetchPlatformList(data) {
     data
   })
 }
+
+
+export function fetchSiteSettings() {
+ return request({
+  url: '/platform/site-settings',
+  method: 'get'
+ })
+}
+
+export function updateSiteSettings(data) {
+ return request({
+  url: '/platform/site-settings/update',
+  method: 'post',
+  data
+ })
+}
