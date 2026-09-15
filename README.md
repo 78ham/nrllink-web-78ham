@@ -1169,17 +1169,11 @@ if ('serviceWorker' in navigator) {
 # 构建
 npm run build:prod
 # 输出: dist/
-
-# 部署到 nginx
-cp -r dist/* /var/www/nrllink/
-
-# nginx配置
-location / {
-    root /var/www/nrllink;
-    index index.html;
-    try_files $uri $uri/ /index.html;
-}
 ```
+
+容器部署时前端由独立的前端容器（nginx）提供，并负责把 `/api`、`/ws`、`/uploads`
+转发给同一 Docker 网络里的后端容器，详见下方「Docker 部署」。
+需要域名 + HTTPS 时，在宿主机再加一层反向代理指向前端端口即可，见 `docs/reverse-proxy.md`。
 
 ---
 
@@ -1211,33 +1205,111 @@ location / {
 | SVG优化 | SVGO | |
 
 
-### Docker
+### Docker 部署
 
-#### docker-compose (Recommended)
+> **本仓库是生产部署入口**，只用它就能跑起整套服务（前端容器 + 后端容器，同一编排、同一网络组），
+> 不需要再克隆后端仓库（后端镜像内置一份中性默认配置，开箱即用）。
 
-Place both repos under the same parent directory:
+#### 拓扑
+
 ```
-parent/
-  nrllink-78ham/       # Backend
-  nrllink-web-78ham/   # Frontend
+                    ┌────────────── 宿主机 ──────────────┐
+公网浏览器 ──> web:80 ──(Docker 网络 nrllink-net)──> nrllink:9000
+                                  ↑
+局域网客户端 ─────────────────────┘  （接口直连，默认对局域网开放）
 
-cd nrllink-web-78ham
-docker compose up -d
-
-# Access: http://localhost:7891 (Nginx；生产建议放反代后，容器仅暴露 127.0.0.1:7891:80)
-# Backend API proxied via Nginx -> nrllink:9000
+公网设备 ──UDP 60050──────────────────────> nrllink:60050/udp
 ```
 
-#### Standalone frontend image
+| 服务 | 容器 | 端口 | 暴露范围 |
+|------|------|------|----------|
+| 前端 | `nrllink-web` | `80/tcp` | **公网**（页面入口） |
+| 后端 | `nrllink-server` | `9000/tcp` | **局域网**（接口 / WebSocket / 上传图片） |
+| 后端 | `nrllink-server` | `60050/udp` | **公网**（设备语音 / 信令） |
 
-镜像由 GitHub Actions 在推送到 `main` 分支或打 `v*` tag 时自动构建并发布到 `ghcr.io/78ham/nrllink-web:latest`，一般无需本地 `docker build`。
+前端容器内的 nginx 负责同源路由：`/api`、`/ws`、`/uploads` 等转发给同一网络组的 `nrllink:9000`。
+前后端容器用服务名互访，**不经过宿主机端口**。
+
+> ⚠️ 后端接口默认绑 `0.0.0.0:9000` 供局域网访问，请务必在防火墙 / 安全组确认 9000 **不对公网开放**。
+> 想更严格地只开内网，把 `.env` 里 `API_BIND` 改成局域网网卡地址（如 `192.168.1.10`）。
+
+#### 方式一：仓库部署（推荐）
 
 ```bash
-# 推荐：容器 80 端口仅暴露到本机 7891，前面再放反代（Caddy/Nginx）处理 80/443
-docker run -d -p 127.0.0.1:7891:80 --link nrllink-server:nrllink ghcr.io/78ham/nrllink-web:latest
+git clone https://github.com/78ham/nrllink-web-78ham.git
+cd nrllink-web-78ham
+./install.sh          # 拉镜像启动；加 --build 则用本地代码构建前端镜像
 ```
 
-> Frontend Nginx proxies API requests to backend container. WebSocket also proxied.
+#### 方式二：服务器一行命令
+
+不用 clone，脚本会把编排文件下载到 `./nrllink` 并启动：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/78ham/nrllink-web-78ham/main/install.sh | sh
+```
+
+#### 更新
+
+```bash
+./update.sh           # 更新前端 + 后端
+./update.sh --web     # 只更新前端
+./update.sh --api     # 只更新后端
+./update.sh --build   # 用本地代码重新构建前端镜像后更新
+```
+
+#### 部署结构
+
+| 服务 | 说明 |
+|------|------|
+| `web` | 前端容器（nginx），对公网提供页面并做同源路由 |
+| `nrllink` | 后端容器，提供接口 / WebSocket / 上传图片 / 设备接入 |
+
+| 卷 | 内容 |
+|----|------|
+| `nrllink-data` | SQLite 数据库 |
+| `nrllink-uploads` | 后台上传的图片等运行期文件 |
+
+#### 常用命令
+
+```bash
+docker compose ps
+docker compose logs -f web                      # 前端日志
+docker compose logs -f nrllink                  # 后端日志（默认管理员密码在这里）
+docker compose pull && docker compose up -d     # 更新
+docker compose down                             # 停止（数据在 volume 中，不会丢失）
+```
+
+#### 端口与变量
+
+| 变量（`.env`） | 默认值 | 说明 |
+|------|------|------|
+| `NRL_IMAGE` | `ghcr.io/78ham/nrllink:latest` | 后端镜像 |
+| `NRL_WEB_IMAGE` | `ghcr.io/78ham/nrllink-web:latest` | 前端镜像 |
+| `WEB_BIND` | `0.0.0.0` | 前端监听地址（公网） |
+| `WEB_PORT` | `80` | 前端映射到宿主机的端口 |
+| `API_BIND` | `0.0.0.0` | 后端接口监听地址（局域网，须靠防火墙挡住公网） |
+| `API_PORT` | `9000` | 后端接口映射到宿主机的端口 |
+| `UDP_PORT` | `60050` | 设备接入端口，必须公网放通 |
+| `TOKEN_KEY` | 留空 | JWT 签名密钥，生产建议设置（`install.sh` 会自动生成） |
+
+#### 自定义后端配置
+
+后端镜像内置一份中性默认配置（平台名为通用值、APRS 默认关闭）。要改平台名 / ICP / APRS / 微信 / 计费等：
+
+1. 新建 `config/udphub.yaml`（可参考后端仓库 `docker/udphub.default.yaml`）
+2. 在 `docker-compose.yml` 的 `nrllink` 服务里取消这行注释：
+
+```yaml
+      - ./config/udphub.yaml:/nrllink/conf/udphub.yaml:ro
+```
+
+3. `docker compose up -d` 重启，启动脚本会自动优先加载 `/nrllink/conf/udphub.yaml`
+
+#### 需要 HTTPS / 域名？
+
+可以在宿主机再加一层自己的反向代理指向前端端口 `80`（配置示例见 [`docs/reverse-proxy.md`](docs/reverse-proxy.md)），
+也可以把证书直接交给前端容器处理。本项目不强制，按需选择。
 
 ---
 
