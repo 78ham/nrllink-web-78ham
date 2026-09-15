@@ -365,7 +365,7 @@ export default {
       }
 
       this.initAudioWorker()
-      this.audioWorker.postMessage({ g711Bytes: Array.from(g711Bytes) })
+      this.audioWorker.postMessage({ g711Bytes })
     },
     async toggleRoomSubscription(roomKey) {
       if (!this.websock || this.websock.readyState !== WebSocket.OPEN) {
@@ -495,7 +495,8 @@ export default {
 
 .monitor-room-button.speaking {
   border-color: var(--platform-accent-2);
-  box-shadow: 0 0 0 1px var(--platform-accent-2) inset, 0 0 20px var(--platform-accent-2);
+  box-shadow: 0 0 12px var(--platform-accent-18);
+  will-change: transform;
   animation: speakingPulse 0.8s ease-in-out infinite;
   animation-delay: var(--speaking-pulse-delay);
 }
@@ -609,7 +610,8 @@ export default {
 
 .recent-call-item.active {
   border-color: var(--platform-accent-2);
-  box-shadow: 0 0 0 1px var(--platform-accent-2) inset, 0 0 20px var(--platform-accent-2);
+  box-shadow: 0 0 12px var(--platform-accent-18);
+  will-change: transform;
   animation: speakingPulse 0.8s ease-in-out infinite;
   animation-delay: var(--speaking-pulse-delay);
 }

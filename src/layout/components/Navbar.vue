@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="navbar">
     <hamburger
       id="hamburger-container"
@@ -13,6 +13,10 @@
       <template v-if="device!=='mobile'">
         <div class="right-menu-item desktop-only">{{ name }}</div>
         <div class="right-menu-item desktop-only">{{ callsign }}</div>
+        <router-link to="/chat/index" class="nav-chat-pill right-menu-item hover-effect desktop-only">
+          <span class="nav-chat-dot" />
+          <span class="nav-chat-label">互联对讲</span>
+        </router-link>
         <button
           v-if="billingEnabled"
           class="expire-toggle right-menu-item hover-effect desktop-only"
@@ -60,6 +64,9 @@
               <router-link to="/dashboard">
                 <el-dropdown-item>{{ $t('navbar.dashboard') }}</el-dropdown-item>
               </router-link>
+              <router-link to="/chat/index">
+                <el-dropdown-item>互联对讲</el-dropdown-item>
+              </router-link>
 
               <el-dropdown-item divided>
                 <span style="display:block;" @click="logout">{{ $t('navbar.logOut') }}</span>
@@ -69,6 +76,10 @@
         </el-dropdown>
       </template>
       <template v-if="device==='mobile'">
+        <router-link to="/chat/index" class="nav-chat-pill right-menu-item hover-effect">
+          <span class="nav-chat-dot" />
+          <span class="nav-chat-label">对讲</span>
+        </router-link>
         <img :src="avatar+'?imageView2/1/w/80/h/80'" class="mobile-avatar">
         <button class="lang-toggle right-menu-item hover-effect" @click="toggleLanguage">
           {{ language === 'zh' ? 'EN' : '中' }}
@@ -340,6 +351,42 @@ export default {
 
         &:hover {
           background: rgba(var(--platform-accent), 0.1);
+        }
+      }
+    }
+
+    .nav-chat-pill {
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 14px;
+      height: 36px;
+      border-radius: 999px;
+      background: rgba(80, 135, 100, 0.14);
+      border: 1px solid var(--platform-border);
+      color: var(--platform-accent);
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.22s ease;
+
+      .nav-chat-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #10b981;
+        box-shadow: 0 0 6px #10b981;
+      }
+
+      &:hover {
+        background: var(--platform-accent);
+        color: #ffffff;
+        border-color: var(--platform-accent);
+        transform: translateY(-1px);
+
+        .nav-chat-dot {
+          background: #ffffff;
+          box-shadow: 0 0 6px #ffffff;
         }
       }
     }

@@ -37,6 +37,45 @@
         {{ $t('employee.export') }}
       </el-button>
 
+      <!-- Auto-Approve Daemon Switch Capsule -->
+      <button
+        type="button"
+        class="toolbar-capsule auto-approve-capsule"
+        :class="{ 'is-active': autoApproveEnabled }"
+        :title="autoApproveEnabled ? '自动审批模式运行中，新注册用户将自动审批' : '点击开启无人值守自动审批模式'"
+        @click="toggleAutoApprove"
+      >
+        <span class="capsule-indicator" :class="{ 'is-pulsing': autoApproveEnabled }" />
+        <span>自动审批: {{ autoApproveEnabled ? '运行中' : '未开启' }}</span>
+        <span v-if="autoApprovedCount > 0" class="auto-count-tag">已审 {{ autoApprovedCount }}</span>
+      </button>
+
+      <!-- Batch Approve All Pending Button -->
+      <el-button
+        v-if="pendingCount > 0"
+        v-waves
+        :loading="batchApproving"
+        class="filter-item action-btn action-btn-success"
+        type="success"
+        @click="handleBatchApproveAll"
+      >
+        <el-icon><Check /></el-icon>
+        一键全审 ({{ pendingCount }}人待审)
+      </el-button>
+
+      <!-- Batch Approve Selected Button -->
+      <el-button
+        v-if="multipleSelection.length > 0"
+        v-waves
+        :loading="batchApproving"
+        class="filter-item action-btn action-btn-success"
+        type="success"
+        @click="handleBatchApproveSelected"
+      >
+        <el-icon><Check /></el-icon>
+        批量审批 ({{ multipleSelection.length }})
+      </el-button>
+
       <button
         type="button"
         class="toolbar-capsule"
@@ -58,7 +97,9 @@
         highlight-current-row
         style="width: 100%"
         @sort-change="sortChange"
+        @selection-change="handleSelectionChange"
       >
+        <el-table-column type="selection" width="45" align="center" />
         <el-table-column :label="$t('employee.id')" prop="id" sortable="custom" align="center" min-width="80">
           <template #default="scope">
             <span>{{ scope.row.id }}</span>
@@ -131,6 +172,14 @@
             <el-button
               v-if="row.status === 1"
               type="success"
+              size="small"
+              class="compact-btn quick-approve-btn"
+              @click="handleQuickApprove(row)"
+            >快捷通过</el-button>
+
+            <el-button
+              v-if="row.status === 1"
+              type="success"
               plain
               size="small"
               class="compact-btn audit-btn"
@@ -170,6 +219,7 @@
           <div class="register-card__row register-card__row--stack"><span class="register-card__label">{{ $t('register.note') }}</span><p class="register-card__note">{{ item.note || '--' }}</p></div>
         </div>
         <div class="register-card__actions">
+          <el-button v-if="item.status === 1" type="success" size="small" class="compact-btn quick-approve-btn" @click="handleQuickApprove(item)">快捷通过</el-button>
           <el-button v-if="item.status === 1" type="success" plain size="small" class="compact-btn audit-btn" @click="handleUpdate(item)">{{ $t('register.audit') }}</el-button>
           <el-button size="small" type="danger" plain class="compact-btn delete-btn" @click="handleDelete(item)">{{ $t('employee.delete') }}</el-button>
         </div>
@@ -317,16 +367,33 @@ export default {
         phone: [{ required: true, message: '电话号码是必选项', trigger: 'blur' }]
       },
       downloadLoading: false,
-      showtable: true
+      showtable: true,
+      autoApproveEnabled: localStorage.getItem('reg_auto_approve_enabled') === '1',
+      autoApproveTimer: null,
+      autoApprovedCount: 0,
+      batchApproving: false,
+      multipleSelection: []
     }
   },
   computed: {
-    ...mapState(useAppStore, ['device'])
+    ...mapState(useAppStore, ['device']),
+    pendingList() {
+      return (this.list || []).filter(item => item.status === 1)
+    },
+    pendingCount() {
+      return this.pendingList.length
+    }
   },
 
   created() {
     this.showtable = this.device !== 'mobile'
     this.getList()
+    if (this.autoApproveEnabled) {
+      this.startAutoApproveDaemon()
+    }
+  },
+  beforeUnmount() {
+    this.stopAutoApproveDaemon()
   },
   methods: {
     statusFilter(status) {
@@ -490,6 +557,147 @@ export default {
       return jsonData.map(v =>
         filterVal.map(j => v[j])
       )
+    },
+    handleSelectionChange(val) {
+      this.multipleSelection = val || []
+    },
+    async handleQuickApprove(row) {
+      try {
+        const res = await addReg(row)
+        if (res && res.code === 20000) {
+          ElMessage.success(`呼号 ${row.callsign || row.name} 审核通过`)
+          this.getList()
+        } else {
+          ElMessage.warning(res?.data?.message || '审核操作完成')
+          this.getList()
+        }
+      } catch (err) {
+        console.error('Quick approve failed:', err)
+        ElMessage.error('审批请求异常，请稍后重试')
+      }
+    },
+    async handleBatchApproveSelected() {
+      const targets = (this.multipleSelection || []).filter(item => item.status === 1)
+      if (targets.length === 0) {
+        ElMessage.warning('请勾选需要审核的待审用户')
+        return
+      }
+
+      try {
+        await ElMessageBox.confirm(`确认批量审批通过选中的 ${targets.length} 位待审用户？`, '批量审批确认', {
+          confirmButtonText: '确定审批',
+          cancelButtonText: '取消',
+          type: 'success'
+        })
+      } catch (e) {
+        return
+      }
+
+      this.batchApproving = true
+      let successCount = 0
+      for (const item of targets) {
+        try {
+          const res = await addReg(item)
+          if (res && res.code === 20000) {
+            successCount++
+          }
+        } catch (e) {
+          console.error(`Failed to approve ${item.callsign}:`, e)
+        }
+      }
+
+      this.batchApproving = false
+      ElMessage.success(`批量审批完成：成功审批 ${successCount} / ${targets.length} 人`)
+      this.getList()
+    },
+    async handleBatchApproveAll() {
+      const targets = this.pendingList
+      if (targets.length === 0) {
+        ElMessage.info('当前没有待审核的申请')
+        return
+      }
+
+      try {
+        await ElMessageBox.confirm(`确认一键审批通过当前全部 ${targets.length} 位待审用户？`, '一键全部审批确认', {
+          confirmButtonText: '一键全部通过',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+      } catch (e) {
+        return
+      }
+
+      this.batchApproving = true
+      let successCount = 0
+      for (const item of targets) {
+        try {
+          const res = await addReg(item)
+          if (res && res.code === 20000) {
+            successCount++
+          }
+        } catch (e) {
+          console.error(`Failed to approve ${item.callsign}:`, e)
+        }
+      }
+
+      this.batchApproving = false
+      ElMessage.success(`一键审批完成：成功自动审批 ${successCount} 位用户`)
+      this.getList()
+    },
+    toggleAutoApprove() {
+      this.autoApproveEnabled = !this.autoApproveEnabled
+      localStorage.setItem('reg_auto_approve_enabled', this.autoApproveEnabled ? '1' : '0')
+
+      if (this.autoApproveEnabled) {
+        ElMessage.success('已开启自动审批模式：系统将自动轮询并自动审批新注册用户')
+        this.startAutoApproveDaemon()
+      } else {
+        ElMessage.info('已暂停自动审批模式')
+        this.stopAutoApproveDaemon()
+      }
+    },
+    startAutoApproveDaemon() {
+      this.stopAutoApproveDaemon()
+      this.runAutoApproveCheck()
+      this.autoApproveTimer = window.setInterval(() => {
+        this.runAutoApproveCheck()
+      }, 12000)
+    },
+    stopAutoApproveDaemon() {
+      if (this.autoApproveTimer) {
+        clearInterval(this.autoApproveTimer)
+        this.autoApproveTimer = null
+      }
+    },
+    async runAutoApproveCheck() {
+      if (!this.autoApproveEnabled) return
+      try {
+        const response = await listReg({ ...this.listQuery, page: 1, limit: 50 })
+        const items = response?.data?.items || []
+        const pendings = items.filter(i => i.status === 1)
+
+        if (pendings.length > 0) {
+          let newlyApproved = 0
+          for (const item of pendings) {
+            try {
+              const res = await addReg(item)
+              if (res && res.code === 20000) {
+                newlyApproved++
+                this.autoApprovedCount++
+              }
+            } catch (e) {
+              console.error('Auto approve failed for item:', item, e)
+            }
+          }
+
+          if (newlyApproved > 0) {
+            ElMessage.success(`【自动审批】已自动审批通过 ${newlyApproved} 位新注册用户`)
+            this.getList()
+          }
+        }
+      } catch (err) {
+        console.error('Auto approve check error:', err)
+      }
     }
   }
 }
@@ -601,6 +809,50 @@ export default {
     color: var(--action-at-text, #96ffe7) !important;
     border-color: var(--action-at-border, rgba(54, 240, 203, 0.4)) !important;
     background: var(--action-at-bg, linear-gradient(135deg, rgba(15, 87, 79, 0.34) 0%, rgba(13, 54, 77, 0.26) 100%)) !important;
+  }
+
+  .quick-approve-btn {
+    background: #10b981 !important;
+    border-color: #10b981 !important;
+    color: #ffffff !important;
+    font-weight: 600;
+
+    &:hover {
+      background: #059669 !important;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+    }
+  }
+
+  .auto-approve-capsule {
+    &.is-active {
+      border-color: #10b981 !important;
+      background: rgba(16, 185, 129, 0.14) !important;
+      color: var(--platform-ink) !important;
+    }
+
+    .is-pulsing {
+      animation: pulseGreen 1.2s infinite ease-in-out;
+    }
+
+    .auto-count-tag {
+      font-size: 11px;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: #10b981;
+      color: #ffffff;
+      font-weight: 700;
+    }
+  }
+
+  @keyframes pulseGreen {
+    0%, 100% {
+      transform: scale(1);
+      box-shadow: 0 0 0 rgba(16, 185, 129, 0.4);
+    }
+    50% {
+      transform: scale(1.3);
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+    }
   }
 
   .delete-btn {

@@ -84,6 +84,19 @@ export const constantRoutes = [{
 },
 
 {
+  path: '/chat',
+  component: Layout,
+  redirect: '/chat/index',
+  children: [{
+    path: 'index',
+    component: () =>
+      import('@/views/chat/index.vue'),
+    name: 'Chat',
+    meta: { title: 'chat', icon: 'message', noCache: false }
+  }]
+},
+
+{
   path: '/profile',
   component: Layout,
   redirect: '/profile/index',

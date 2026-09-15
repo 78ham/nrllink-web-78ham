@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="dashboard-home">
     <div class="dashboard-shell">
       <section class="dashboard-hero">
@@ -136,24 +136,23 @@ export default {
 
 .dashboard-home::before {
   content: "";
-  position: fixed;
-  inset: -40% auto auto -20%;
-  width: 640px;
-  height: 640px;
-  background: radial-gradient(circle, var(--platform-accent) 0%, var(--platform-accent) 0%, transparent 70%);
-  filter: blur(3px);
+  position: absolute;
+  top: -100px;
+  left: -100px;
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, var(--platform-accent-16) 0%, transparent 70%);
   pointer-events: none;
 }
 
 .dashboard-home::after {
   content: "";
-  position: fixed;
-  right: -20%;
-  bottom: -30%;
-  width: 720px;
-  height: 720px;
-  background: radial-gradient(circle, var(--platform-accent-2) 0%, var(--platform-accent-2) 0%, transparent 70%);
-  filter: blur(5px);
+  position: absolute;
+  right: -100px;
+  bottom: -100px;
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, var(--platform-accent-14) 0%, transparent 70%);
   pointer-events: none;
 }
 

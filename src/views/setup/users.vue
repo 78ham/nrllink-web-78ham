@@ -515,9 +515,15 @@ export default {
       this.$refs.dataForm.validate(valid => {
         if (valid) {
           createEmployee(this.temp).then(response => {
+            const data = response?.data || {}
+            const message = data.message || '创建成功'
+            if (data.isok === 1) {
+              ElMessage.error(message)
+              return
+            }
             this.getList()
             this.dialogFormVisible = false
-            ElMessage.success(response?.data?.message || '创建成功')
+            ElMessage.success(message)
           })
         }
       })
@@ -542,8 +548,14 @@ export default {
                 break
               }
             }
+            const data = response?.data || {}
+            const message = data.message || '更新成功'
+            if (data.isok === 1) {
+              ElMessage.error(message)
+              return
+            }
             this.dialogFormVisible = false
-            ElMessage.success(response?.data?.message || '更新成功')
+            ElMessage.success(message)
           })
         }
       })
