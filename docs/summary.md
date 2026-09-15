@@ -13,7 +13,9 @@
 
 ## 发布
 - 构建：`npm run build:prod`
-- 部署：`rsync -a --delete dist/ /root/PgarlicPTT/www/`
+- 容器部署（推荐）：`./install.sh` 启动前端容器 + 后端容器；`./update.sh` 更新
+  参见根 README 的「Docker 部署」章节
+- 镜像方式：前端 `ghcr.io/78ham/nrllink-web:latest`，后端 `ghcr.io/78ham/nrllink:latest`
 
 ## 待办
 - 扩展测试：store/权限/关键组件更多用例
