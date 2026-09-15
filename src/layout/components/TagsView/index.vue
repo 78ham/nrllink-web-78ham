@@ -226,11 +226,11 @@ export default {
 
 <style lang="scss" scoped>
 .tags-view-container {
-  height: 34px;
+  height: 36px;
   width: 100%;
   background: var(--platform-shell);
   border-bottom: 1px solid var(--platform-border);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 8px 24px rgba(0, 0, 0, 0.18);
+
   .tags-view-wrapper {
     height: 100%;
     display: flex;
@@ -242,74 +242,73 @@ export default {
       gap: 6px;
       position: relative;
       cursor: pointer;
-      height: 28px;
-      line-height: 28px;
+      height: 26px;
+      line-height: 26px;
       border: 1px solid var(--platform-border);
       color: var(--platform-ink-dim);
       background: var(--platform-surface);
-      padding: 0 12px;
+      padding: 0 10px;
       font-size: 12px;
-      border-radius: 10px;
-      margin-left: 8px;
-      margin-top: 0;
-      transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+      font-weight: 500;
+      border-radius: 6px;
+      margin-left: 6px;
+      transition: all 0.15s cubic-bezier(0.2, 0, 0, 1);
 
       &:first-of-type {
-        margin-left: 15px;
+        margin-left: 12px;
       }
 
       &:last-of-type {
-        margin-right: 15px;
+        margin-right: 12px;
       }
 
       &:hover {
         color: var(--platform-ink);
         border-color: var(--platform-border-strong);
         background: var(--platform-surface-soft);
-        transform: translateY(-1px);
       }
 
       &.active {
-        background: linear-gradient(135deg, var(--platform-accent) 0%, var(--platform-accent-2) 100%);
-        color: var(--platform-on-accent, #ffffff);
-        border-color: var(--platform-border-strong);
-        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.26);
+        background: var(--platform-surface-soft);
+        color: var(--platform-ink);
+        border-color: var(--platform-border-accent);
+        font-weight: 600;
 
         &::before {
           content: '';
-          background: rgba(255, 255, 255, 0.92);
+          background: var(--platform-accent);
           display: inline-block;
-          width: 8px;
-          height: 8px;
+          width: 6px;
+          height: 6px;
           border-radius: 50%;
-          position: relative;
-          margin-right: 2px;
+          box-shadow: 0 0 6px var(--platform-accent);
         }
       }
     }
   }
+
   .contextmenu {
     margin: 0;
-    background: var(--platform-shell);
+    background: var(--platform-surface);
     z-index: 3000;
     position: absolute;
     list-style-type: none;
-    padding: 6px 0;
-    border-radius: 12px;
+    padding: 4px;
+    border-radius: 10px;
     font-size: 12px;
-    font-weight: 400;
     color: var(--platform-ink-dim);
     border: 1px solid var(--platform-border);
-    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.34);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
 
     li {
-      margin: 0;
-      padding: 7px 16px;
+      margin: 2px 0;
+      padding: 6px 14px;
+      border-radius: 6px;
       cursor: pointer;
-      transition: background 0.2s ease, color 0.2s ease;
+      transition: background 0.15s ease, color 0.15s ease;
 
       &:hover {
-        background: var(--platform-accent);
+        background: var(--platform-surface-soft);
         color: var(--platform-ink);
       }
     }
@@ -321,26 +320,19 @@ export default {
 .tags-view-wrapper {
   .tags-view-item {
     .el-icon-close {
-      width: 16px;
-      height: 16px;
+      width: 14px;
+      height: 14px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       vertical-align: middle;
       border-radius: 50%;
       text-align: center;
-      transition: all .3s cubic-bezier(.645, .045, .355, 1);
-      transform-origin: 100% 50%;
-      color: inherit;
-
-      &:before {
-        transform: scale(.6);
-        display: inline-block;
-        vertical-align: -3px;
-      }
+      transition: all 0.2s ease;
+      color: var(--platform-ink-dim);
 
       &:hover {
-        background-color: var(--platform-surface);
+        background-color: var(--platform-surface-light);
         color: var(--platform-ink);
       }
     }

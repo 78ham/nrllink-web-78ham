@@ -401,10 +401,10 @@ export default {
 }
 
 .monitor-card {
-  background: var(--platform-shell);
+  background: var(--platform-surface);
   border: 1px solid var(--platform-border);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.26);
-  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  border-radius: 16px;
   padding: 18px;
   display: flex;
   flex-direction: column;
@@ -423,7 +423,9 @@ export default {
 
 .monitor-header h4 {
   margin: 0;
-  font-size: 20px;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   color: var(--platform-ink);
 }
 
@@ -440,19 +442,24 @@ export default {
   display: flex;
   align-items: center;
   gap: 4px;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  background: var(--platform-surface-soft);
+  border: 1px solid var(--platform-border-light);
 }
 
 .monitor-stats-inline .stat-item .el-icon {
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .monitor-stats-inline .stat-item strong {
-  font-size: 14px;
+  font-size: 12.5px;
   font-weight: 600;
+  color: var(--platform-ink);
 }
 
 .monitor-stats-inline .stat-item.online .el-icon {
-  color: var(--platform-accent);
+  color: #10b981;
 }
 
 .monitor-room-grid {
@@ -464,10 +471,10 @@ export default {
 .monitor-room-button {
   appearance: none;
   border: 1px solid var(--platform-border);
-  border-radius: 16px;
-  background: var(--platform-surface);
+  border-radius: 12px;
+  background: var(--platform-surface-soft);
   color: var(--platform-ink);
-  min-height: 56px;
+  min-height: 54px;
   flex: 1 1 220px;
   min-width: min(220px, 100%);
   max-width: 100%;
@@ -476,26 +483,26 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  gap: 2px;
+  gap: 3px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s cubic-bezier(0.2, 0, 0, 1);
 }
 
 .monitor-room-button:hover {
   transform: translateY(-1px);
   border-color: var(--platform-border-strong);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+  background: var(--platform-surface-light);
 }
 
 .monitor-room-button.active {
-  border-color: var(--platform-accent);
-  background: linear-gradient(140deg, rgba(6, 214, 160, 0.2) 0%, rgba(17, 138, 178, 0.2) 100%);
-  box-shadow: 0 0 0 1px var(--platform-accent) inset, 0 12px 32px var(--platform-accent);
+  border-color: var(--platform-border-accent);
+  background: var(--platform-accent-12);
+  box-shadow: 0 0 0 1px var(--platform-accent-16) inset;
 }
 
 .monitor-room-button.speaking {
-  border-color: var(--platform-accent-2);
-  box-shadow: 0 0 12px var(--platform-accent-18);
+  border-color: #10b981;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.25);
   will-change: transform;
   animation: speakingPulse 0.8s ease-in-out infinite;
   animation-delay: var(--speaking-pulse-delay);
@@ -506,17 +513,17 @@ export default {
 }
 
 .room-title {
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 600;
-  line-height: 1.5;
+  line-height: 1.4;
   color: var(--platform-ink);
 }
 
 .room-caller {
   color: var(--platform-accent);
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
-  line-height: 1.5;
+  line-height: 1.4;
   white-space: normal;
   word-break: break-word;
 }

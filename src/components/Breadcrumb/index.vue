@@ -68,24 +68,31 @@ export default {
 
 <style lang="scss" scoped>
 .app-breadcrumb.el-breadcrumb {
-  display: inline-block;
-  font-size: 14px;
-  line-height: 50px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 13.5px;
+  line-height: 54px;
   margin-left: 8px;
 
   .no-redirect {
-    color: var(--platform-ink-dim);
+    color: var(--platform-ink);
+    font-weight: 600;
     cursor: text;
   }
 
   :deep(.el-breadcrumb__inner),
   :deep(.el-breadcrumb__separator) {
-    color: var(--platform-note-text, var(--platform-ink-dim));
+    color: var(--platform-ink-dim);
+    font-size: 13px;
   }
 
-  :deep(a),
-  :deep(a:hover) {
+  :deep(a) {
     color: var(--platform-ink-dim);
+    transition: color 0.15s ease;
+
+    &:hover {
+      color: var(--platform-accent);
+    }
   }
 }
 </style>

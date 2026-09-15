@@ -11,12 +11,16 @@
 
     <div class="right-menu">
       <template v-if="device!=='mobile'">
-        <div class="right-menu-item desktop-only">{{ name }}</div>
-        <div class="right-menu-item desktop-only">{{ callsign }}</div>
+        <div class="nav-user-pill desktop-only">
+          <span class="user-pill-name">{{ name || 'HAM' }}</span>
+          <span v-if="callsign" class="user-pill-callsign">{{ callsign }}</span>
+        </div>
+
         <router-link to="/chat/index" class="nav-chat-pill right-menu-item hover-effect desktop-only">
           <span class="nav-chat-dot" />
           <span class="nav-chat-label">互联对讲</span>
         </router-link>
+
         <button
           v-if="billingEnabled"
           class="expire-toggle right-menu-item hover-effect desktop-only"
@@ -51,7 +55,7 @@
 
         <el-dropdown class="avatar-container right-menu-item hover-effect" trigger="click" popper-class="platform-theme-user-dropdown">
           <div class="avatar-wrapper">
-            <img :src="avatar+'?imageView2/1/w/80/h/80'" class="user-avatar">
+            <img :src="avatar+'?imageView2/1/w/80/h/80'" class="user-avatar" alt="Avatar">
             <el-icon class="el-icon-caret-bottom">
               <CaretBottom />
             </el-icon>
@@ -74,17 +78,29 @@
             </el-dropdown-menu>
           </template>
         </el-dropdown>
+
+        <!-- Direct Logout button for admin backend (Obsidian Arc Style) -->
+        <button
+          type="button"
+          class="nav-logout-btn desktop-only"
+          :title="$t('navbar.logOut')"
+          @click="logout"
+        >
+          <el-icon class="logout-icon"><SwitchButton /></el-icon>
+          <span class="logout-text">{{ $t('navbar.logOut') }}</span>
+        </button>
       </template>
+
       <template v-if="device==='mobile'">
         <router-link to="/chat/index" class="nav-chat-pill right-menu-item hover-effect">
           <span class="nav-chat-dot" />
           <span class="nav-chat-label">对讲</span>
         </router-link>
-        <img :src="avatar+'?imageView2/1/w/80/h/80'" class="mobile-avatar">
+        <img :src="avatar+'?imageView2/1/w/80/h/80'" class="mobile-avatar" alt="Avatar">
         <button class="lang-toggle right-menu-item hover-effect" @click="toggleLanguage">
           {{ language === 'zh' ? 'EN' : '中' }}
         </button>
-        <button class="mobile-logout right-menu-item hover-effect" @click="logout">
+        <button class="mobile-logout right-menu-item hover-effect" :title="$t('navbar.logOut')" @click="logout">
           <el-icon><SwitchButton /></el-icon>
         </button>
       </template>
@@ -93,7 +109,6 @@
 </template>
 
 <script>
-import { mapState, storeToRefs } from 'pinia'
 import { pinia } from '@/store'
 import { useAppStore } from '@/store/modules/app'
 import { useUserStore } from '@/store/modules/user'
@@ -105,14 +120,15 @@ import Hamburger from '@/components/Hamburger/index.vue'
 import { computed } from 'vue'
 import { setI18nLanguage } from '@/lang'
 import router from '@/router'
-import { Check, SwitchButton } from '@element-plus/icons-vue'
+import { Check, SwitchButton, CaretBottom } from '@element-plus/icons-vue'
 
 export default {
   components: {
     Breadcrumb,
     Hamburger,
     Check,
-    SwitchButton
+    SwitchButton,
+    CaretBottom
   },
   data() {
     return {
@@ -172,7 +188,6 @@ export default {
       } catch (e) {
         console.warn('logout api error, clearing local session anyway:', e)
       }
-      // 无论后端是否成功，都跳转到登录页
       router.push(`/login?redirect=${window.location.pathname}`)
     }
 
@@ -205,38 +220,42 @@ export default {
 <style lang="scss">
 .platform-theme-user-dropdown {
   border: 1px solid var(--platform-border) !important;
-  border-radius: 18px !important;
-  background: var(--platform-shell) !important;
-  box-shadow: 0 24px 56px rgba(0, 0, 0, 0.42), 0 0 0 1px var(--platform-border-strong) inset !important;
+  border-radius: 14px !important;
+  background: var(--platform-surface) !important;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45) !important;
   overflow: hidden;
 
   .el-dropdown-menu {
-    padding: 8px;
+    padding: 6px;
     background: transparent !important;
   }
 
   .el-dropdown-menu__item {
-    min-width: 148px;
-    margin: 4px 0;
-    border-radius: 12px;
+    min-width: 136px;
+    margin: 2px 0;
+    padding: 8px 12px;
+    border-radius: 8px;
     color: var(--platform-ink-dim) !important;
-    font-weight: 600;
-    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    font-size: 13px;
+    font-weight: 500;
+    transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
   }
 
   .el-dropdown-menu__item:not(.is-disabled):hover,
   .el-dropdown-menu__item:not(.is-disabled):focus {
-    background: linear-gradient(90deg, var(--platform-accent) 0%, var(--platform-accent-2) 100%) !important;
+    background: var(--platform-surface-soft) !important;
     color: var(--platform-ink) !important;
     transform: translateX(2px);
   }
 
   .el-dropdown-menu__item--divided {
-    border-top-color: var(--platform-border) !important;
+    border-top: 1px solid var(--platform-border) !important;
+    margin-top: 4px;
+    padding-top: 8px;
   }
 
   .el-dropdown-menu__item--divided:before {
-    background: transparent !important;
+    display: none;
   }
 
   .el-popper__arrow::before {
@@ -248,66 +267,34 @@ export default {
     text-decoration: none;
   }
 }
-
-@media (max-width: 1100px) {
- .navbar .right-menu {
-  gap: 2px;
- }
-
- .navbar .right-menu .right-menu-item {
-  padding-left: 5px;
-  padding-right: 5px;
-  font-size: 15px;
- }
-
- .navbar .right-menu .theme-picker-container .theme-trigger {
-  padding-left: 8px;
-  padding-right: 8px;
- }
-
- .navbar .right-menu .avatar-container {
-  margin-right: 24px;
- }
-}
-
-@media (max-width: 767px) {
- .navbar {
-  padding: 0 8px;
- }
-
- .navbar .hamburger-container,
- .navbar .breadcrumb-container {
-  display: none;
- }
-
- .navbar .right-menu {
-  width: 100%;
-  justify-content: flex-end;
-  gap: 6px;
- }
-}
-
 </style>
 
 <style lang="scss" scoped>
 .navbar {
-  height: 50px;
+  height: 54px;
   overflow: hidden;
   position: relative;
-  background: var(--platform-shell) !important;
+  background: var(--platform-surface) !important;
   border-bottom: 1px solid var(--platform-border);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  box-sizing: border-box;
 
   .hamburger-container {
-    line-height: 46px;
+    line-height: 54px;
     flex: 0 0 auto;
     height: 100%;
     cursor: pointer;
-    transition: background 0.3s;
+    transition: background 0.2s;
     -webkit-tap-highlight-color: transparent;
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    border-radius: 8px;
 
     &:hover {
-      background: rgba(0, 0, 0, 0.025);
+      background: var(--platform-surface-soft);
     }
   }
 
@@ -315,11 +302,7 @@ export default {
     flex: 1 1 auto;
     min-width: 0;
     overflow: hidden;
-  }
-
-  .errLog-container {
-    display: inline-block;
-    vertical-align: top;
+    margin-left: 8px;
   }
 
   .right-menu {
@@ -329,29 +312,30 @@ export default {
     height: 100%;
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 8px;
 
     &:focus {
       outline: none;
     }
 
-    .right-menu-item {
+    .nav-user-pill {
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      padding: 0 8px;
-      height: auto;
-      font-size: 18px;
-      color: var(--platform-ink-dim);
-      line-height: 1;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 9999px;
+      background: var(--platform-surface-soft);
+      border: 1px solid var(--platform-border);
+      font-size: 12.5px;
 
-      &.hover-effect {
-        cursor: pointer;
-        transition: background 0.3s;
+      .user-pill-name {
+        font-weight: 600;
+        color: var(--platform-ink);
+      }
 
-        &:hover {
-          background: rgba(var(--platform-accent), 0.1);
-        }
+      .user-pill-callsign {
+        color: var(--platform-accent);
+        font-weight: 700;
       }
     }
 
@@ -360,19 +344,19 @@ export default {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 0 14px;
-      height: 36px;
-      border-radius: 999px;
-      background: rgba(80, 135, 100, 0.14);
-      border: 1px solid var(--platform-border);
+      padding: 0 12px;
+      height: 32px;
+      border-radius: 9999px;
+      background: var(--platform-accent-10);
+      border: 1px solid var(--platform-border-accent);
       color: var(--platform-accent);
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 600;
-      transition: all 0.22s ease;
+      transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
 
       .nav-chat-dot {
-        width: 7px;
-        height: 7px;
+        width: 6px;
+        height: 6px;
         border-radius: 50%;
         background: #10b981;
         box-shadow: 0 0 6px #10b981;
@@ -381,7 +365,6 @@ export default {
       &:hover {
         background: var(--platform-accent);
         color: #ffffff;
-        border-color: var(--platform-accent);
         transform: translateY(-1px);
 
         .nav-chat-dot {
@@ -394,43 +377,40 @@ export default {
     .lang-toggle {
       appearance: none;
       border: 1px solid var(--platform-border);
-      border-radius: 999px;
-      background: var(--platform-surface);
+      border-radius: 9999px;
+      background: var(--platform-surface-soft);
       color: var(--platform-ink-dim);
       cursor: pointer;
-      font-size: 14px;
-      font-weight: 700;
-      padding: 0 12px;
-      height: 36px;
-      margin: 0 4px;
+      font-size: 12.5px;
+      font-weight: 600;
+      padding: 0 10px;
+      height: 32px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      line-height: 1;
       transition: all 0.2s ease;
 
       &:hover {
         border-color: var(--platform-border-strong);
         color: var(--platform-ink);
+        background: var(--platform-surface-light);
       }
     }
 
     .expire-toggle {
       appearance: none;
       border: 1px solid var(--platform-border);
-      border-radius: 999px;
-      background: var(--platform-surface);
+      border-radius: 9999px;
+      background: var(--platform-surface-soft);
       color: var(--platform-ink-dim);
       cursor: pointer;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
-      padding: 0 14px;
-      height: 36px;
-      margin: 0 4px;
+      padding: 0 12px;
+      height: 32px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      line-height: 1;
       transition: all 0.2s ease;
 
       &:hover {
@@ -439,96 +419,164 @@ export default {
       }
 
       &.expire-toggle--warning {
-        color: #ffe08a;
-        border-color: rgba(255, 196, 61, 0.45);
-        background: rgba(89, 66, 17, 0.28);
+        color: #f59e0b;
+        border-color: rgba(245, 158, 11, 0.4);
+        background: rgba(245, 158, 11, 0.12);
       }
 
       &.expire-toggle--danger {
-        color: #ffb7c8;
-        border-color: rgba(255, 116, 145, 0.45);
-        background: rgba(89, 28, 45, 0.28);
+        color: #ef4444;
+        border-color: rgba(239, 68, 68, 0.4);
+        background: rgba(239, 68, 68, 0.12);
       }
     }
 
     .theme-picker-container {
-      margin: 0 4px;
-
       .theme-trigger {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        padding: 6px 12px;
+        padding: 0 12px;
+        height: 32px;
         border: 1px solid var(--platform-border);
-        border-radius: 999px;
-        background: var(--platform-surface);
+        border-radius: 9999px;
+        background: var(--platform-surface-soft);
         cursor: pointer;
         transition: all 0.2s ease;
 
         &:hover {
           border-color: var(--platform-border-strong);
-          background: var(--platform-surface-soft);
+          background: var(--platform-surface-light);
         }
 
         .theme-icon {
-          font-size: 16px;
+          font-size: 14px;
         }
 
         .theme-name {
-          font-size: 13px;
-          font-weight: 600;
+          font-size: 12.5px;
+          font-weight: 500;
           color: var(--platform-ink-dim);
         }
       }
     }
 
     .avatar-container {
-      margin-right: 30px;
       height: 100%;
       display: inline-flex;
       align-items: center;
+      cursor: pointer;
 
       .avatar-wrapper {
         position: relative;
         display: inline-flex;
         align-items: center;
+        gap: 4px;
 
         .user-avatar {
-          cursor: pointer;
-          width: 40px;
-          height: 40px;
-          border-radius: 10px;
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          border: 1.5px solid var(--platform-border);
+          object-fit: cover;
+          transition: border-color 0.2s ease;
+        }
+
+        &:hover .user-avatar {
+          border-color: var(--platform-accent);
         }
 
         .el-icon-caret-bottom {
-          cursor: pointer;
-          position: absolute;
-          right: -20px;
-          top: 50%;
-          transform: translateY(-50%);
           font-size: 12px;
+          color: var(--platform-ink-dim);
         }
       }
     }
 
-    .mobile-avatar {
-      width: 32px;
+    // Direct Logout Button in Desktop Header
+    .nav-logout-btn {
+      appearance: none;
+      border: 1px solid rgba(239, 68, 68, 0.28);
+      border-radius: 9999px;
+      background: rgba(239, 68, 68, 0.08);
+      color: #f87171;
       height: 32px;
-      border-radius: 8px;
+      padding: 0 12px;
+      font-size: 12.5px;
+      font-weight: 600;
       cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      outline: none;
+      transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+
+      .logout-icon {
+        font-size: 14px;
+        flex-shrink: 0;
+      }
+
+      .logout-text {
+        white-space: nowrap;
+      }
+
+      &:hover {
+        border-color: #ef4444;
+        background: #ef4444;
+        color: #ffffff;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+    }
+
+    .mobile-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 1px solid var(--platform-border);
+      object-fit: cover;
     }
 
     .mobile-logout {
       appearance: none;
-      border: none;
-      background: transparent;
-      color: var(--platform-ink-dim);
-      cursor: pointer;
-      font-size: 18px;
+      border: 1px solid rgba(239, 68, 68, 0.28);
+      border-radius: 8px;
+      background: rgba(239, 68, 68, 0.08);
+      color: #f87171;
+      width: 32px;
+      height: 32px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 0 8px;
+      cursor: pointer;
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  .navbar .right-menu .nav-user-pill {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .navbar {
+    padding: 0 10px;
+    height: 48px;
+
+    .hamburger-container,
+    .breadcrumb-container {
+      display: none;
+    }
+
+    .right-menu {
+      width: 100%;
+      justify-content: flex-end;
+      gap: 6px;
     }
   }
 }

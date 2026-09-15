@@ -1181,7 +1181,7 @@ export default {
 .login-container {
   min-height: 100vh;
   width: 100%;
-  background: radial-gradient(980px 460px at 18% -14%, var(--platform-accent-2) 0%, var(--platform-surface) 56%, var(--platform-surface-soft) 100%);
+  background: var(--platform-shell);
   position: relative;
   overflow: hidden;
   display: flex;
@@ -1196,29 +1196,6 @@ export default {
   *::after {
     box-sizing: border-box;
     min-width: 0;
-  }
-
-  &::before {
-    content: "";
-    position: fixed;
-    inset: -40% auto auto -20%;
-    width: 640px;
-    height: 640px;
-    background: radial-gradient(circle, var(--platform-accent) 0%, var(--platform-accent) 0%, transparent 70%);
-    filter: blur(3px);
-    pointer-events: none;
-  }
-
-  &::after {
-    content: "";
-    position: fixed;
-    right: -20%;
-    bottom: -30%;
-    width: 720px;
-    height: 720px;
-    background: radial-gradient(circle, var(--platform-accent-2) 0%, var(--platform-accent-2) 0%, transparent 70%);
-    filter: blur(5px);
-    pointer-events: none;
   }
 
   .topbar {
@@ -1471,9 +1448,10 @@ export default {
   }
 
   .topbar-button.solid {
-    background: linear-gradient(90deg, var(--platform-accent) 0%, var(--platform-accent-2) 100%);
-    border: none;
-    box-shadow: 0 12px 28px var(--platform-accent-22);
+    background: var(--platform-accent);
+    color: #ffffff;
+    border: 1px solid transparent;
+    box-shadow: 0 2px 10px var(--platform-accent-22);
   }
 
   .content-wrapper {
@@ -1516,12 +1494,11 @@ export default {
   .floating-panel.desktop-floating {
     position: absolute;
     z-index: 2;
-    border-radius: 22px;
-    background: var(--platform-shell);
+    border-radius: 16px;
+    background: var(--platform-surface);
     border: 1px solid var(--platform-border);
-    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.22);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
     overflow: hidden;
-    backdrop-filter: blur(10px);
   }
 
   .panel-toolbar {
@@ -1531,8 +1508,8 @@ export default {
     justify-content: center;
     gap: 12px;
     padding: 12px 52px 12px 16px;
-    min-height: 52px;
-    background: var(--platform-surface-90);
+    min-height: 48px;
+    background: var(--platform-surface-soft);
     border-bottom: 1px solid var(--platform-border);
     cursor: move;
     user-select: none;

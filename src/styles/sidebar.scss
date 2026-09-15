@@ -3,27 +3,28 @@
 #app {
   .main-container {
     height: 100vh;
-    transition: margin-left .28s;
+    transition: margin-left .28s cubic-bezier(0.2, 0, 0, 1);
     margin-left: $sideBarWidth;
     position: relative;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    background: var(--platform-deep-98);
+    background: var(--platform-shell);
   }
 
   .sidebar-container {
-    transition: width 0.28s;
+    transition: width 0.28s cubic-bezier(0.2, 0, 0, 1);
     width: $sideBarWidth !important;
     background-color: var(--sidebar-bg);
+    border-right: 1px solid var(--platform-border);
     height: 100%;
     position: fixed;
-    font-size: 0px;
     top: 0;
     bottom: 0;
     left: 0;
     z-index: 1001;
     overflow: hidden;
+    box-sizing: border-box;
 
     .horizontal-collapse-transition {
       transition: 0s width ease-in-out, 0s padding-left ease-in-out, 0s padding-right ease-in-out;
@@ -34,21 +35,18 @@
     }
 
     .el-scrollbar__bar.is-vertical {
-      right: 0px;
+      right: 2px;
     }
 
     .el-scrollbar {
+      flex: 1 1 0;
+      min-height: 0;
       height: 100%;
     }
 
     .el-scrollbar__view {
       display: block;
-    }
-
-    &.has-logo {
-      .el-scrollbar {
-        height: calc(100% - 50px);
-      }
+      padding: 6px 0;
     }
 
     .is-horizontal {
@@ -59,10 +57,14 @@
       display: inline-block;
       width: 100%;
       overflow: hidden;
+      text-decoration: none;
     }
 
     .svg-icon {
-      margin-right: 16px;
+      margin-right: 12px;
+      font-size: 16px;
+      vertical-align: middle;
+      color: inherit;
     }
 
     .el-menu {
@@ -70,33 +72,56 @@
       height: 100%;
       width: 100% !important;
       display: block;
+      background-color: transparent !important;
     }
 
-    .submenu-title-noDropdown,
+    .el-menu-item,
     .el-sub-menu__title {
+      height: 42px;
+      line-height: 42px;
+      font-size: 13.5px;
+      border-radius: 10px;
+      margin: 3px 8px;
+      color: var(--sidebar-text) !important;
+      transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+
       &:hover {
         background-color: var(--sidebar-hover) !important;
+        color: var(--platform-ink) !important;
       }
     }
 
+    .el-menu-item.is-active {
+      background-color: var(--platform-accent-14) !important;
+      color: var(--platform-accent) !important;
+      font-weight: 600;
+    }
+
     .is-active > .el-sub-menu__title {
-      color: var(--sidebar-active-text) !important;
+      color: var(--platform-accent) !important;
+      font-weight: 600;
     }
 
     & .nest-menu .el-sub-menu > .el-sub-menu__title,
     & .el-sub-menu .el-menu-item {
-      min-width: $sideBarWidth !important;
-      background-color: var(--sidebar-sub-bg) !important;
+      min-width: calc(#{$sideBarWidth} - 16px) !important;
+      background-color: transparent !important;
 
       &:hover {
         background-color: var(--sidebar-sub-hover) !important;
+      }
+
+      &.is-active {
+        background-color: var(--platform-accent-14) !important;
+        color: var(--platform-accent) !important;
       }
     }
   }
 
   .hideSidebar {
     .sidebar-container {
-      width: 54px !important;
+      width: 58px !important;
+
       .el-scrollbar__view {
         display: block !important;
       }
@@ -107,11 +132,20 @@
     }
 
     .main-container {
-      margin-left: 54px;
+      margin-left: 58px;
     }
 
     .svg-icon {
       margin-right: 0px;
+    }
+
+    .el-menu-item,
+    .el-sub-menu__title {
+      margin: 3px 4px !important;
+      padding: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
     }
 
     .submenu-title-noDropdown {
@@ -120,9 +154,12 @@
 
       .el-tooltip {
         padding: 0 !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
 
         .svg-icon {
-          margin-left: 20px;
+          margin-left: 0 !important;
         }
       }
     }
@@ -134,7 +171,7 @@
         padding: 0 !important;
 
         .svg-icon {
-          margin-left: 20px;
+          margin-left: 0 !important;
         }
 
         .el-sub-menu__icon-arrow {
@@ -144,30 +181,8 @@
     }
 
     .el-menu--collapse {
-      .el-sub-menu {
-        & > .el-sub-menu__title {
-          & > span {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            visibility: visible;
-          }
-        }
-      }
-    }
-
-    .el-menu--collapse {
       .menu-title {
         display: none !important;
-      }
-
-      .el-menu-item,
-      .el-sub-menu__title {
-        padding: 0 !important;
-        display: flex;
-        align-items: center;
-        justify-content: center;
       }
 
       .menu-item {
@@ -180,17 +195,7 @@
       .svg-icon {
         margin: 0 !important;
       }
-
-      .submenu-title-noDropdown .el-tooltip {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
     }
-  }
-
-  .el-menu--collapse .el-menu .el-sub-menu {
-    min-width: $sideBarWidth !important;
   }
 
   .mobile {
@@ -200,7 +205,7 @@
     }
 
     .sidebar-container {
-      transition: transform .28s;
+      transition: transform .28s cubic-bezier(0.2, 0, 0, 1);
       width: $sideBarWidth !important;
     }
 
@@ -214,7 +219,6 @@
   }
 
   .withoutAnimation {
-
     .main-container,
     .sidebar-container {
       transition: none;
@@ -222,35 +226,34 @@
   }
 }
 
+// Dropdown popup for collapsed menus
 .el-menu--vertical {
   & > .el-menu {
+    background-color: var(--platform-surface) !important;
+    border: 1px solid var(--platform-border) !important;
+    border-radius: 14px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+    padding: 6px;
+
     .svg-icon {
-      margin-right: 16px;
+      margin-right: 12px;
     }
   }
 
-  .nest-menu .el-sub-menu > .el-sub-menu__title,
   .el-menu-item {
+    border-radius: 8px;
+    margin: 2px 0;
+    color: var(--sidebar-text) !important;
+
     &:hover {
       background-color: var(--sidebar-hover) !important;
-    }
-  }
-
-  > .el-menu--popup {
-    max-height: 100vh;
-    overflow-y: auto;
-
-    &::-webkit-scrollbar-track-piece {
-      background: var(--sidebar-sub-bg);
+      color: var(--platform-ink) !important;
     }
 
-    &::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: var(--sidebar-text);
-      border-radius: 20px;
+    &.is-active {
+      background-color: var(--platform-accent-14) !important;
+      color: var(--platform-accent) !important;
+      font-weight: 600;
     }
   }
 }

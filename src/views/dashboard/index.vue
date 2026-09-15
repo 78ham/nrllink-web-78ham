@@ -128,46 +128,23 @@ export default {
 <style lang="scss" scoped>
 .dashboard-home {
   min-height: 100%;
-  background: radial-gradient(980px 460px at 18% -14%, var(--platform-accent-2) 0%, var(--platform-surface) 56%, var(--platform-surface-soft) 100%);
+  background: var(--platform-shell);
   position: relative;
   overflow: hidden;
   color: var(--platform-ink);
 }
 
-.dashboard-home::before {
-  content: "";
-  position: absolute;
-  top: -100px;
-  left: -100px;
-  width: 450px;
-  height: 450px;
-  background: radial-gradient(circle, var(--platform-accent-16) 0%, transparent 70%);
-  pointer-events: none;
-}
-
-.dashboard-home::after {
-  content: "";
-  position: absolute;
-  right: -100px;
-  bottom: -100px;
-  width: 450px;
-  height: 450px;
-  background: radial-gradient(circle, var(--platform-accent-14) 0%, transparent 70%);
-  pointer-events: none;
-}
-
 .dashboard-shell {
   width: min(1520px, calc(100% - 48px));
   margin: 0 auto;
-  padding: 28px 0 40px;
+  padding: 24px 0 36px;
   position: relative;
   z-index: 1;
 }
 
 .dashboard-hero {
   display: block;
-  align-items: center;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 
 .hero-copy--compact {
@@ -192,7 +169,7 @@ export default {
 .hero-unified-stats {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
+  gap: 14px;
   width: 100%;
 }
 
@@ -204,53 +181,67 @@ export default {
   min-height: 720px;
 }
 
+// Obsidian Arc Metric Stat Card
 .unified-stat-card {
   min-width: 0;
-  padding: 12px 14px;
-  border-radius: 18px;
+  padding: 16px 18px;
+  border-radius: 14px;
   background: var(--platform-surface);
   border: 1px solid var(--platform-border);
-  text-align: center;
-  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-height: 128px;
-}
-
-.unified-stat-card strong {
-  display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 26px;
-  line-height: 1.1;
-  color: var(--platform-accent);
-  min-height: 58px;
-  text-align: center;
-  overflow-wrap: anywhere;
-  word-break: break-word;
+  min-height: 116px;
+  transition: border-color 0.2s cubic-bezier(0.2, 0, 0, 1), transform 0.2s cubic-bezier(0.2, 0, 0, 1);
+
+  &:hover {
+    border-color: var(--platform-border-strong);
+    transform: translateY(-2px);
+  }
+
+  strong {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: var(--platform-ink);
+    text-align: center;
+  }
+
+  span {
+    display: block;
+    margin-top: 6px;
+    font-size: 11.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--platform-ink-dim);
+    line-height: 1.35;
+  }
 }
 
-.unified-stat-card span {
-  display: block;
-  margin-top: 4px;
-  font-size: 12px;
-  color: var(--platform-ink-dim);
-  line-height: 1.35;
-}
-
-// Announcements
+// Announcements (Obsidian Arc reading card)
 .dashboard-announcements {
   margin-bottom: 24px;
 }
 
 .announcement-card {
-  border-radius: 18px;
+  border-radius: 14px;
   background: var(--platform-surface);
   border: 1px solid var(--platform-border);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
   padding: 16px 20px;
   margin-bottom: 12px;
-  backdrop-filter: blur(8px);
+  transition: border-color 0.2s ease;
+
+  &:hover {
+    border-color: var(--platform-border-strong);
+  }
 }
 
 .ann-header {
@@ -261,27 +252,29 @@ export default {
 }
 
 .ann-pin {
-  background: rgba(255, 59, 48, 0.2);
-  color: #ff6b6b;
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
   padding: 2px 8px;
-  border-radius: 6px;
+  border-radius: 9999px;
   font-size: 11px;
   font-weight: 700;
 }
 
 .ann-type {
-  background: var(--platform-accent-16);
+  background: var(--platform-accent-12);
   color: var(--platform-accent);
+  border: 1px solid var(--platform-border-accent);
   padding: 2px 8px;
-  border-radius: 6px;
+  border-radius: 9999px;
   font-size: 11px;
   font-weight: 600;
 }
 
 .ann-title {
   margin: 0;
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 15px;
+  font-weight: 600;
   color: var(--platform-ink);
 }
 
@@ -293,7 +286,7 @@ export default {
 }
 
 .ann-content {
-  font-size: 14px;
+  font-size: 13.5px;
   line-height: 1.6;
   color: var(--platform-ink-dim);
 }
@@ -303,7 +296,7 @@ export default {
   time {
     font-size: 12px;
     color: var(--platform-ink-dim);
-    opacity: 0.6;
+    opacity: 0.7;
   }
 }
 
@@ -335,7 +328,7 @@ export default {
 @media (max-width: 767px) {
   .dashboard-shell {
     width: min(100%, calc(100% - 24px));
-    padding-top: 18px;
+    padding-top: 16px;
   }
 
   .hero-copy--compact {
@@ -350,6 +343,7 @@ export default {
   .hero-unified-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     width: 100%;
+    gap: 10px;
   }
 
   .monitor-panel-content {
@@ -357,31 +351,21 @@ export default {
   }
 
   .unified-stat-card {
-    min-height: 118px;
-  }
+    min-height: 98px;
+    padding: 12px;
 
-  .unified-stat-card strong {
-    min-height: 50px;
-    font-size: 24px;
+    strong {
+      font-size: 22px;
+    }
   }
 
   .announcement-card {
-    border-radius: 14px;
+    border-radius: 12px;
     padding: 12px 14px;
   }
 
   .ann-title {
     font-size: 14px;
-  }
-}
-
-@media (max-width: 520px) {
-  .hero-unified-stats {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .unified-stat-card {
-    min-height: 104px;
   }
 }
 </style>

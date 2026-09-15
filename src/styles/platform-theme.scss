@@ -1,3 +1,6 @@
+// Obsidian Arc Design System - Platform Theme
+// High-performance, architectural, GPU-friendly UI stylesheet
+
 :root {
   --el-color-primary: var(--platform-accent) !important;
   --el-color-primary-light-3: var(--platform-accent-34) !important;
@@ -6,206 +9,138 @@
   --el-color-primary-light-8: var(--platform-accent-72) !important;
   --el-color-primary-light-9: var(--platform-accent-85) !important;
   --el-color-primary-dark-2: var(--platform-accent-2) !important;
-  --el-color-success: var(--platform-accent) !important;
-  --el-color-warning: #ffba00 !important;
-  --el-color-danger: #ff4949 !important;
-  --el-color-info: var(--platform-surface-68) !important;
-  --el-bg-color: var(--platform-deep-98) !important;
-  --el-bg-color-overlay: var(--platform-deep-98) !important;
+  --el-color-success: #10b981 !important;
+  --el-color-warning: #f59e0b !important;
+  --el-color-danger: #ef4444 !important;
+  --el-color-info: var(--platform-ink-dim) !important;
+  --el-bg-color: var(--platform-surface) !important;
+  --el-bg-color-overlay: var(--platform-surface) !important;
   --el-text-color-primary: var(--platform-ink) !important;
   --el-text-color-regular: var(--platform-ink-dim) !important;
   --el-text-color-secondary: var(--platform-ink-dim) !important;
-  --el-text-color-placeholder: var(--platform-ink-dim) !important;
+  --el-text-color-placeholder: var(--platform-ink-muted) !important;
   --el-border-color: var(--platform-border) !important;
   --el-border-color-light: var(--platform-border-light) !important;
   --el-border-color-lighter: var(--platform-border-lighter) !important;
   --el-border-color-extra-light: var(--platform-border-lighter) !important;
   --el-border-color-dark: var(--platform-border-strong) !important;
   --el-border-color-base: var(--platform-border-input) !important;
-  --el-fill-color-blank: var(--platform-deep-86) !important;
-  --el-fill-color-light: var(--platform-accent-16) !important;
-  --el-fill-color-lighter: var(--platform-surface-80) !important;
-  --el-fill-color-extra-light: var(--platform-surface-xlight) !important;
-  --el-mask-color: rgba(10, 23, 41, 0.72) !important;
-  --el-mask-color-extra-light: rgba(10, 23, 41, 0.42) !important;
-
-  --platform-ink: #f4f8ff;
-  --platform-ink-dim: rgba(228, 239, 255, 0.72);
-  --platform-shell: linear-gradient(145deg, rgba(10, 23, 41, 0.82) 0%, rgba(12, 29, 50, 0.72) 100%);
-  --platform-surface: rgba(12, 31, 58, 0.74);
-  --platform-surface-soft: rgba(12, 31, 58, 0.52);
-  --platform-surface-light: rgba(12, 31, 58, 0.46);
-  --platform-surface-xlight: rgba(12, 31, 58, 0.42);
-  --platform-surface-0: rgba(12, 31, 58, 0);
-  --platform-surface-68: rgba(12, 31, 58, 0.68);
-  --platform-surface-76: rgba(12, 31, 58, 0.76);
-  --platform-surface-80: rgba(12, 31, 58, 0.8);
-  --platform-surface-88: rgba(12, 31, 58, 0.88);
-  --platform-surface-90: rgba(12, 31, 58, 0.9);
-  --platform-surface-94: rgba(12, 31, 58, 0.94);
-  --platform-deep: rgba(10, 23, 41, 0.72);
-  --platform-deep-86: rgba(10, 23, 41, 0.86);
-  --platform-deep-90: rgba(10, 23, 41, 0.9);
-  --platform-deep-98: rgba(10, 23, 41, 0.98);
-  --platform-border: rgba(104, 176, 255, 0.14);
-  --platform-border-light: rgba(104, 176, 255, 0.1);
-  --platform-border-lighter: rgba(104, 176, 255, 0.08);
-  --platform-border-strong: rgba(54, 240, 203, 0.28);
-  --platform-border-input: rgba(104, 176, 255, 0.16);
-  --platform-border-stronger: rgba(54, 240, 203, 0.32);
-  --platform-border-accent: rgba(54, 240, 203, 0.26);
-  --platform-accent: #8ff9de;
-  --platform-accent-2: #3f8dff;
-  --platform-accent-06: rgba(54, 240, 203, 0.06);
-  --platform-accent-08: rgba(38, 239, 199, 0.08);
-  --platform-accent-10: rgba(38, 239, 199, 0.1);
-  --platform-accent-12: rgba(38, 239, 199, 0.12);
-  --platform-accent-14: rgba(63, 141, 255, 0.14);
-  --platform-accent-16: rgba(63, 141, 255, 0.16);
-  --platform-accent-18: rgba(38, 239, 199, 0.18);
-  --platform-accent-20: rgba(38, 239, 199, 0.2);
-  --platform-accent-22: rgba(63, 141, 255, 0.22);
-  --platform-accent-25: rgba(54, 240, 203, 0.25);
-  --platform-accent-34: rgba(54, 240, 203, 0.34);
-  --platform-accent-42: rgba(143, 249, 222, 0.42);
-  --platform-accent-62: rgba(143, 249, 222, 0.62);
-  --platform-accent-72: rgba(94, 166, 255, 0.72);
-  --platform-accent-85: rgba(38, 239, 199, 0.85);
-  --platform-accent-88: rgba(63, 141, 255, 0.88);
-  --platform-accent-92: rgba(39, 214, 182, 0.92);
-  --sidebar-bg: #0f1c31;
-  --sidebar-text: rgba(228, 239, 255, 0.76);
-  --sidebar-active-text: #36f0cb;
-  --sidebar-hover: #1a3050;
-  --sidebar-sub-bg: #0b1625;
-  --sidebar-sub-hover: #1a3050;
-}
-
-.platform-theme-page,
-.platform-theme-card,
-.platform-theme-dialog,
-.platform-theme-select-dropdown,
-.sidebar-container {
-  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  --el-fill-color-blank: var(--platform-field-bg) !important;
+  --el-fill-color-light: var(--platform-accent-10) !important;
+  --el-fill-color-lighter: var(--platform-surface-soft) !important;
+  --el-fill-color-extra-light: var(--platform-surface-light) !important;
+  --el-mask-color: rgba(0, 0, 0, 0.65) !important;
+  --el-mask-color-extra-light: rgba(0, 0, 0, 0.35) !important;
 }
 
 body, html {
-  background: var(--platform-deep-98) !important;
+  background: var(--platform-shell) !important;
+  color: var(--platform-ink);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.toolbar-capsule {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  border-radius: 999px;
-  border: 1px solid var(--platform-border);
-  background: var(--platform-surface-76);
-  color: var(--platform-ink-dim);
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  user-select: none;
-  box-shadow: 0 0 0 1px var(--platform-border-lighter) inset;
-
-  .capsule-indicator {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--platform-accent);
-    transition: all 0.25s ease;
-  }
-
-  &:hover {
-    border-color: var(--platform-border-strong);
-    background: var(--platform-surface-soft);
-    color: var(--platform-ink);
-  }
-
-  &.is-active {
-    border-color: var(--platform-border-strong);
-    background: linear-gradient(135deg, var(--platform-accent-10) 0%, var(--platform-accent-16) 100%);
-    color: var(--platform-ink);
-    box-shadow: 0 0 0 1px var(--platform-accent-08) inset, 0 4px 16px var(--platform-accent-16);
-
-    .capsule-indicator {
-      background: linear-gradient(135deg, var(--platform-accent) 0%, var(--platform-accent-2) 100%);
-      box-shadow: 0 0 8px var(--platform-accent);
-    }
-  }
-}
+// ---------------------------------------------------------------------------
+// Main Surface Containers (Obsidian Arc aesthetic)
+// ---------------------------------------------------------------------------
 
 .platform-theme-page {
   min-height: calc(100vh - 84px);
   padding: 24px;
-  background:
-    radial-gradient(980px 460px at 18% -14%, var(--platform-accent-2) 0%, var(--platform-surface) 56%, var(--platform-surface-soft) 100%);
+  background: var(--platform-shell);
   color: var(--platform-ink);
+  transition: background-color 0.2s cubic-bezier(0.2, 0, 0, 1), color 0.2s ease;
 }
 
 .platform-theme-card {
-  border-radius: 20px;
-  background: var(--platform-shell) !important;
+  border-radius: 16px;
+  background: var(--platform-surface) !important;
   border: 1px solid var(--platform-border);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-  --el-card-bg-color: var(--platform-deep-98) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  --el-card-bg-color: var(--platform-surface) !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+
+  &:hover {
+    border-color: var(--platform-border-strong);
+  }
 }
 
 .platform-theme-card.el-card {
-  background: var(--platform-shell) !important;
+  background: var(--platform-surface) !important;
+  border-color: var(--platform-border);
 }
 
 .platform-theme-page .filter-container,
 .platform-theme-page .table-shell,
 .platform-theme-page .pagination-container,
 .platform-theme-page .box-item {
-  border-radius: 20px;
-  background: var(--platform-shell);
+  border-radius: 16px;
+  background: var(--platform-surface);
   border: 1px solid var(--platform-border);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.1);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .platform-theme-page .filter-container {
-  padding: 20px;
-  margin-bottom: 20px;
+  padding: 16px 20px;
+  margin-bottom: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
 }
 
-.platform-theme-page .pagination-container {
-  margin-top: 20px;
-  padding: 20px 18px;
-  background: var(--platform-deep);
-}
+// ---------------------------------------------------------------------------
+// Capsule Toolbar Switch / Toggle
+// ---------------------------------------------------------------------------
 
-.platform-theme-page .pagination-container .el-select__wrapper,
-.platform-theme-page .pagination-container .el-input__wrapper {
-  background: var(--platform-deep-86) !important;
-  box-shadow: 0 0 0 1px var(--platform-border-input) inset !important;
-  border-radius: 12px;
-}
+.toolbar-capsule {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  border-radius: 9999px;
+  border: 1px solid var(--platform-border);
+  background: var(--platform-surface-soft);
+  color: var(--platform-ink-dim);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+  user-select: none;
 
-.platform-theme-page .pagination-container .el-select__selected-item,
-.platform-theme-page .pagination-container .el-input__inner,
-.platform-theme-page .pagination-container .el-pagination__total,
-.platform-theme-page .pagination-container .el-pagination__jump,
-.platform-theme-page .pagination-container .el-pagination__goto {
-  color: var(--platform-ink) !important;
-}
-
-@media (max-width: 768px) {
-  .platform-theme-page .pagination-container .el-pagination__sizes {
-    min-width: 112px;
+  .capsule-indicator {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--platform-ink-dim);
+    transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
   }
 
-  .platform-theme-page .pagination-container .btn-prev,
-  .platform-theme-page .pagination-container .btn-next,
-  .platform-theme-page .pagination-container .el-pager li {
-    min-width: 34px;
-    height: 34px;
-    line-height: 32px;
-    margin: 0 !important;
+  &:hover {
+    border-color: var(--platform-border-strong);
+    background: var(--platform-surface-light);
+    color: var(--platform-ink);
+  }
+
+  &.is-active {
+    border-color: var(--platform-border-accent);
+    background: var(--platform-accent-12);
+    color: var(--platform-ink);
+    box-shadow: 0 0 0 1px var(--platform-accent-18) inset;
+
+    .capsule-indicator {
+      background: var(--platform-accent);
+      box-shadow: 0 0 8px var(--platform-accent);
+    }
   }
 }
+
+// ---------------------------------------------------------------------------
+// Form Fields & Inputs (Filled background with refined focus ring)
+// ---------------------------------------------------------------------------
 
 .platform-theme-page .filter-container .el-input__wrapper,
 .platform-theme-page .filter-container .el-select__wrapper,
@@ -213,9 +148,20 @@ body, html {
 .platform-theme-dialog .el-select__wrapper,
 .platform-theme-dialog .el-textarea__inner,
 .platform-theme-dialog .el-input-number__wrapper {
-  background: var(--platform-deep-86) !important;
+  background: var(--platform-field-bg) !important;
   box-shadow: 0 0 0 1px var(--platform-border-input) inset !important;
-  border-radius: 14px;
+  border-radius: 10px !important;
+  transition: box-shadow 0.2s cubic-bezier(0.2, 0, 0, 1), background-color 0.2s ease !important;
+
+  &:hover {
+    box-shadow: 0 0 0 1px var(--platform-border-strong) inset !important;
+    background: var(--platform-field-bg-hover) !important;
+  }
+
+  &.is-focus {
+    box-shadow: 0 0 0 1.5px var(--platform-accent) inset, 0 0 0 3px var(--platform-accent-16) !important;
+    background: var(--platform-field-bg-hover) !important;
+  }
 }
 
 .platform-theme-page .filter-container .el-input__inner,
@@ -235,8 +181,8 @@ body, html {
 .platform-theme-page .filter-container .el-select__placeholder,
 .platform-theme-dialog .el-input__inner::placeholder,
 .platform-theme-dialog .el-textarea__inner::placeholder {
-  color: var(--platform-ink-dim) !important;
-  opacity: 0.6;
+  color: var(--platform-ink-muted) !important;
+  opacity: 0.8;
 }
 
 .platform-theme-page .filter-container .el-switch__label,
@@ -244,9 +190,13 @@ body, html {
   color: var(--platform-ink-dim) !important;
 }
 
+// ---------------------------------------------------------------------------
+// Select Dropdowns & Menus (Obsidian Arc floating poppers)
+// ---------------------------------------------------------------------------
+
 .platform-theme-select-dropdown {
-  --el-bg-color-overlay: var(--platform-deep-98);
-  --el-fill-color-light: var(--platform-accent-16);
+  --el-bg-color-overlay: var(--platform-surface);
+  --el-fill-color-light: var(--platform-accent-12);
   --el-fill-color-blank: transparent;
   --el-text-color-regular: var(--platform-ink);
   --el-text-color-secondary: var(--platform-ink-dim);
@@ -254,148 +204,228 @@ body, html {
   --el-border-color-lighter: var(--platform-border-light);
   --el-mask-color: transparent;
   border: 1px solid var(--platform-border) !important;
-  border-radius: 18px !important;
-  background: var(--platform-shell) !important;
-  box-shadow: 0 24px 56px rgba(0, 0, 0, 0.42), 0 0 0 1px var(--platform-accent-08) inset !important;
+  border-radius: 14px !important;
+  background: var(--platform-surface) !important;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45) !important;
   overflow: hidden;
+
+  .el-scrollbar__view {
+    padding: 6px;
+  }
+
+  .el-select-dropdown__item {
+    min-height: 38px;
+    line-height: 38px;
+    margin: 2px 0;
+    padding: 0 12px;
+    border-radius: 8px;
+    color: var(--platform-ink) !important;
+    font-size: 13px;
+    transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+
+    &.hover,
+    &:hover {
+      background: var(--platform-surface-soft) !important;
+      color: var(--platform-ink) !important;
+      transform: translateX(2px);
+    }
+
+    &.selected {
+      background: var(--platform-accent-14) !important;
+      color: var(--platform-accent) !important;
+      font-weight: 600;
+    }
+  }
+
+  .el-popper__arrow::before {
+    background: var(--platform-surface) !important;
+    border-color: var(--platform-border) !important;
+  }
 }
 
-.platform-theme-select-dropdown .el-scrollbar__view {
-  padding: 8px;
+// ---------------------------------------------------------------------------
+// Buttons (Capsule / Pill Buttons matching Obsidian Arc)
+// ---------------------------------------------------------------------------
+
+.platform-theme-page .el-button,
+.platform-theme-dialog .el-button,
+.el-message-box__btns .el-button {
+  border-radius: 9999px;
+  font-weight: 500;
+  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
 }
 
-.platform-theme-select-dropdown .el-select-dropdown__item {
-  min-height: 42px;
-  line-height: 42px;
-  margin: 4px 0;
-  border-radius: 12px;
+.platform-theme-page .el-button--primary,
+.platform-theme-dialog .el-button--primary,
+.el-message-box__btns .el-button--primary {
+  background: var(--platform-accent) !important;
+  border: 1px solid transparent !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 10px var(--platform-accent-22);
+
+  &:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px var(--platform-accent-34);
+  }
+
+  &:active {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.platform-theme-page .el-button--default,
+.platform-theme-dialog .el-button--default,
+.el-message-box__btns .el-button--default {
+  background: var(--platform-surface-soft) !important;
+  border: 1px solid var(--platform-border) !important;
   color: var(--platform-ink) !important;
-  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+
+  &:hover {
+    background: var(--platform-surface-light) !important;
+    border-color: var(--platform-border-strong) !important;
+    color: var(--platform-ink) !important;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
 }
 
-.platform-theme-select-dropdown .el-select-dropdown__item.hover,
-.platform-theme-select-dropdown .el-select-dropdown__item:hover {
-  background: linear-gradient(90deg, var(--platform-accent-10) 0%, var(--platform-accent-16) 100%) !important;
-  color: var(--platform-ink) !important;
-  transform: translateX(2px);
-}
-
-.platform-theme-select-dropdown .el-select-dropdown__item.selected {
-  background: linear-gradient(90deg, var(--platform-accent-16) 0%, var(--platform-accent-22) 100%) !important;
-  color: var(--platform-accent) !important;
-  font-weight: 700;
-}
-
-.platform-theme-select-dropdown .el-popper__arrow::before {
-  background: var(--platform-deep-98) !important;
-  border-color: var(--platform-border) !important;
-}
-
-.platform-theme-page .el-button--primary {
-  background: linear-gradient(90deg, var(--platform-accent) 0%, var(--platform-accent-2) 100%);
-  border: none;
-  box-shadow: 0 12px 28px var(--platform-accent-22);
-}
-
+// Plain Action Buttons (Table pills)
 .platform-theme-page .el-button--primary.is-plain,
-.platform-theme-dialog .el-button--primary.is-plain {
-  background: var(--action-edit-bg, var(--platform-surface-68)) !important;
-  border-color: var(--action-edit-border, var(--platform-border)) !important;
-  color: var(--action-edit-text, var(--platform-ink)) !important;
-}
+.platform-theme-dialog .el-button--primary.is-plain,
+.action-btn-secondary {
+  border-radius: 8px !important;
+  background: var(--action-edit-bg, var(--platform-surface-soft)) !important;
+  border: 1px solid var(--action-edit-border, var(--platform-border)) !important;
+  color: var(--action-edit-text, var(--platform-accent)) !important;
 
-.platform-theme-page .el-button--primary.is-plain:hover,
-.platform-theme-page .el-button--primary.is-plain:focus,
-.platform-theme-dialog .el-button--primary.is-plain:hover,
-.platform-theme-dialog .el-button--primary.is-plain:focus {
-  background: var(--action-edit-hover-bg, var(--platform-surface-soft)) !important;
-  border-color: var(--action-edit-hover-border, var(--platform-border-strong)) !important;
-  color: var(--action-edit-hover-text, var(--platform-ink)) !important;
+  &:hover, &:focus {
+    background: var(--action-edit-hover-bg, var(--platform-accent)) !important;
+    border-color: var(--action-edit-hover-border, var(--platform-accent)) !important;
+    color: var(--action-edit-hover-text, #ffffff) !important;
+    transform: translateY(-1px);
+  }
 }
 
 .platform-theme-page .el-button--warning.is-plain,
 .platform-theme-dialog .el-button--warning.is-plain {
-  background: var(--action-change-bg, var(--platform-surface-68)) !important;
-  border-color: var(--action-change-border, var(--platform-border)) !important;
-  color: var(--action-change-text, var(--platform-ink)) !important;
-}
+  border-radius: 8px !important;
+  background: var(--action-change-bg, rgba(245, 158, 11, 0.12)) !important;
+  border: 1px solid var(--action-change-border, rgba(245, 158, 11, 0.25)) !important;
+  color: var(--action-change-text, #f59e0b) !important;
 
-.platform-theme-page .el-button--warning.is-plain:hover,
-.platform-theme-page .el-button--warning.is-plain:focus,
-.platform-theme-dialog .el-button--warning.is-plain:hover,
-.platform-theme-dialog .el-button--warning.is-plain:focus {
-  background: var(--action-change-hover-bg, var(--platform-surface-soft)) !important;
-  border-color: var(--action-change-hover-border, var(--platform-border-strong)) !important;
-  color: var(--action-change-hover-text, var(--platform-ink)) !important;
+  &:hover, &:focus {
+    background: var(--action-change-hover-bg, #f59e0b) !important;
+    border-color: var(--action-change-hover-border, #f59e0b) !important;
+    color: var(--action-change-hover-text, #ffffff) !important;
+    transform: translateY(-1px);
+  }
 }
 
 .platform-theme-page .el-button--success.is-plain,
 .platform-theme-dialog .el-button--success.is-plain {
-  background: var(--action-at-bg, var(--platform-surface-68)) !important;
-  border-color: var(--action-at-border, var(--platform-border)) !important;
-  color: var(--action-at-text, var(--platform-ink)) !important;
-}
+  border-radius: 8px !important;
+  background: var(--action-at-bg, rgba(16, 185, 129, 0.12)) !important;
+  border: 1px solid var(--action-at-border, rgba(16, 185, 129, 0.25)) !important;
+  color: var(--action-at-text, #10b981) !important;
 
-.platform-theme-page .el-button--success.is-plain:hover,
-.platform-theme-page .el-button--success.is-plain:focus,
-.platform-theme-dialog .el-button--success.is-plain:hover,
-.platform-theme-dialog .el-button--success.is-plain:focus {
-  background: var(--action-at-hover-bg, var(--platform-surface-soft)) !important;
-  border-color: var(--action-at-hover-border, var(--platform-border-strong)) !important;
-  color: var(--action-at-hover-text, var(--platform-ink)) !important;
+  &:hover, &:focus {
+    background: var(--action-at-hover-bg, #10b981) !important;
+    border-color: var(--action-at-hover-border, #10b981) !important;
+    color: var(--action-at-hover-text, #ffffff) !important;
+    transform: translateY(-1px);
+  }
 }
 
 .platform-theme-page .el-button--danger.is-plain,
 .platform-theme-dialog .el-button--danger.is-plain {
-  background: var(--action-delete-bg, var(--platform-surface-68)) !important;
-  border-color: var(--action-delete-border, var(--platform-border)) !important;
-  color: var(--action-delete-text, var(--platform-ink)) !important;
+  border-radius: 8px !important;
+  background: var(--action-delete-bg, rgba(239, 68, 68, 0.12)) !important;
+  border: 1px solid var(--action-delete-border, rgba(239, 68, 68, 0.25)) !important;
+  color: var(--action-delete-text, #ef4444) !important;
+
+  &:hover, &:focus {
+    background: var(--action-delete-hover-bg, #ef4444) !important;
+    border-color: var(--action-delete-hover-border, #ef4444) !important;
+    color: var(--action-delete-hover-text, #ffffff) !important;
+    transform: translateY(-1px);
+  }
 }
 
-.platform-theme-page .el-button--danger.is-plain:hover,
-.platform-theme-page .el-button--danger.is-plain:focus,
-.platform-theme-dialog .el-button--danger.is-plain:hover,
-.platform-theme-dialog .el-button--danger.is-plain:focus {
-  background: var(--action-delete-hover-bg, var(--platform-surface-soft)) !important;
-  border-color: var(--action-delete-hover-border, var(--platform-border-strong)) !important;
-  color: var(--action-delete-hover-text, var(--platform-ink)) !important;
-}
-
-.platform-theme-page .el-button--info.is-plain,
-.platform-theme-dialog .el-button--info.is-plain {
-  background: var(--platform-surface-68) !important;
-  border-color: var(--platform-border) !important;
-  color: var(--platform-ink) !important;
-}
+// ---------------------------------------------------------------------------
+// Tags & Badges
+// ---------------------------------------------------------------------------
 
 .platform-theme-page .el-tag,
-.platform-theme-dialog .el-tag {
-  border-radius: 999px;
-  border-color: var(--platform-border-lighter);
-  background: var(--platform-surface-80);
+.platform-theme-dialog .el-tag,
+.callsign-tag,
+.metric-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px !important;
+  border: 1px solid var(--platform-border);
+  background: var(--platform-surface-soft);
   color: var(--platform-ink);
+  font-weight: 600;
+  font-size: 12px;
+  padding: 2px 10px;
+  line-height: 20px;
 }
 
-.platform-theme-page .el-table,
-.platform-theme-page .el-table__expanded-cell,
-.platform-theme-page .el-table tr,
-.platform-theme-page .el-table th.el-table__cell,
-.platform-theme-page .el-table td.el-table__cell {
-  background: transparent !important;
+.callsign-tag {
+  color: var(--platform-accent);
+  background: var(--platform-accent-10);
+  border-color: var(--platform-border-accent);
+}
+
+// ---------------------------------------------------------------------------
+// Data Tables (Obsidian Arc Clean Grid)
+// ---------------------------------------------------------------------------
+
+.platform-theme-page .table-shell {
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--platform-surface);
+  border: 1px solid var(--platform-border);
 }
 
 .platform-theme-page .el-table {
   color: var(--platform-ink);
-  --el-fill-color-blank: var(--platform-deep);
+  background: transparent !important;
+  --el-fill-color-blank: var(--platform-surface);
   --el-table-border-color: var(--platform-border-light);
-  --el-table-header-bg-color: var(--platform-surface-90);
-  --el-table-tr-bg-color: var(--platform-surface-light);
+  --el-table-header-bg-color: var(--platform-surface-soft);
+  --el-table-tr-bg-color: var(--platform-surface);
   --el-table-row-hover-bg-color: var(--platform-accent-06);
-  --el-table-header-text-color: var(--platform-ink);
-  --el-table-text-color: var(--platform-ink-dim);
-  --el-table-current-row-bg-color: var(--platform-accent-14);
-  border-radius: 20px;
-  overflow: hidden;
+  --el-table-header-text-color: var(--platform-ink-dim);
+  --el-table-text-color: var(--platform-ink);
+  --el-table-current-row-bg-color: var(--platform-accent-12);
+
+  th.el-table__cell {
+    height: 48px;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    background: var(--platform-surface-soft) !important;
+    color: var(--platform-ink-dim) !important;
+    border-bottom: 1px solid var(--platform-border) !important;
+  }
+
+  td.el-table__cell {
+    padding: 12px 0;
+    font-size: 13.5px;
+    border-bottom: 1px solid var(--platform-border-light) !important;
+    background: transparent !important;
+  }
+
+  tr:hover > td.el-table__cell {
+    background: var(--platform-accent-06) !important;
+  }
 }
 
 .platform-theme-page .el-table__inner-wrapper,
@@ -409,508 +439,162 @@ body, html {
 }
 
 .platform-theme-page .el-loading-mask {
-  background: var(--platform-deep-90) !important;
-  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.6) !important;
 }
 
 .platform-theme-page .el-loading-spinner .path {
   stroke: var(--platform-accent) !important;
 }
 
-.platform-theme-page .el-loading-spinner .el-loading-text {
-  color: var(--platform-ink-dim) !important;
-}
+// ---------------------------------------------------------------------------
+// Pagination (Minimalist Pill Architecture)
+// ---------------------------------------------------------------------------
 
-.platform-theme-page .el-table::before,
-.platform-theme-page .el-table__inner-wrapper::before {
-  background-color: var(--platform-border-light) !important;
-}
-
-.platform-theme-page .el-table th.el-table__cell {
-  height: 54px;
-  font-weight: 700;
-}
-
-.platform-theme-page .el-table td.el-table__cell,
-.platform-theme-page .el-table th.el-table__cell {
-  border-bottom-color: var(--platform-border-light) !important;
-}
-
-.platform-theme-page .el-table--border .el-table__cell,
-.platform-theme-page .el-table__body-wrapper .el-table--border.is-scrolling-left~.el-table__fixed {
-  border-right-color: var(--platform-border-lighter) !important;
+.platform-theme-page .pagination-container {
+  margin-top: 18px;
+  padding: 14px 20px;
+  background: var(--platform-surface);
+  border: 1px solid var(--platform-border);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .platform-theme-page .el-pagination {
   color: var(--platform-ink);
-  --el-pagination-button-bg-color: var(--platform-surface-76);
+  --el-pagination-button-bg-color: var(--platform-surface-soft);
   --el-pagination-button-color: var(--platform-ink);
   --el-pagination-hover-color: var(--platform-accent);
   --el-pagination-bg-color: transparent;
+
+  .btn-prev,
+  .btn-next,
+  .el-pager li {
+    border-radius: 8px !important;
+    border: 1px solid var(--platform-border);
+    background: var(--platform-surface-soft);
+    color: var(--platform-ink-dim);
+    transition: all 0.15s ease;
+
+    &:hover {
+      border-color: var(--platform-border-strong);
+      color: var(--platform-ink);
+    }
+
+    &.is-active {
+      background: var(--platform-accent) !important;
+      color: #ffffff !important;
+      border-color: var(--platform-accent);
+      font-weight: 600;
+    }
+  }
 }
 
-.platform-theme-page .btn-prev,
-.platform-theme-page .btn-next,
-.platform-theme-page .el-pager li {
-  border-radius: 10px !important;
-  border: 1px solid var(--platform-border-light);
-}
-
-.platform-theme-page .el-pager li.is-active {
-  background: linear-gradient(90deg, var(--platform-accent-18) 0%, var(--platform-accent-22) 100%) !important;
-  color: var(--platform-accent) !important;
-  border-color: var(--platform-border-accent);
-}
+// ---------------------------------------------------------------------------
+// Dialogs & Modals (Obsidian Arc Floating Windows)
+// ---------------------------------------------------------------------------
 
 .platform-theme-dialog,
 .platform-theme-dialog.el-dialog,
 .platform-theme-dialog.el-overlay-dialog .el-dialog,
 .platform-theme-dialog .el-dialog {
-  --el-dialog-bg-color: var(--platform-deep-98) !important;
-  background: var(--platform-shell) !important;
+  --el-dialog-bg-color: var(--platform-surface) !important;
+  background: var(--platform-surface) !important;
   border: 1px solid var(--platform-border) !important;
-  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--platform-accent-08) inset !important;
-  border-radius: 24px !important;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5) !important;
+  border-radius: 18px !important;
+  overflow: hidden;
 }
 
-.platform-theme-dialog .el-dialog__header,
-.platform-theme-dialog .el-dialog__footer {
-  border-color: var(--platform-border-light) !important;
+.platform-theme-dialog .el-dialog__header {
+  padding: 18px 24px !important;
+  background: var(--platform-surface-soft) !important;
+  border-bottom: 1px solid var(--platform-border) !important;
+  margin-right: 0 !important;
+
+  .el-dialog__title {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: var(--platform-ink) !important;
+  }
+
+  .el-dialog__headerbtn {
+    top: 18px;
+    right: 20px;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background: var(--platform-surface-light);
+    }
+
+    .el-dialog__close {
+      color: var(--platform-ink-dim) !important;
+    }
+  }
 }
 
-.platform-theme-dialog .el-dialog__body,
-.platform-theme-dialog .el-form-item__label,
-.platform-theme-dialog .el-radio__label,
-.platform-theme-dialog .el-collapse-item__header,
-.platform-theme-dialog .el-collapse-item__content,
-.platform-theme-dialog .el-input-number__decrease,
-.platform-theme-dialog .el-input-number__increase {
+.platform-theme-dialog .el-dialog__body {
+  padding: 24px !important;
+  background: var(--platform-surface) !important;
   color: var(--platform-ink) !important;
+}
+
+.platform-theme-dialog .el-dialog__footer {
+  padding: 14px 24px 18px !important;
+  background: var(--platform-surface-soft) !important;
+  border-top: 1px solid var(--platform-border) !important;
 }
 
 .platform-theme-dialog.el-overlay-dialog,
 .platform-theme-dialog .el-overlay {
-  background: var(--platform-deep-98) !important;
-  backdrop-filter: blur(8px);
-}
-
-.platform-theme-dialog .el-dialog__header {
-  padding: 22px 24px 18px !important;
-  background: var(--platform-surface-94);
-}
-
-.platform-theme-dialog .el-dialog__body {
-  padding: 22px 24px !important;
-  background: transparent !important;
-}
-
-.platform-theme-dialog .el-dialog__footer {
-  padding: 16px 24px 22px !important;
-  background: var(--platform-surface-68);
-}
-
-.platform-theme-dialog .el-dialog__headerbtn .el-dialog__close {
-  color: var(--platform-ink-dim) !important;
-  transition: color 0.2s ease, transform 0.2s ease;
-}
-
-.platform-theme-dialog .el-dialog__headerbtn:hover .el-dialog__close {
-  color: var(--platform-accent) !important;
-  transform: scale(1.08);
+  background: rgba(0, 0, 0, 0.65) !important;
 }
 
 .platform-theme-dialog .el-form-item {
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
-.platform-theme-dialog .el-form-item__content,
-.platform-theme-dialog .el-form-item__label,
-.platform-theme-dialog .el-text,
-.platform-theme-dialog p,
-.platform-theme-dialog span,
-.platform-theme-dialog div {
-  color: inherit;
-}
-
-.platform-theme-dialog .el-input__wrapper,
-.platform-theme-dialog .el-select__wrapper,
-.platform-theme-dialog .el-textarea__inner,
-.platform-theme-dialog .el-input-number__wrapper {
-  min-height: 40px;
-}
-
-.platform-theme-dialog .el-input-number {
-  --el-input-number-border-color: var(--platform-border-input);
-  --el-input-number-hover-border-color: var(--platform-border-strong);
-  width: auto;
-}
-
-.platform-theme-dialog .el-input-number .el-input__wrapper,
-.platform-theme-dialog .el-input-number .el-input-number__wrapper {
-  background: var(--platform-deep-90) !important;
-  box-shadow: 0 0 0 1px var(--platform-border-input) inset !important;
-  border-radius: 14px !important;
-}
-
-.platform-theme-dialog .el-input-number .el-input__inner {
-  color: var(--platform-ink) !important;
-  text-align: center;
-}
-
-.platform-theme-dialog .el-input-number__decrease,
-.platform-theme-dialog .el-input-number__increase {
-  width: 34px !important;
-  border-color: var(--platform-border-input) !important;
-  background: var(--platform-surface-88) !important;
-  color: var(--platform-ink-dim) !important;
-  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-}
-
-.platform-theme-dialog .el-input-number__decrease:hover,
-.platform-theme-dialog .el-input-number__increase:hover {
-  background: linear-gradient(90deg, var(--platform-accent-12) 0%, var(--platform-accent-16) 100%) !important;
-  border-color: var(--platform-border-stronger) !important;
-  color: var(--platform-ink) !important;
-}
-
-.platform-theme-dialog .el-input-number__decrease {
-  border-radius: 14px 0 0 14px !important;
-}
-
-.platform-theme-dialog .el-input-number__increase {
-  border-radius: 0 14px 14px 0 !important;
-}
-
-.platform-theme-dialog .el-input-number__decrease.is-disabled,
-.platform-theme-dialog .el-input-number__increase.is-disabled,
-.platform-theme-dialog .el-input-number__decrease.is-disabled:hover,
-.platform-theme-dialog .el-input-number__increase.is-disabled:hover {
-  background: var(--platform-deep-90) !important;
-  border-color: var(--platform-border-lighter) !important;
-  color: var(--platform-ink-dim) !important;
-  opacity: 0.5;
-}
-
-.platform-theme-dialog .el-input__wrapper.is-focus,
-.platform-theme-dialog .el-select__wrapper.is-focused,
-.platform-theme-dialog .el-textarea__inner:focus,
-.platform-theme-dialog .el-input-number__wrapper.is-focus {
-  box-shadow: 0 0 0 1px var(--platform-border-stronger) inset, 0 0 0 4px var(--platform-accent-08) !important;
-}
-
-.platform-theme-dialog .el-input.is-disabled .el-input__wrapper,
-.platform-theme-dialog .el-textarea.is-disabled .el-textarea__inner,
-.platform-theme-dialog .el-input-number.is-disabled .el-input-number__wrapper,
-.platform-theme-dialog .el-select .el-select__wrapper.is-disabled {
-  background: var(--platform-deep-90) !important;
-  box-shadow: 0 0 0 1px var(--platform-border-lighter) inset !important;
-}
-
-.platform-theme-dialog .el-input.is-disabled .el-input__inner,
-.platform-theme-dialog .el-textarea.is-disabled .el-textarea__inner,
-.platform-theme-dialog .el-input-number.is-disabled .el-input__inner {
-  color: var(--platform-ink-dim) !important;
-  -webkit-text-fill-color: var(--platform-ink-dim) !important;
-}
-
-.platform-theme-dialog .el-select__caret,
-.platform-theme-dialog .el-input__icon,
-.platform-theme-dialog .el-input-number__decrease,
-.platform-theme-dialog .el-input-number__increase {
-  color: var(--platform-ink-dim) !important;
-  opacity: 0.8;
-}
-
-.platform-theme-dialog .el-radio-group {
-  gap: 10px;
-}
-
-.platform-theme-dialog .el-radio {
-  margin-right: 0 !important;
-  padding: 8px 12px;
-  border-radius: 999px;
-  background: var(--platform-surface-xlight);
-  border: 1px solid var(--platform-border-light);
-}
-
-.platform-theme-dialog .el-radio__input.is-checked + .el-radio__label {
-  color: var(--platform-ink) !important;
-}
-
-.platform-theme-dialog .el-radio__inner {
-  border-color: var(--platform-border-input) !important;
-  background: var(--platform-deep-86) !important;
-}
-
-.platform-theme-dialog .el-radio__input.is-checked .el-radio__inner {
-  border-color: var(--platform-border-strong) !important;
-  background: linear-gradient(135deg, var(--platform-accent) 0%, var(--platform-accent-2) 100%) !important;
-}
-
-.platform-theme-dialog .el-radio__input.is-checked .el-radio__inner::after {
-  background: var(--platform-deep) !important;
-}
-
-.platform-theme-dialog .el-switch {
-  --el-switch-on-color: linear-gradient(90deg, var(--platform-accent) 0%, var(--platform-accent-2) 100%);
-  --el-switch-off-color: var(--platform-border);
-}
-
-.platform-theme-dialog .el-switch__core {
-  border-color: var(--platform-border-input) !important;
-  background: var(--platform-deep-86) !important;
-}
-
-.platform-theme-dialog .is-checked .el-switch__core {
-  background: linear-gradient(90deg, var(--platform-accent-85) 0%, var(--platform-accent-88) 100%) !important;
-}
-
-.platform-theme-dialog .el-switch__label,
-.platform-theme-dialog .el-switch__label * {
-  color: var(--platform-ink-dim) !important;
-}
-
-.platform-theme-dialog .el-slider__runway,
-.platform-theme-dialog .el-slider__bar {
-  height: 8px !important;
-  border-radius: 999px;
-}
-
-.platform-theme-dialog .el-slider__runway {
-  background: var(--platform-border-light) !important;
-}
-
-.platform-theme-dialog .el-slider__bar {
-  background: linear-gradient(90deg, var(--platform-accent) 0%, var(--platform-accent-2) 100%) !important;
-}
-
-.platform-theme-dialog .el-slider__button {
-  border: 2px solid var(--platform-border-strong) !important;
-  background: var(--platform-surface) !important;
-  box-shadow: 0 0 0 4px var(--platform-accent-08);
-}
-
-.platform-theme-dialog .el-slider__input {
-  width: 110px !important;
-}
-
-.platform-theme-dialog .el-slider__input .el-input-number__wrapper {
-  background: var(--platform-deep-86) !important;
-}
-
-.platform-theme-dialog .el-collapse-item__header,
-.platform-theme-dialog .el-collapse-item__wrap {
-  background: transparent !important;
-  border-color: var(--platform-border-light) !important;
-}
-
-.platform-theme-dialog .el-collapse-item__header {
-  min-height: 52px;
-  padding: 0 14px;
-  border-radius: 16px;
-  background: var(--platform-surface-xlight) !important;
-  transition: border-color 0.2s ease, background 0.2s ease;
-}
-
-.platform-theme-dialog .el-collapse-item__header.is-active,
-.platform-theme-dialog .el-collapse-item__header:hover {
-  border-color: var(--platform-border-strong) !important;
-  background: linear-gradient(90deg, var(--platform-accent-08) 0%, var(--platform-accent-14) 100%) !important;
-}
-
-.platform-theme-dialog .el-collapse-item__content {
-  padding: 18px 8px 8px;
-}
-
-.platform-theme-dialog .el-button:not(.is-plain) {
-  border-color: transparent !important;
-}
-
-.platform-theme-dialog .el-button--default {
-  background: var(--platform-surface-68) !important;
-  border-color: var(--platform-border) !important;
-  color: var(--platform-ink) !important;
-}
-
-.platform-theme-dialog .el-button--default:hover,
-.platform-theme-dialog .el-button--default:focus {
-  background: var(--platform-surface-80) !important;
-  border-color: var(--platform-border-strong) !important;
-  color: var(--platform-ink) !important;
-}
-
-.platform-theme-dialog .el-button--primary {
-  background: linear-gradient(90deg, var(--platform-accent) 0%, var(--platform-accent-2) 100%) !important;
-  box-shadow: 0 12px 28px var(--platform-accent-22);
-  color: var(--platform-deep) !important;
-}
-
-.platform-theme-dialog .el-popconfirm__main,
-.platform-theme-dialog .el-popconfirm__action {
-  color: var(--platform-ink) !important;
-}
-
-@media (max-width: 768px) {
-  .platform-theme-page {
-    padding: 16px;
-  }
-
-  .platform-theme-page .filter-container.platform-theme-toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: stretch;
-    gap: 12px;
-    padding: 14px;
-  }
-
-  .platform-theme-page .filter-container.platform-theme-toolbar .filter-item {
-    margin-right: 0 !important;
-    margin-bottom: 0 !important;
-  }
-
-  .platform-theme-page .filter-container.platform-theme-toolbar .filter-item.search-input,
-  .platform-theme-page .filter-container.platform-theme-toolbar .filter-item.owner-input,
-  .platform-theme-page .filter-container.platform-theme-toolbar .filter-item.role-select,
-  .platform-theme-page .filter-container.platform-theme-toolbar .filter-item.group-select {
-    width: 100% !important;
-    flex: 1 1 100%;
-  }
-
-  .platform-theme-page .filter-container.platform-theme-toolbar .filter-item.action-btn,
-  .platform-theme-page .filter-container.platform-theme-toolbar .filter-item.action-btn-secondary {
-    flex: 1 1 calc(50% - 6px);
-    width: calc(50% - 6px) !important;
-    min-width: 0 !important;
-    height: 40px !important;
-    padding: 0 14px !important;
-    border-radius: 12px !important;
-    justify-content: center;
-  }
-
-  .platform-theme-page .filter-container.platform-theme-toolbar .filter-item.action-btn .el-icon,
-  .platform-theme-page .filter-container.platform-theme-toolbar .filter-item.action-btn-secondary .el-icon {
-    margin-right: 6px;
-  }
-
-  .platform-theme-page .filter-container.platform-theme-toolbar .filter-item.view-switch,
-  .platform-theme-page .filter-container.platform-theme-toolbar .filter-item.status-switch {
-    width: calc(50% - 6px) !important;
-    flex: 1 1 calc(50% - 6px);
-    min-width: 0 !important;
-    justify-content: flex-start;
-    padding: 0 2px;
-  }
-
-  .platform-theme-page .filter-container.platform-theme-toolbar .el-input,
-  .platform-theme-page .filter-container.platform-theme-toolbar .el-select {
-    width: 100% !important;
-  }
-
-  .platform-theme-page .filter-container.platform-theme-toolbar .el-input__wrapper,
-  .platform-theme-page .filter-container.platform-theme-toolbar .el-select__wrapper {
-    min-height: 40px;
-    padding-left: 12px;
-    padding-right: 12px;
-    border-radius: 12px !important;
-  }
-
-  .platform-theme-page .filter-container.platform-theme-toolbar .el-switch__label {
-    flex: initial;
-  }
-
-  .platform-theme-page .filter-container.platform-theme-toolbar .el-switch__label--right {
-    text-align: left;
-  }
-
-  .platform-theme-page .filter-container,
-  .platform-theme-page .table-shell,
-  .platform-theme-page .pagination-container,
-  .platform-theme-page .box-item {
-    border-radius: 18px;
-  }
-
-  .platform-theme-page .pagination-container {
-    padding: 14px 12px;
-  }
-
-  .platform-theme-page .pagination-container .el-pagination {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 10px 8px;
-  }
-}
+// ---------------------------------------------------------------------------
+// Message Box
+// ---------------------------------------------------------------------------
 
 .el-message-box {
-  --el-messagebox-bg-color: var(--platform-deep-98) !important;
+  --el-messagebox-bg-color: var(--platform-surface) !important;
   --el-messagebox-border-color: var(--platform-border) !important;
-  background: var(--platform-shell) !important;
+  background: var(--platform-surface) !important;
   border: 1px solid var(--platform-border) !important;
-  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--platform-accent-08) inset !important;
-  border-radius: 20px !important;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5) !important;
+  border-radius: 18px !important;
+
+  .el-message-box__title {
+    color: var(--platform-ink) !important;
+    font-weight: 600;
+  }
+
+  .el-message-box__content {
+    color: var(--platform-ink-dim) !important;
+  }
+
+  .el-message-box__btns {
+    gap: 10px;
+
+    .el-button {
+      border-radius: 9999px;
+      min-width: 84px;
+    }
+  }
 }
 
-.el-message-box__title {
-  color: var(--platform-ink) !important;
-}
-
-.el-message-box__content {
-  color: var(--platform-ink-dim) !important;
-}
-
-.el-message-box__headerbtn .el-message-box__close {
-  color: var(--platform-ink-dim) !important;
-}
-
-.el-message-box__headerbtn:hover .el-message-box__close {
-  color: var(--platform-accent) !important;
-}
-
-.el-message-box__status {
-  color: var(--platform-ink-dim) !important;
-}
-
-.el-message-box__status.el-icon-warning,
-.el-message-box__status.el-icon-warning::before {
-  color: var(--platform-accent-2) !important;
-}
-
-.el-message-box__btns {
-  gap: 12px;
-}
-
-.el-message-box__btns .el-button {
-  border-radius: 12px;
-  min-width: 88px;
-}
-
-.el-message-box__btns .el-button--primary {
-  background: linear-gradient(90deg, var(--platform-accent) 0%, var(--platform-accent-2) 100%) !important;
-  border-color: transparent !important;
-  color: var(--platform-deep) !important;
-  font-weight: 700;
-}
-
-.el-message-box__btns .el-button--primary:hover {
-  opacity: 0.88;
-}
-
-.el-message-box__btns .el-button--default {
-  background: var(--platform-surface-68) !important;
-  border-color: var(--platform-border) !important;
-  color: var(--platform-ink-dim) !important;
-}
-
-.el-message-box__btns .el-button--default:hover {
-  background: var(--platform-surface-80) !important;
-  border-color: var(--platform-border-strong) !important;
-  color: var(--platform-ink) !important;
-}
-
-.el-message-box__wrapper.is-message-box {
-  background: var(--platform-deep-98) !important;
-  backdrop-filter: blur(8px);
-}
+// ---------------------------------------------------------------------------
+// Theme Picker Dropdown
+// ---------------------------------------------------------------------------
 
 .theme-option {
   display: flex;
@@ -919,11 +603,10 @@ body, html {
   width: 100%;
 
   .theme-option-icon {
-    font-size: 16px;
-    width: 24px;
-    min-width: 24px;
+    font-size: 15px;
+    width: 22px;
+    min-width: 22px;
     text-align: center;
-    flex-shrink: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -931,11 +614,37 @@ body, html {
 
   .theme-option-name {
     flex: 1;
+    font-size: 13px;
   }
 
   .theme-check {
     flex-shrink: 0;
     margin-left: auto;
     color: var(--platform-accent);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Responsive Adjustments
+// ---------------------------------------------------------------------------
+
+@media (max-width: 768px) {
+  .platform-theme-page {
+    padding: 14px;
+  }
+
+  .platform-theme-page .filter-container {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .platform-theme-page .filter-container .filter-item {
+    margin-right: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  .platform-theme-page .pagination-container {
+    padding: 12px;
+    justify-content: center;
   }
 }
