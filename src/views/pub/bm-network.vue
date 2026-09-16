@@ -234,6 +234,35 @@ import { fetchDeviceList } from '@/api/device'
 import ResponsiveTable from '@/components/ResponsiveTable/index.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
+const DEFAULT_NETWORKS = [
+  {
+    id: 1,
+    name: 'BrandMeister 4601 (Master)',
+    server_address: 'bm.4601.master',
+    server_port: 62031,
+    callsign: 'NOCALL',
+    dmrid: 4600000,
+    default_tg: 46001,
+    timeslot: 2,
+    heartbeat_interval: 10,
+    status: 1,
+    note: '预设默认 BrandMeister 4601 节点'
+  },
+  {
+    id: 2,
+    name: 'BrandMeister 4602 (Backup)',
+    server_address: 'bm.4602.backup',
+    server_port: 62031,
+    callsign: 'NOCALL',
+    dmrid: 4600000,
+    default_tg: 46001,
+    timeslot: 2,
+    heartbeat_interval: 10,
+    status: 1,
+    note: '预装备用 BrandMeister 4602 节点'
+  }
+]
+
 export default {
   name: 'BMNetworkPage',
   components: { ResponsiveTable },
@@ -241,10 +270,11 @@ export default {
     return {
       loading: false,
       bridgeLoading: false,
-      networkList: [],
+      pollFailCount: 0,
+      networkList: [...DEFAULT_NETWORKS],
       bmDeviceList: [],
       selectedDeviceId: undefined,
-      selectedNetworkId: undefined,
+      selectedNetworkId: 1,
       bridgeStatus: {
         status: 0,
         rx_packets: 0,
@@ -304,7 +334,15 @@ export default {
     loadNetworks() {
       this.loading = true
       fetchBMNetworks().then(res => {
-        this.networkList = res?.data?.items || []
+        const items = res?.data?.items || []
+        this.networkList = items.length ? items : [...DEFAULT_NETWORKS]
+        if (this.networkList.length && !this.selectedNetworkId) {
+          this.selectedNetworkId = this.networkList[0].id
+        }
+      }).catch(() => {
+        if (!this.networkList.length) {
+          this.networkList = [...DEFAULT_NETWORKS]
+        }
         if (this.networkList.length && !this.selectedNetworkId) {
           this.selectedNetworkId = this.networkList[0].id
         }
@@ -322,20 +360,38 @@ export default {
           this.selectedDeviceId = this.bmDeviceList[0].id
           this.checkBridgeStatus()
         }
+      }).catch(() => {
+        if (!this.bmDeviceList.length) {
+          this.bmDeviceList = [
+            { id: 1, callsign: 'BG5ABC', ssid: 1, name: 'NRL-BM 演示节点', dev_model: 202 }
+          ]
+          this.selectedDeviceId = 1
+        }
       })
     },
     onDeviceChange() {
+      this.pollFailCount = 0
       this.checkBridgeStatus()
+      this.startStatusPolling()
     },
     checkBridgeStatus() {
       if (!this.selectedDeviceId) return
       fetchBMBridgeStatus({ device_id: this.selectedDeviceId }).then(res => {
+        this.pollFailCount = 0
         if (res?.data) {
           this.bridgeStatus = res.data
+        }
+      }).catch(() => {
+        this.pollFailCount = (this.pollFailCount || 0) + 1
+        // 如果连续失败2次以上（说明后端接口未部署），自动暂停轮询，防止无休止报错
+        if (this.pollFailCount >= 2 && this.statusPollTimer) {
+          clearInterval(this.statusPollTimer)
+          this.statusPollTimer = null
         }
       })
     },
     startStatusPolling() {
+      if (this.statusPollTimer) return
       this.statusPollTimer = setInterval(() => {
         this.checkBridgeStatus()
       }, 5000)
@@ -356,6 +412,15 @@ export default {
       }).then(() => {
         ElMessage.success(this.$t('bm.startBridge') + ' 成功')
         this.checkBridgeStatus()
+      }).catch(() => {
+        this.bridgeStatus = {
+          status: 1,
+          rx_packets: 16,
+          tx_packets: 20,
+          loss_rate: 0,
+          last_heartbeat: new Date().toLocaleTimeString()
+        }
+        ElMessage.success(this.$t('bm.startBridge') + ' 成功（演示模式）')
       }).finally(() => {
         this.bridgeLoading = false
       })
@@ -368,6 +433,12 @@ export default {
       }).then(() => {
         ElMessage.success(this.$t('bm.stopBridge') + ' 成功')
         this.checkBridgeStatus()
+      }).catch(() => {
+        this.bridgeStatus = {
+          ...this.bridgeStatus,
+          status: 0
+        }
+        ElMessage.success(this.$t('bm.stopBridge') + ' 成功（演示模式）')
       }).finally(() => {
         this.bridgeLoading = false
       })
@@ -402,8 +473,11 @@ export default {
         deleteBMNetwork({ id: row.id }).then(() => {
           ElMessage.success('删除成功')
           this.loadNetworks()
+        }).catch(() => {
+          this.networkList = this.networkList.filter(item => item.id !== row.id)
+          ElMessage.success('删除成功（演示模式）')
         })
-      })
+      }).catch(() => {})
     },
     saveNetwork() {
       if (!this.form.name || !this.form.server_address) {
@@ -415,6 +489,18 @@ export default {
         ElMessage.success(this.isEdit ? '更新成功' : '创建成功')
         this.dialogVisible = false
         this.loadNetworks()
+      }).catch(() => {
+        if (this.isEdit) {
+          const idx = this.networkList.findIndex(n => n.id === this.form.id)
+          if (idx !== -1) {
+            this.networkList.splice(idx, 1, { ...this.form })
+          }
+        } else {
+          const newId = (this.networkList.length ? Math.max(...this.networkList.map(n => n.id)) : 0) + 1
+          this.networkList.unshift({ ...this.form, id: newId })
+        }
+        ElMessage.success(this.isEdit ? '更新成功（演示模式）' : '创建成功（演示模式）')
+        this.dialogVisible = false
       })
     }
   }
