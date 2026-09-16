@@ -136,9 +136,6 @@ export default {
   name: 'OperatorLogPage',
   components: { Pagination },
   directives: { waves },
-  computed: {
-    ...mapState(useAppStore, ['device']),
-  },
   data() {
     return {
       tableKey: 0,
@@ -159,6 +156,9 @@ export default {
         ]
       }
     }
+  },
+  computed: {
+    ...mapState(useAppStore, ['device'])
   },
   created() {
     this.showtable = this.device !== 'mobile'

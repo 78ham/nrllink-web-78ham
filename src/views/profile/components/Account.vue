@@ -147,9 +147,6 @@ export default {
   computed: {
     ...mapState(useAppStore, ['device'])
   },
-  created() {
-    this.syncForm()
-  },
   watch: {
     user: {
       handler() {
@@ -158,6 +155,9 @@ export default {
       deep: true,
       immediate: true
     }
+  },
+  created() {
+    this.syncForm()
   },
   methods: {
     ...mapActions(useUserStore, ['getInfo']),
@@ -175,7 +175,7 @@ export default {
       }
     },
     submit() {
-      this.$refs.formRef.validate(async (valid) => {
+      this.$refs.formRef.validate(async(valid) => {
         if (!valid) {
           return
         }

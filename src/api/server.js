@@ -40,12 +40,10 @@ export function deleteServer(data) {
   })
 }
 
-
-
 export function registerServer(data) {
- return request({
-  url: '/server/register',
-  method: 'post',
-  data
- })
+  return request({
+    url: '/server/register',
+    method: 'post',
+    data
+  })
 }

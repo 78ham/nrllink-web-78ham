@@ -6,9 +6,9 @@ export const DevTypeOptions = [
   { id: 4, name: 'WEB' }
 ]
 
-//1-99为硬件设备，100-199为软件 APP，200-299为服务器端
+// 1-99为硬件设备，100-199为软件 APP，200-299为服务器端
 export const DevModelOptions = [
-//1-99为硬件设备，100-199为软件 APP，200-299为服务器端
+// 1-99为硬件设备，100-199为软件 APP，200-299为服务器端
   { id: 0, name: '未知' },
   { id: 1, name: 'NRL-2100' },
   { id: 2, name: 'NRL-2200' },
@@ -48,34 +48,30 @@ export const DevModelOptions = [
   { id: 50, name: '海能达中继' },
   { id: 55, name: 'UVE5' },
 
+  // BG4SF作品
+  { id: 86, name: 'BG4SF-Cottell' }, // 开拓者
+  { id: 68, name: 'BG4SF-Zeenow' }, // 指南者
+  { id: 88, name: 'BG4SF-Leapower' }, // 领跑者
 
-
-//BG4SF作品
-  { id: 86, name: 'BG4SF-Cottell' },//开拓者
-  { id: 68, name: 'BG4SF-Zeenow' },//指南者
-  { id: 88, name: 'BG4SF-Leapower' },//领跑者
-
-
-
-//BA4QAO作品
+  // BA4QAO作品
   { id: 60, name: 'BA4QAO-ESP32' },
 
-//BD4VKI作品
+  // BD4VKI作品
   { id: 66, name: 'BD4VKI-ESP32' },
 
-//BI4UMD作品
+  // BI4UMD作品
   { id: 70, name: 'BI4UMD-ESP32' },
 
-//BG4QG作品
+  // BG4QG作品
   { id: 80, name: 'BG4QG-ESP32' },
 
-//BH6BBH作品
+  // BH6BBH作品
   { id: 90, name: 'BH6BBH-ESP32' },
 
-//BH4TIH公网对讲
+  // BH4TIH公网对讲
   { id: 99, name: 'BH4TIH-ESP32' },
 
-//软件端
+  // 软件端
   { id: 100, name: 'NRL-微信小程序' },
   { id: 101, name: 'NRL-73HAM安卓' },
   { id: 102, name: 'NR工具集-IOS' },
@@ -87,15 +83,14 @@ export const DevModelOptions = [
   { id: 109, name: 'NRL-win-BG5FOX' },
   { id: 111, name: 'NRL-BH6BBH' },
   { id: 119, name: 'NRL-73HAM Pro 安卓' },
- 
 
-//服务器端
+  // 服务器端
 
   { id: 200, name: 'NRL-Server' },
   { id: 201, name: 'NRL-会议' },
   { id: 202, name: 'NRL-BM' },
- // { id: 221, name: 'BG4SF-FormatConversion-1' },//221和222的数据包长度互转160-500
- // { id: 222, name: 'BG4SF-FormatConversion-2' },//221和222的数据包长度互转160-500
+  // { id: 221, name: 'BG4SF-FormatConversion-1' },//221和222的数据包长度互转160-500
+  // { id: 222, name: 'BG4SF-FormatConversion-2' },//221和222的数据包长度互转160-500
   { id: 250, name: 'NRL-保姆' },
   { id: 255, name: 'NRL-全网互连' }
 

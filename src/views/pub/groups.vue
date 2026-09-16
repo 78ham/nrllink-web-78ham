@@ -92,7 +92,7 @@
       :fullscreen="isNarrowDialogScreen"
       class="platform-theme-dialog"
     >
-      <div class="joined-devices-dialog" v-loading="joinedDevicesLoading">
+      <div v-loading="joinedDevicesLoading" class="joined-devices-dialog">
         <div v-if="joinedDevicesList.length" class="device-pill-list joined-device-list">
           <div v-for="d in joinedDevicesList" :key="d.id" class="text item">
             <div class="tag-wrap">
@@ -497,6 +497,8 @@ export default {
   color: var(--platform-ink-dim);
   display: flex;
   align-items: center;
+  min-height: 44px;
+  touch-action: manipulation;
   justify-content: space-between;
   gap: 12px;
   text-align: left;

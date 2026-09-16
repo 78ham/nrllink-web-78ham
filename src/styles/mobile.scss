@@ -1,9 +1,11 @@
 // Mobile-specific global styles
 // Touch-optimized sizes, responsive utilities, safe-area support
 
+@use './variables.scss' as *;
+
 // === Breakpoint variables ===
-$mobile-breakpoint: 768px;
-$tablet-breakpoint: 1024px;
+$mobile-breakpoint: $bp-mobile;
+$tablet-breakpoint: $bp-tablet;
 
 // === Mobile-first touch targets ===
 @media (pointer: coarse) {
@@ -72,6 +74,24 @@ $tablet-breakpoint: 1024px;
   .app-wrapper {
     // Prevent horizontal overflow
     overflow-x: hidden;
+    // 横屏刘海/挖孔安全区
+    padding-left: var(--sal, 0px);
+    padding-right: var(--sar, 0px);
+  }
+
+  // 防 iOS 聚焦自动缩放：表单控件字号不得小于 16px
+  .el-input__inner,
+  .el-textarea__inner,
+  .el-select__input,
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+
+  // 触摸设备禁用双击缩放延迟
+  a, button, .el-button, [role="button"] {
+    touch-action: manipulation;
   }
 
   // App container mobile padding

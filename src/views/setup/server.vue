@@ -26,183 +26,209 @@
       </button>
     </div>
 
-    <div v-if="showtable" class="table-shell table-responsive">
-      <el-table
-        :key="tableKey"
-        v-loading="listLoading"
-        :data="list"
-        border
-        fit
-        stripe
-        highlight-current-row
-        style="width: 100%"
-        @sort-change="sortChange"
-      >
-        <el-table-column :label="$t('Account.id')" prop="id" sortable="custom" align="center" min-width="80">
-          <template #default="scope">
-            <span>{{ scope.row.id }}</span>
-          </template>
-        </el-table-column>
+    <responsive-table
+      :data="list"
+      :columns="serverColumns"
+      :loading="listLoading"
+      title-key="name"
+      row-key="id"
+      :has-more="list.length < total"
+      @load-more="handleLoadMore"
+      @refresh="getList"
+    >
+      <template #table>
+        <div v-if="showtable" class="table-shell table-responsive">
+          <el-table
+            :key="tableKey"
+            v-loading="listLoading"
+            :data="list"
+            border
+            fit
+            stripe
+            highlight-current-row
+            style="width: 100%"
+            @sort-change="sortChange"
+          >
+            <el-table-column :label="$t('Account.id')" prop="id" sortable="custom" align="center" min-width="80">
+              <template #default="scope">
+                <span>{{ scope.row.id }}</span>
+              </template>
+            </el-table-column>
 
-        <el-table-column :label="$t('server.server_name')" min-width="150" align="center">
-          <template #default="scope">
-            <div class="server-name-cell">{{ scope.row.name || '--' }}</div>
-          </template>
-        </el-table-column>
+            <el-table-column :label="$t('server.server_name')" min-width="150" align="center">
+              <template #default="scope">
+                <div class="server-name-cell">{{ scope.row.name || '--' }}</div>
+              </template>
+            </el-table-column>
 
-        <el-table-column :label="$t('server.server_type')" min-width="130" align="center">
-          <template #default="scope">
-            <el-tag class="server-type-tag">{{ serverTypeLabel(scope.row.server_type) }}</el-tag>
-          </template>
-        </el-table-column>
+            <el-table-column :label="$t('server.server_type')" min-width="130" align="center">
+              <template #default="scope">
+                <el-tag class="server-type-tag">{{ serverTypeLabel(scope.row.server_type) }}</el-tag>
+              </template>
+            </el-table-column>
 
-        <el-table-column :label="$t('server.cpu_type')" min-width="140" align="center">
-          <template #default="scope">
-            <span>{{ scope.row.cpu_type || '--' }}</span>
-          </template>
-        </el-table-column>
+            <el-table-column :label="$t('server.cpu_type')" min-width="140" align="center">
+              <template #default="scope">
+                <span>{{ scope.row.cpu_type || '--' }}</span>
+              </template>
+            </el-table-column>
 
-        <el-table-column :label="$t('server.mem_size')" min-width="150" align="center">
-          <template #default="scope">
-            <div class="metric-pill">{{ scope.row.mem_size || '--' }}</div>
-          </template>
-        </el-table-column>
+            <el-table-column :label="$t('server.mem_size')" min-width="150" align="center">
+              <template #default="scope">
+                <div class="metric-pill">{{ scope.row.mem_size || '--' }}</div>
+              </template>
+            </el-table-column>
 
-        <el-table-column :label="$t('server.input_rate')" min-width="130" align="center">
-          <template #default="scope">
-            <div class="metric-pill">{{ scope.row.input_rate || '--' }}</div>
-          </template>
-        </el-table-column>
+            <el-table-column :label="$t('server.input_rate')" min-width="130" align="center">
+              <template #default="scope">
+                <div class="metric-pill">{{ scope.row.input_rate || '--' }}</div>
+              </template>
+            </el-table-column>
 
-        <el-table-column :label="$t('server.output_rate')" min-width="130" align="center">
-          <template #default="scope">
-            <div class="metric-pill">{{ scope.row.output_rate || '--' }}</div>
-          </template>
-        </el-table-column>
+            <el-table-column :label="$t('server.output_rate')" min-width="130" align="center">
+              <template #default="scope">
+                <div class="metric-pill">{{ scope.row.output_rate || '--' }}</div>
+              </template>
+            </el-table-column>
 
-        <el-table-column :label="$t('server.netcard')" min-width="150" align="center">
-          <template #default="scope">
-            <span>{{ scope.row.netcard || '--' }}</span>
-          </template>
-        </el-table-column>
+            <el-table-column :label="$t('server.netcard')" min-width="150" align="center">
+              <template #default="scope">
+                <span>{{ scope.row.netcard || '--' }}</span>
+              </template>
+            </el-table-column>
 
-        <el-table-column :label="$t('server.iptype')" min-width="120" align="center">
-          <template #default="scope">
-            <el-tag class="server-ip-tag">{{ scope.row.ip_type || '--' }}</el-tag>
-          </template>
-        </el-table-column>
+            <el-table-column :label="$t('server.iptype')" min-width="120" align="center">
+              <template #default="scope">
+                <el-tag class="server-ip-tag">{{ scope.row.ip_type || '--' }}</el-tag>
+              </template>
+            </el-table-column>
 
-        <el-table-column :label="$t('server.ip_addr')" min-width="150" align="center">
-          <template #default="scope">
-            <div class="mono-cell">{{ scope.row.ip_addr || '--' }}</div>
-          </template>
-        </el-table-column>
+            <el-table-column :label="$t('server.ip_addr')" min-width="150" align="center">
+              <template #default="scope">
+                <div class="mono-cell">{{ scope.row.ip_addr || '--' }}</div>
+              </template>
+            </el-table-column>
 
-        <el-table-column label="域名" min-width="180" align="center">
-          <template #default="scope">
-            <div class="mono-cell">{{ scope.row.dns_name || '--' }}</div>
-          </template>
-        </el-table-column>
+            <el-table-column label="域名" min-width="180" align="center">
+              <template #default="scope">
+                <div class="mono-cell">{{ scope.row.dns_name || '--' }}</div>
+              </template>
+            </el-table-column>
 
-        <el-table-column :label="$t('server.udp_port')" min-width="110" align="center">
-          <template #default="scope">
-            <div class="metric-pill">{{ scope.row.udp_port || '--' }}</div>
-          </template>
-        </el-table-column>
+            <el-table-column :label="$t('server.udp_port')" min-width="110" align="center">
+              <template #default="scope">
+                <div class="metric-pill">{{ scope.row.udp_port || '--' }}</div>
+              </template>
+            </el-table-column>
 
-        <el-table-column label="所有者" min-width="110" align="center">
-          <template #default="scope">
-            <span>{{ scope.row.ower_id || '--' }}</span>
-          </template>
-        </el-table-column>
+            <el-table-column label="所有者" min-width="110" align="center">
+              <template #default="scope">
+                <span>{{ scope.row.ower_id || '--' }}</span>
+              </template>
+            </el-table-column>
 
-        <el-table-column label="所有者呼号" min-width="150" align="center">
-          <template #default="scope">
-            <el-tag class="owner-tag">{{ scope.row.ower_callsign || '--' }}</el-tag>
-          </template>
-        </el-table-column>
+            <el-table-column label="所有者呼号" min-width="150" align="center">
+              <template #default="scope">
+                <el-tag class="owner-tag">{{ scope.row.ower_callsign || '--' }}</el-tag>
+              </template>
+            </el-table-column>
 
-        <el-table-column :label="$t('server.status')" min-width="110" align="center">
-          <template #default="scope">
-            <el-tag :class="statusClass(scope.row.status)" class="server-status-tag">
-              {{ statusLabel(scope.row.status) }}
-            </el-tag>
-          </template>
-        </el-table-column>
+            <el-table-column :label="$t('server.status')" min-width="110" align="center">
+              <template #default="scope">
+                <el-tag :class="statusClass(scope.row.status)" class="server-status-tag">
+                  {{ statusLabel(scope.row.status) }}
+                </el-tag>
+              </template>
+            </el-table-column>
 
-        <el-table-column :label="$t('device.createTime')" min-width="160" align="center">
-          <template #default="scope">
-            <span>{{ parseTime(scope.row.create_time) || '--' }}</span>
-          </template>
-        </el-table-column>
+            <el-table-column :label="$t('device.createTime')" min-width="160" align="center">
+              <template #default="scope">
+                <span>{{ parseTime(scope.row.create_time) || '--' }}</span>
+              </template>
+            </el-table-column>
 
-        <el-table-column :label="$t('device.updateTime')" min-width="160" align="center">
-          <template #default="scope">
-            <span>{{ parseTime(scope.row.update_time) || '--' }}</span>
-          </template>
-        </el-table-column>
+            <el-table-column :label="$t('device.updateTime')" min-width="160" align="center">
+              <template #default="scope">
+                <span>{{ parseTime(scope.row.update_time) || '--' }}</span>
+              </template>
+            </el-table-column>
 
-        <el-table-column :label="$t('server.note')" min-width="180" align="center">
-          <template #default="scope">
-            <div class="note-cell">{{ scope.row.note || '--' }}</div>
-          </template>
-        </el-table-column>
+            <el-table-column :label="$t('server.note')" min-width="180" align="center">
+              <template #default="scope">
+                <div class="note-cell">{{ scope.row.note || '--' }}</div>
+              </template>
+            </el-table-column>
 
-        <el-table-column :label="$t('device.bind')" align="center" class-name="small-padding fixed-width" min-width="200">
-          <template #default="{ row }">
-            <el-button size="small" type="primary" plain class="compact-btn server-edit-btn" @click="handleUpdate(row)">
-              {{ $t('device.edit') }}
-            </el-button>
+            <el-table-column :label="$t('device.bind')" align="center" class-name="small-padding fixed-width" min-width="200">
+              <template #default="{ row }">
+                <el-button size="small" type="primary" plain class="compact-btn server-edit-btn" @click="handleUpdate(row)">
+                  {{ $t('device.edit') }}
+                </el-button>
 
-            <el-button size="small" type="danger" plain class="compact-btn server-delete-btn" @click="handleDelete(row)">
-              {{ $t('device.delete') }}
-            </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-    </div>
-
-    <div v-else class="server-card-grid">
-      <article v-for="item in list" :key="item.id" class="server-card">
-        <div class="server-card__header">
-          <div class="server-card__headline">
-            <el-tag size="small" effect="dark" class="server-id-tag">#{{ item.id }}</el-tag>
-            <h3>{{ item.name || '--' }}</h3>
-          </div>
-          <el-tag :class="statusClass(item.status)" class="server-status-tag">{{ statusLabel(item.status) }}</el-tag>
+                <el-button size="small" type="danger" plain class="compact-btn server-delete-btn" @click="handleDelete(row)">
+                  {{ $t('device.delete') }}
+                </el-button>
+              </template>
+            </el-table-column>
+          </el-table>
         </div>
 
-        <div class="server-card__meta">
-          <div class="server-meta-pill">
-            <span class="server-card__label">{{ $t('server.server_type') }}</span>
-            <strong>{{ serverTypeLabel(item.server_type) }}</strong>
-          </div>
-          <div class="server-meta-pill">
-            <span class="server-card__label">{{ $t('server.mem_size') }}</span>
-            <strong>{{ item.mem_size || '--' }}</strong>
-          </div>
-        </div>
+        <div v-else class="server-card-grid">
+          <article v-for="item in list" :key="item.id" class="server-card">
+            <div class="server-card__header">
+              <div class="server-card__headline">
+                <el-tag size="small" effect="dark" class="server-id-tag">#{{ item.id }}</el-tag>
+                <h3>{{ item.name || '--' }}</h3>
+              </div>
+              <el-tag :class="statusClass(item.status)" class="server-status-tag">{{ statusLabel(item.status) }}</el-tag>
+            </div>
 
-        <div class="server-card__body">
-          <div class="server-card__row"><span class="server-card__label">{{ $t('server.cpu_type') }}</span><span class="server-card__value">{{ item.cpu_type || '--' }}</span></div>
-          <div class="server-card__row"><span class="server-card__label">{{ $t('server.input_rate') }}</span><div class="metric-pill">{{ item.input_rate || '--' }}</div></div>
-          <div class="server-card__row"><span class="server-card__label">{{ $t('server.output_rate') }}</span><div class="metric-pill">{{ item.output_rate || '--' }}</div></div>
-          <div class="server-card__row"><span class="server-card__label">{{ $t('server.iptype') }}</span><el-tag class="server-ip-tag">{{ item.ip_type || '--' }}</el-tag></div>
-          <div class="server-card__row"><span class="server-card__label">{{ $t('server.ip_addr') }}</span><span class="server-card__value mono-cell">{{ item.ip_addr || '--' }}</span></div>
-          <div class="server-card__row"><span class="server-card__label">{{ $t('server.dns_name') }}</span><span class="server-card__value mono-cell">{{ item.dns_name || '--' }}</span></div>
-          <div class="server-card__row"><span class="server-card__label">{{ $t('server.udp_port') }}</span><div class="metric-pill">{{ item.udp_port || '--' }}</div></div>
-          <div class="server-card__row"><span class="server-card__label">所有者呼号</span><el-tag class="owner-tag">{{ item.ower_callsign || '--' }}</el-tag></div>
-          <div class="server-card__row"><span class="server-card__label">{{ $t('device.createTime') }}</span><span class="server-card__value">{{ parseTime(item.create_time) || '--' }}</span></div>
-          <div class="server-card__row"><span class="server-card__label">{{ $t('device.updateTime') }}</span><span class="server-card__value">{{ parseTime(item.update_time) || '--' }}</span></div>
-          <div class="server-card__row server-card__row--stack"><span class="server-card__label">{{ $t('server.note') }}</span><p class="server-card__note">{{ item.note || '--' }}</p></div>
-        </div>
+            <div class="server-card__meta">
+              <div class="server-meta-pill">
+                <span class="server-card__label">{{ $t('server.server_type') }}</span>
+                <strong>{{ serverTypeLabel(item.server_type) }}</strong>
+              </div>
+              <div class="server-meta-pill">
+                <span class="server-card__label">{{ $t('server.mem_size') }}</span>
+                <strong>{{ item.mem_size || '--' }}</strong>
+              </div>
+            </div>
 
-        <div class="server-card__actions">
-          <el-button size="small" type="primary" plain class="compact-btn server-edit-btn" @click="handleUpdate(item)">{{ $t('device.edit') }}</el-button>
-          <el-button size="small" type="danger" plain class="compact-btn server-delete-btn" @click="handleDelete(item)">{{ $t('device.delete') }}</el-button>
-        </div>
-      </article>
-    </div>
+            <div class="server-card__body">
+              <div class="server-card__row"><span class="server-card__label">{{ $t('server.cpu_type') }}</span><span class="server-card__value">{{ item.cpu_type || '--' }}</span></div>
+              <div class="server-card__row"><span class="server-card__label">{{ $t('server.input_rate') }}</span><div class="metric-pill">{{ item.input_rate || '--' }}</div></div>
+              <div class="server-card__row"><span class="server-card__label">{{ $t('server.output_rate') }}</span><div class="metric-pill">{{ item.output_rate || '--' }}</div></div>
+              <div class="server-card__row"><span class="server-card__label">{{ $t('server.iptype') }}</span><el-tag class="server-ip-tag">{{ item.ip_type || '--' }}</el-tag></div>
+              <div class="server-card__row"><span class="server-card__label">{{ $t('server.ip_addr') }}</span><span class="server-card__value mono-cell">{{ item.ip_addr || '--' }}</span></div>
+              <div class="server-card__row"><span class="server-card__label">{{ $t('server.dns_name') }}</span><span class="server-card__value mono-cell">{{ item.dns_name || '--' }}</span></div>
+              <div class="server-card__row"><span class="server-card__label">{{ $t('server.udp_port') }}</span><div class="metric-pill">{{ item.udp_port || '--' }}</div></div>
+              <div class="server-card__row"><span class="server-card__label">所有者呼号</span><el-tag class="owner-tag">{{ item.ower_callsign || '--' }}</el-tag></div>
+              <div class="server-card__row"><span class="server-card__label">{{ $t('device.createTime') }}</span><span class="server-card__value">{{ parseTime(item.create_time) || '--' }}</span></div>
+              <div class="server-card__row"><span class="server-card__label">{{ $t('device.updateTime') }}</span><span class="server-card__value">{{ parseTime(item.update_time) || '--' }}</span></div>
+              <div class="server-card__row server-card__row--stack"><span class="server-card__label">{{ $t('server.note') }}</span><p class="server-card__note">{{ item.note || '--' }}</p></div>
+            </div>
+
+            <div class="server-card__actions">
+              <el-button size="small" type="primary" plain class="compact-btn server-edit-btn" @click="handleUpdate(item)">{{ $t('device.edit') }}</el-button>
+              <el-button size="small" type="danger" plain class="compact-btn server-delete-btn" @click="handleDelete(item)">{{ $t('device.delete') }}</el-button>
+            </div>
+          </article></div></template>
+
+      <template #badge="{ row }">
+        <el-tag :class="statusClass(row.status)" class="server-status-tag">
+          {{ statusLabel(row.status) }}
+        </el-tag>
+      </template>
+
+      <template #actions="{ row }">
+        <el-button size="small" type="primary" plain class="compact-btn server-edit-btn" @click="handleUpdate(row)">
+          {{ $t('device.edit') }}
+        </el-button>
+        <el-button size="small" type="danger" plain class="compact-btn server-delete-btn" @click="handleDelete(row)">
+          {{ $t('device.delete') }}
+        </el-button>
+      </template>
+    </responsive-table>
 
     <el-dialog v-model="dialogFormVisible" :title="textMap[dialogStatus]" class="platform-theme-dialog setup-server-dialog">
       <el-form
@@ -285,14 +311,23 @@ import { ServerTypeOptions } from '@/utils/system'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { mapState } from 'pinia'
 import { useAppStore } from '@/store/modules/app'
+import ResponsiveTable from '@/components/ResponsiveTable/index.vue'
 
 export default {
   name: 'SetupServerPage',
+  components: { ResponsiveTable },
   directives: { waves },
   data() {
     return {
       tableKey: 0,
       list: [],
+      serverColumns: [
+        { prop: 'server_type', label: '节点类型', formatter: (row) => this.serverTypeLabel(row.server_type) },
+        { prop: 'ip_addr', label: 'IP地址', formatter: (row) => row.ip_addr || row.dns_name || '--' },
+        { prop: 'udp_port', label: 'UDP端口' },
+        { prop: 'ower_callsign', label: '所有者呼号' },
+        { prop: 'mem_size', label: '内存' }
+      ],
       devicesOptions: [],
       ServerTypeOptions,
       total: 0,
@@ -328,6 +363,11 @@ export default {
     ...mapState(useAppStore, ['device'])
   },
 
+  created() {
+    this.showtable = this.device !== 'mobile'
+    this.getList()
+  },
+
   methods: {
     checkPermission,
     fetchServerList,
@@ -360,6 +400,9 @@ export default {
     },
     handleFilter() {
       this.listQuery.page = 1
+      this.getList()
+    },
+    handleLoadMore() {
       this.getList()
     },
     sortChange(data) {
@@ -459,11 +502,6 @@ export default {
           ElMessage.info('已取消删除')
         })
     }
-  },
-
-  created() {
-    this.showtable = this.device !== 'mobile'
-    this.getList()
   }
 }
 </script>

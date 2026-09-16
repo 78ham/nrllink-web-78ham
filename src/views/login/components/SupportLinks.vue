@@ -32,7 +32,7 @@
         </a>
       </li>
 
-            <li class="special-server">
+      <li class="special-server">
         <a :href="'https://github.com/hicaoc/nrl-pulse/releases'" target="_blank" class="server-link special-link">
           <div class="special-text">NRL桌面版(MacOS,Windows,Linux)</div>
         </a>

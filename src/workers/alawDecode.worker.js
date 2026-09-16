@@ -3,7 +3,7 @@ const alawDecodeTable = new Int16Array(256)
 function buildAlawTable() {
   for (let i = 0; i < 256; i++) {
     const code = i ^ 0x55
-    let exponent = (code & 0x70) >> 4
+    const exponent = (code & 0x70) >> 4
     let mantissa = code & 0x0f
 
     if (exponent > 0) {

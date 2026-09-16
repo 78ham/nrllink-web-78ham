@@ -6,8 +6,9 @@
       :to="tab.path"
       class="tabbar-item"
       :class="{ active: isActive(tab.path) }"
+      :aria-current="isActive(tab.path) ? 'page' : null"
     >
-      <span class="tabbar-icon">{{ tab.icon }}</span>
+      <svg-icon :icon-class="tab.iconClass" class="tabbar-icon" />
       <span class="tabbar-label">{{ $t(tab.label) || tab.fallback }}</span>
     </router-link>
   </nav>
@@ -27,11 +28,11 @@ export default {
     const isMobile = computed(() => appStore.device === 'mobile')
 
     const tabs = [
-      { path: '/dashboard', icon: '🏠', label: 'route.dashboard', fallback: '首页' },
-      { path: '/public/totaldevices', icon: '📡', label: 'route.totaldevices', fallback: '设备' },
-      { path: '/public/groups', icon: '👥', label: 'route.grouproom', fallback: '群组' },
-      { path: '/public/relay', icon: '🗼', label: 'route.relay', fallback: '中继' },
-      { path: '/profile/index', icon: '👤', label: 'route.profile', fallback: '我的' }
+      { path: '/dashboard', iconClass: 'dashboard', label: 'route.dashboard', fallback: '首页' },
+      { path: '/public/totaldevices', iconClass: 'table', label: 'route.totaldevices', fallback: '设备' },
+      { path: '/public/groups', iconClass: 'peoples', label: 'route.grouproom', fallback: '群组' },
+      { path: '/public/relay', iconClass: 'international', label: 'route.relay', fallback: '中继' },
+      { path: '/profile/index', iconClass: 'user', label: 'route.profile', fallback: '我的' }
     ]
 
     const isActive = (path) => {
@@ -104,8 +105,10 @@ export default {
 }
 
 .tabbar-icon {
-  font-size: 22px;
-  line-height: 1;
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+  fill: currentColor;
   transition: transform 0.2s;
 }
 

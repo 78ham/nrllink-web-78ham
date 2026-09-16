@@ -1,49 +1,58 @@
 import { pinia } from '@/store'
 import { useAppStore } from '@/store/modules/app'
+import { detectDevice, DEVICE } from '@/utils/device'
 
-const { body } = document
-const WIDTH = 992 // refer to Bootstrap's responsive design
+let rafId = null
 
 export default {
   watch: {
-    $route(route) {
-      if (this.device === 'mobile' && this.sidebar.opened) {
-        const appStore = useAppStore(pinia)
+    $route() {
+      const appStore = useAppStore(pinia)
+      if (this.device === DEVICE.MOBILE && appStore.sidebar.opened) {
         appStore.closeSideBar({ withoutAnimation: false })
       }
     }
   },
   beforeMount() {
-    window.addEventListener('resize', this.$_resizeHandler)
+    window.addEventListener('resize', this.$_resizeHandler, { passive: true })
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', this.$_resizeHandler, { passive: true })
+    }
   },
   beforeUnmount() {
     window.removeEventListener('resize', this.$_resizeHandler)
-  },
-  mounted() {
-    const isMobile = this.$_isMobile()
-    if (isMobile) {
-      const appStore = useAppStore(pinia)
-      appStore.toggleDevice('mobile')
-      appStore.closeSideBar({ withoutAnimation: true })
+    if (window.visualViewport) {
+      window.visualViewport.removeEventListener('resize', this.$_resizeHandler)
+    }
+    if (rafId) {
+      window.cancelAnimationFrame(rafId)
+      rafId = null
     }
   },
+  mounted() {
+    this.$_applyDevice()
+  },
   methods: {
-    // use $_ for mixins properties
-    // https://vuejs.org/v2/style-guide/index.html#Private-property-names-essential
-    $_isMobile() {
-      const rect = body.getBoundingClientRect()
-      return rect.width - 1 < WIDTH
+    $_currentDevice() {
+      return detectDevice()
+    },
+    $_applyDevice() {
+      const appStore = useAppStore(pinia)
+      const device = this.$_currentDevice()
+      appStore.toggleDevice(device)
+      if (device === DEVICE.MOBILE) {
+        appStore.closeSideBar({ withoutAnimation: true })
+      } else if (device === DEVICE.TABLET) {
+        appStore.closeSideBar({ withoutAnimation: true })
+      }
     },
     $_resizeHandler() {
-      if (!document.hidden) {
-        const isMobile = this.$_isMobile()
-        const appStore = useAppStore(pinia)
-        appStore.toggleDevice(isMobile ? 'mobile' : 'desktop')
-
-        if (isMobile) {
-          appStore.closeSideBar({ withoutAnimation: true })
-        }
-      }
+      if (document.hidden) return
+      if (rafId) return
+      rafId = window.requestAnimationFrame(() => {
+        rafId = null
+        this.$_applyDevice()
+      })
     }
   }
 }

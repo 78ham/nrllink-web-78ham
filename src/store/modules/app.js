@@ -12,6 +12,11 @@ export const useAppStore = defineStore('app', {
     language: getLanguage(),
     size: Cookies.get('size') || 'medium'
   }),
+  getters: {
+    isMobile: (state) => state.device === 'mobile',
+    isTablet: (state) => state.device === 'tablet',
+    isDesktop: (state) => state.device === 'desktop'
+  },
   actions: {
     toggleSideBar() {
       this.sidebar.opened = !this.sidebar.opened

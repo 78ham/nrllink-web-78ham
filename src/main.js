@@ -39,8 +39,7 @@ import '@/fonts/manrope.css' // local Manrope font
 
 import App from './App.vue'
 import router from './router'
-import { setupStore } from './store'
-import { pinia } from './store'
+import { setupStore, pinia } from './store'
 import { useSettingsStore } from '@/store/modules/settings'
 
 import i18n from './lang' // internationalization
@@ -48,20 +47,11 @@ import { setupIcons } from './icons' // icon
 import './permission' // permission control
 import { setupErrorLog } from './utils/error-log' // error log
 import { setElementPlusTheme, setPlatformTheme } from './utils/theme'
+import { initPerfMonitoring } from './utils/perf'
 
 import * as filters from './filters' // global filters
 
-// import Print from 'vue-print-nb'
-// import 'default-passive-events'
-
-/**
- * If you don't want to use mock-server
- * you want to use mockjs for request interception
- * you can execute:
- *
- * import { mockXHR } from '../mock'
- * mockXHR()
- */
+initPerfMonitoring()
 
 const app = createApp(App)
 

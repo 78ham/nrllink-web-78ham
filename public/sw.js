@@ -1,7 +1,8 @@
-const CACHE_NAME = 'nrllink-v1'
+const CACHE_NAME = 'nrllink-v2'
 const STATIC_ASSETS = [
   '/',
   '/index.html',
+  '/offline.html',
   '/favicon.ico'
 ]
 
@@ -49,7 +50,7 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(request, clone))
           return response
         })
-        .catch(() => caches.match(request).then((r) => r || caches.match('/index.html')))
+        .catch(() => caches.match(request).then((r) => r || caches.match('/index.html') || caches.match('/offline.html')))
     )
     return
   }

@@ -38,3 +38,4 @@ docker-compose.override.yml
 .env
 .ghcr-token
 udphub.yaml
+docs/前端大升级实施方案.md

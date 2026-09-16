@@ -16,11 +16,6 @@
           <span v-if="callsign" class="user-pill-callsign">{{ callsign }}</span>
         </div>
 
-        <router-link to="/chat/index" class="nav-chat-pill right-menu-item hover-effect desktop-only">
-          <span class="nav-chat-dot" />
-          <span class="nav-chat-label">互联对讲</span>
-        </router-link>
-
         <button
           v-if="billingEnabled"
           class="expire-toggle right-menu-item hover-effect desktop-only"
@@ -68,9 +63,6 @@
               <router-link to="/dashboard">
                 <el-dropdown-item>{{ $t('navbar.dashboard') }}</el-dropdown-item>
               </router-link>
-              <router-link to="/chat/index">
-                <el-dropdown-item>互联对讲</el-dropdown-item>
-              </router-link>
 
               <el-dropdown-item divided>
                 <span style="display:block;" @click="logout">{{ $t('navbar.logOut') }}</span>
@@ -92,10 +84,6 @@
       </template>
 
       <template v-if="device==='mobile'">
-        <router-link to="/chat/index" class="nav-chat-pill right-menu-item hover-effect">
-          <span class="nav-chat-dot" />
-          <span class="nav-chat-label">对讲</span>
-        </router-link>
         <img :src="avatar+'?imageView2/1/w/80/h/80'" class="mobile-avatar" alt="Avatar">
         <button class="lang-toggle right-menu-item hover-effect" @click="toggleLanguage">
           {{ language === 'zh' ? 'EN' : '中' }}
@@ -129,11 +117,6 @@ export default {
     Check,
     SwitchButton,
     CaretBottom
-  },
-  data() {
-    return {
-      themes
-    }
   },
   setup() {
     const appStore = useAppStore(pinia)
@@ -182,7 +165,7 @@ export default {
       setPlatformTheme(key)
     }
 
-    const logout = async () => {
+    const logout = async() => {
       try {
         await userStore.logout()
       } catch (e) {
@@ -212,6 +195,11 @@ export default {
       switchTheme,
       logout,
       goRenew
+    }
+  },
+  data() {
+    return {
+      themes
     }
   }
 }
@@ -336,41 +324,6 @@ export default {
       .user-pill-callsign {
         color: var(--platform-accent);
         font-weight: 700;
-      }
-    }
-
-    .nav-chat-pill {
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 0 12px;
-      height: 32px;
-      border-radius: 9999px;
-      background: var(--platform-accent-10);
-      border: 1px solid var(--platform-border-accent);
-      color: var(--platform-accent);
-      font-size: 12.5px;
-      font-weight: 600;
-      transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
-
-      .nav-chat-dot {
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: #10b981;
-        box-shadow: 0 0 6px #10b981;
-      }
-
-      &:hover {
-        background: var(--platform-accent);
-        color: #ffffff;
-        transform: translateY(-1px);
-
-        .nav-chat-dot {
-          background: #ffffff;
-          box-shadow: 0 0 6px #ffffff;
-        }
       }
     }
 

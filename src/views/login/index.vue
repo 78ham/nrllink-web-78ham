@@ -49,21 +49,21 @@
               </el-dropdown-menu>
             </template>
           </el-dropdown>
-        <button
-          v-if="hasHiddenPanels"
-          type="button"
-          class="topbar-button ghost panel-icon-button"
-          :aria-label="$t('login.showAllPanels')"
-          :title="$t('login.showAllPanels')"
-          @click="restoreAllPanels"
-        >
-          <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
-            <path d="M4 7a3 3 0 0 1 3-3h3a1 1 0 1 1 0 2H7a1 1 0 0 0-1 1v3a1 1 0 1 1-2 0V7Zm10-3a1 1 0 0 1 1-1h2a3 3 0 0 1 3 3v2a1 1 0 1 1-2 0V7a1 1 0 0 0-1-1h-2a1 1 0 0 1-1-1ZM5 14a1 1 0 0 1 1 1v2a1 1 0 0 0 1 1h2a1 1 0 1 1 0 2H7a3 3 0 0 1-3-3v-2a1 1 0 0 1 1-1Zm14 0a1 1 0 0 1 1 1v2a3 3 0 0 1-3 3h-3a1 1 0 1 1 0-2h3a1 1 0 0 0 1-1v-2a1 1 0 0 1 1-1ZM9 9h6a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1Zm1 2v2h4v-2h-4Z" />
-          </svg>
-        </button>
-        <button type="button" class="topbar-button ghost" @click="openLoginDialog">{{ $t('login.login') }}</button>
-        <button type="button" class="topbar-button solid" @click="openRegisterDialog">{{ $t('login.register') }}</button>
-      </div>
+          <button
+            v-if="hasHiddenPanels"
+            type="button"
+            class="topbar-button ghost panel-icon-button"
+            :aria-label="$t('login.showAllPanels')"
+            :title="$t('login.showAllPanels')"
+            @click="restoreAllPanels"
+          >
+            <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+              <path d="M4 7a3 3 0 0 1 3-3h3a1 1 0 1 1 0 2H7a1 1 0 0 0-1 1v3a1 1 0 1 1-2 0V7Zm10-3a1 1 0 0 1 1-1h2a3 3 0 0 1 3 3v2a1 1 0 1 1-2 0V7a1 1 0 0 0-1-1h-2a1 1 0 0 1-1-1ZM5 14a1 1 0 0 1 1 1v2a1 1 0 0 0 1 1h2a1 1 0 1 1 0 2H7a3 3 0 0 1-3-3v-2a1 1 0 0 1 1-1Zm14 0a1 1 0 0 1 1 1v2a3 3 0 0 1-3 3h-3a1 1 0 1 1 0-2h3a1 1 0 0 0 1-1v-2a1 1 0 0 1 1-1ZM9 9h6a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1Zm1 2v2h4v-2h-4Z" />
+            </svg>
+          </button>
+          <button type="button" class="topbar-button ghost" @click="openLoginDialog">{{ $t('login.login') }}</button>
+          <button type="button" class="topbar-button solid" @click="openRegisterDialog">{{ $t('login.register') }}</button>
+        </div>
       </div>
     </div>
 
@@ -98,7 +98,7 @@
           <button type="button" class="panel-close" @click.stop="closePanel('left')">×</button>
         </div>
         <div class="panel-content">
-        <support-links @toggle-image="toggleImage" />
+          <support-links @toggle-image="toggleImage" />
         </div>
         <button
           v-if="isDesktopPanels"
@@ -171,7 +171,7 @@
           <button type="button" class="panel-close" @click.stop="closePanel('right')">×</button>
         </div>
         <div class="panel-content">
-        <server-list :list="sortedServerList" />
+          <server-list :list="sortedServerList" />
         </div>
         <button
           v-if="isDesktopPanels"
@@ -307,7 +307,7 @@
         <span v-if="copyright !== ''" class="copyright">{{ copyright }}</span>
       </div>
     </div>
-    </div>
+  </div>
 </template>
 
 <script>

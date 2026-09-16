@@ -6,27 +6,27 @@
 
     <div class="table-responsive">
       <el-table v-loading="loading" :data="list" border fit>
-      <el-table-column label="序号" prop="id" min-width="80" align="center" />
-      <el-table-column label="套餐名称" prop="name" min-width="160" />
-      <el-table-column label="月份" prop="months" min-width="100" align="center" />
-      <el-table-column label="月单价" min-width="120" align="center">
-        <template #default="{ row }">{{ formatMoney(row.unit_price_cents) }}</template>
-      </el-table-column>
-      <el-table-column label="套餐价格" min-width="130" align="center">
-        <template #default="{ row }">{{ formatMoney(row.price_cents) }}</template>
-      </el-table-column>
-      <el-table-column label="状态" min-width="100" align="center">
-        <template #default="{ row }">
-          <el-tag :type="row.status === 1 ? 'success' : 'info'">{{ row.status === 1 ? '启用' : '停用' }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="备注" prop="note" min-width="180" />
-      <el-table-column label="动作" min-width="180" align="center">
-        <template #default="{ row }">
-          <el-button size="small" type="primary" plain @click="handleUpdate(row)">编辑</el-button>
-          <el-button size="small" type="danger" plain @click="handleDelete(row)">停用</el-button>
-        </template>
-      </el-table-column>
+        <el-table-column label="序号" prop="id" min-width="80" align="center" />
+        <el-table-column label="套餐名称" prop="name" min-width="160" />
+        <el-table-column label="月份" prop="months" min-width="100" align="center" />
+        <el-table-column label="月单价" min-width="120" align="center">
+          <template #default="{ row }">{{ formatMoney(row.unit_price_cents) }}</template>
+        </el-table-column>
+        <el-table-column label="套餐价格" min-width="130" align="center">
+          <template #default="{ row }">{{ formatMoney(row.price_cents) }}</template>
+        </el-table-column>
+        <el-table-column label="状态" min-width="100" align="center">
+          <template #default="{ row }">
+            <el-tag :type="row.status === 1 ? 'success' : 'info'">{{ row.status === 1 ? '启用' : '停用' }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="备注" prop="note" min-width="180" />
+        <el-table-column label="动作" min-width="180" align="center">
+          <template #default="{ row }">
+            <el-button size="small" type="primary" plain @click="handleUpdate(row)">编辑</el-button>
+            <el-button size="small" type="danger" plain @click="handleDelete(row)">停用</el-button>
+          </template>
+        </el-table-column>
       </el-table>
     </div>
 
@@ -148,7 +148,7 @@ export default {
     handleDelete(row) {
       ElMessageBox.confirm(`确认停用套餐：${row.name}？`, '提示', {
         type: 'warning'
-      }).then(async () => {
+      }).then(async() => {
         await deleteBillingPackage(row)
         ElMessage.success('已停用')
         this.getList()

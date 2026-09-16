@@ -107,21 +107,6 @@ export default {
       default: false
     }
   },
-  computed: {
-    isEmbedded() {
-      if (this.embedded) {
-        return true
-      }
-      const queryValue = this.$route?.query?.embed
-      if (queryValue === '1' || queryValue === 'true') {
-        return true
-      }
-      if (typeof window === 'undefined') {
-        return false
-      }
-      return window.self !== window.top
-    }
-  },
   data() {
     const validateCallsign = (rule, value, callback) => {
       if (!value || !/^[A-Z0-9]{5,6}$/.test(value)) {
@@ -175,6 +160,21 @@ export default {
       licenseName: '',
       loading: false,
       fileProcessing: false
+    }
+  },
+  computed: {
+    isEmbedded() {
+      if (this.embedded) {
+        return true
+      }
+      const queryValue = this.$route?.query?.embed
+      if (queryValue === '1' || queryValue === 'true') {
+        return true
+      }
+      if (typeof window === 'undefined') {
+        return false
+      }
+      return window.self !== window.top
     }
   },
   methods: {

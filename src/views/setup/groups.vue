@@ -82,7 +82,7 @@
             <el-tag class="owner-callsign-tag">{{ scope.row.callsign || '--' }}</el-tag>
           </template>
         </el-table-column>
- 
+
         <el-table-column :label="$t('device.createTime')" min-width="140" align="center">
           <template #default="scope">
             <span>{{ parseTime(scope.row.create_time) || '--' }}</span>

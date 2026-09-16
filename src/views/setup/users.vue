@@ -65,168 +65,190 @@
       </button>
     </div>
 
-    <div v-if="showtable" class="table-shell table-responsive">
-      <el-table
-        :key="tableKey"
-        v-loading="listLoading"
-        :data="list"
-        border
-        fit
-        highlight-current-row
-        style="width: 100%"
-        @sort-change="sortChange"
-      >
-        <el-table-column :label="$t('employee.id')" prop="id" sortable="custom" align="center" min-width="80">
-          <template #default="scope">
-            <span>{{ scope.row.id }}</span>
-          </template>
-        </el-table-column>
+    <responsive-table
+      :data="list"
+      :columns="userColumns"
+      :loading="listLoading"
+      title-key="callsign"
+      row-key="id"
+      :has-more="list.length < total"
+      @load-more="handleLoadMore"
+      @refresh="getList"
+    >
+      <template #table>
+        <div v-if="showtable" class="table-shell table-responsive">
+          <el-table
+            :key="tableKey"
+            v-loading="listLoading"
+            :data="list"
+            border
+            fit
+            highlight-current-row
+            style="width: 100%"
+            @sort-change="sortChange"
+          >
+            <el-table-column :label="$t('employee.id')" prop="id" sortable="custom" align="center" min-width="80">
+              <template #default="scope">
+                <span>{{ scope.row.id }}</span>
+              </template>
+            </el-table-column>
 
-        <el-table-column :label="$t('employee.callsign')" min-width="150" align="center">
-          <template #default="scope">
-            <el-tag class="callsign-tag">{{ scope.row.callsign || '--' }}</el-tag>
-          </template>
-        </el-table-column>
+            <el-table-column :label="$t('employee.callsign')" min-width="150" align="center">
+              <template #default="scope">
+                <el-tag class="callsign-tag">{{ scope.row.callsign || '--' }}</el-tag>
+              </template>
+            </el-table-column>
 
-        <el-table-column :label="$t('employee.dmrid')" min-width="120" align="center">
-          <template #default="scope">
-            <div class="metric-pill">{{ scope.row.dmrid || '--' }}</div>
-          </template>
-        </el-table-column>
+            <el-table-column :label="$t('employee.dmrid')" min-width="120" align="center">
+              <template #default="scope">
+                <div class="metric-pill">{{ scope.row.dmrid || '--' }}</div>
+              </template>
+            </el-table-column>
 
-        <el-table-column :label="$t('employee.mdcid')" min-width="120" align="center">
-          <template #default="scope">
-            <div class="metric-pill">{{ scope.row.mdcid || '--' }}</div>
-          </template>
-        </el-table-column>
+            <el-table-column :label="$t('employee.mdcid')" min-width="120" align="center">
+              <template #default="scope">
+                <div class="metric-pill">{{ scope.row.mdcid || '--' }}</div>
+              </template>
+            </el-table-column>
 
-        <el-table-column :label="$t('employee.name')" min-width="140" align="center">
-          <template #default="scope">
-            <div class="primary-cell">{{ scope.row.name || '--' }}</div>
-          </template>
-        </el-table-column>
+            <el-table-column :label="$t('employee.name')" min-width="140" align="center">
+              <template #default="scope">
+                <div class="primary-cell">{{ scope.row.name || '--' }}</div>
+              </template>
+            </el-table-column>
 
-        <el-table-column :label="$t('Account.avatar')" min-width="90" align="center">
-          <template #default="scope">
-            <div class="avatar-shell">
-              <img class="user-avatar" :src="scope.row.avatar" alt="avatar">
-            </div>
-          </template>
-        </el-table-column>
+            <el-table-column :label="$t('Account.avatar')" min-width="90" align="center">
+              <template #default="scope">
+                <div class="avatar-shell">
+                  <img class="user-avatar" :src="scope.row.avatar" alt="avatar">
+                </div>
+              </template>
+            </el-table-column>
 
-        <el-table-column :label="$t('employee.position')" min-width="180" align="center">
-          <template #default="scope">
-            <div class="tag-wrap">
-              <el-tag v-for="r in scope.row.roles" :key="r" class="role-tag">{{ RoleValueFilter(r, roles) }}</el-tag>
-              <span v-if="!scope.row.roles || !scope.row.roles.length" class="table-empty-value">--</span>
-            </div>
-          </template>
-        </el-table-column>
+            <el-table-column :label="$t('employee.position')" min-width="180" align="center">
+              <template #default="scope">
+                <div class="tag-wrap">
+                  <el-tag v-for="r in scope.row.roles" :key="r" class="role-tag">{{ RoleValueFilter(r, roles) }}</el-tag>
+                  <span v-if="!scope.row.roles || !scope.row.roles.length" class="table-empty-value">--</span>
+                </div>
+              </template>
+            </el-table-column>
 
-        <el-table-column :label="$t('Account.nickname')" min-width="160" align="center">
-          <template #default="scope">
-            <span>{{ scope.row.nickname && scope.row.nickname.length ? scope.row.nickname : '未绑定' }}</span>
-          </template>
-        </el-table-column>
+            <el-table-column :label="$t('Account.nickname')" min-width="160" align="center">
+              <template #default="scope">
+                <span>{{ scope.row.nickname && scope.row.nickname.length ? scope.row.nickname : '未绑定' }}</span>
+              </template>
+            </el-table-column>
 
-        <el-table-column :label="$t('employee.phone')" min-width="130" align="center">
-          <template #default="scope">
-            <span>{{ scope.row.phone || '--' }}</span>
-          </template>
-        </el-table-column>
+            <el-table-column :label="$t('employee.phone')" min-width="130" align="center">
+              <template #default="scope">
+                <span>{{ scope.row.phone || '--' }}</span>
+              </template>
+            </el-table-column>
 
-        <el-table-column :label="$t('Account.sex')" min-width="80" align="center">
-          <template #default="scope">
-            <el-tag class="sex-tag">{{ SexFilter(scope.row.sex) }}</el-tag>
-          </template>
-        </el-table-column>
+            <el-table-column :label="$t('Account.sex')" min-width="80" align="center">
+              <template #default="scope">
+                <el-tag class="sex-tag">{{ SexFilter(scope.row.sex) }}</el-tag>
+              </template>
+            </el-table-column>
 
-        <el-table-column :label="$t('employee.birthday')" min-width="130" align="center">
-          <template #default="scope">
-            <span>{{ scope.row.birthday || '--' }}</span>
-          </template>
-        </el-table-column>
+            <el-table-column :label="$t('employee.birthday')" min-width="130" align="center">
+              <template #default="scope">
+                <span>{{ scope.row.birthday || '--' }}</span>
+              </template>
+            </el-table-column>
 
-        <el-table-column :label="$t('employee.address')" min-width="220" align="center">
-          <template #default="scope">
-            <div class="note-cell">{{ scope.row.address || '--' }}</div>
-          </template>
-        </el-table-column>
+            <el-table-column :label="$t('employee.address')" min-width="220" align="center">
+              <template #default="scope">
+                <div class="note-cell">{{ scope.row.address || '--' }}</div>
+              </template>
+            </el-table-column>
 
-        <el-table-column :label="$t('employee.last_login_time')" min-width="170" align="center">
-          <template #default="scope">
-            <span>{{ scope.row.last_login_time || '--' }}</span>
-          </template>
-        </el-table-column>
+            <el-table-column :label="$t('employee.last_login_time')" min-width="170" align="center">
+              <template #default="scope">
+                <span>{{ scope.row.last_login_time || '--' }}</span>
+              </template>
+            </el-table-column>
 
-        <el-table-column label="到期时间" min-width="170" align="center">
-          <template #default="scope">
-            <span>{{ scope.row.expire_time || '未设置' }}</span>
-          </template>
-        </el-table-column>
+            <el-table-column label="到期时间" min-width="170" align="center">
+              <template #default="scope">
+                <span>{{ scope.row.expire_time || '未设置' }}</span>
+              </template>
+            </el-table-column>
 
-        <el-table-column :label="$t('employee.status')" min-width="100" align="center">
-          <template #default="scope">
-            <el-tag :class="statusClass(scope.row.status)" class="user-status-tag">{{ statusFilter(scope.row.status) }}</el-tag>
-          </template>
-        </el-table-column>
+            <el-table-column :label="$t('employee.status')" min-width="100" align="center">
+              <template #default="scope">
+                <el-tag :class="statusClass(scope.row.status)" class="user-status-tag">{{ statusFilter(scope.row.status) }}</el-tag>
+              </template>
+            </el-table-column>
 
-        <el-table-column :label="$t('employee.msg')" min-width="150" align="center">
-          <template #default="scope">
-            <div class="tag-wrap">
-              <el-tag v-if="scope.row.recharge_msg" class="msg-tag msg-tag-bas">BAS</el-tag>
-              <el-tag v-if="scope.row.sign_msg" class="msg-tag msg-tag-app">APP</el-tag>
-              <span v-if="!scope.row.recharge_msg && !scope.row.sign_msg" class="table-empty-value">--</span>
-            </div>
-          </template>
-        </el-table-column>
+            <el-table-column :label="$t('employee.msg')" min-width="150" align="center">
+              <template #default="scope">
+                <div class="tag-wrap">
+                  <el-tag v-if="scope.row.recharge_msg" class="msg-tag msg-tag-bas">BAS</el-tag>
+                  <el-tag v-if="scope.row.sign_msg" class="msg-tag msg-tag-app">APP</el-tag>
+                  <span v-if="!scope.row.recharge_msg && !scope.row.sign_msg" class="table-empty-value">--</span>
+                </div>
+              </template>
+            </el-table-column>
 
-        <el-table-column :label="$t('employee.actions')" align="center" min-width="210" class-name="small-padding fixed-width">
-          <template #default="{ row }">
-            <el-button type="primary" plain size="small" class="compact-btn user-edit-btn" @click="handleUpdate(row)">
-              {{ $t('employee.edit') }}
-            </el-button>
-            <el-button size="small" type="danger" plain class="compact-btn user-delete-btn" @click="handleDelete(row)">
-              {{ $t('employee.delete') }}
-            </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-    </div>
-
-    <div v-else class="users-card-grid">
-      <article v-for="item in list" :key="item.id" class="users-card">
-        <div class="users-card__header">
-          <div class="users-card__headline">
-            <div class="avatar-shell"><img class="user-avatar" :src="item.avatar" alt="avatar"></div>
-            <div>
-              <h3>{{ item.name || '--' }}</h3>
-              <el-tag class="callsign-tag">{{ item.callsign || '--' }}</el-tag>
-            </div>
-          </div>
-          <el-tag :class="statusClass(item.status)" class="user-status-tag">{{ statusFilter(item.status) }}</el-tag>
+            <el-table-column :label="$t('employee.actions')" align="center" min-width="210" class-name="small-padding fixed-width">
+              <template #default="{ row }">
+                <el-button type="primary" plain size="small" class="compact-btn user-edit-btn" @click="handleUpdate(row)">
+                  {{ $t('employee.edit') }}
+                </el-button>
+                <el-button size="small" type="danger" plain class="compact-btn user-delete-btn" @click="handleDelete(row)">
+                  {{ $t('employee.delete') }}
+                </el-button>
+              </template>
+            </el-table-column>
+          </el-table>
         </div>
-        <div class="users-card__meta">
-          <div class="users-meta-pill"><span class="users-card__label">DMR-ID</span><strong>{{ item.dmrid || '--' }}</strong></div>
-          <div class="users-meta-pill"><span class="users-card__label">MDC-ID</span><strong>{{ item.mdcid || '--' }}</strong></div>
+
+        <div v-else class="users-card-grid">
+          <article v-for="item in list" :key="item.id" class="users-card">
+            <div class="users-card__header">
+              <div class="users-card__headline">
+                <div class="avatar-shell"><img class="user-avatar" :src="item.avatar" alt="avatar"></div>
+                <div>
+                  <h3>{{ item.name || '--' }}</h3>
+                  <el-tag class="callsign-tag">{{ item.callsign || '--' }}</el-tag>
+                </div>
+              </div>
+              <el-tag :class="statusClass(item.status)" class="user-status-tag">{{ statusFilter(item.status) }}</el-tag>
+            </div>
+            <div class="users-card__meta">
+              <div class="users-meta-pill"><span class="users-card__label">DMR-ID</span><strong>{{ item.dmrid || '--' }}</strong></div>
+              <div class="users-meta-pill"><span class="users-card__label">MDC-ID</span><strong>{{ item.mdcid || '--' }}</strong></div>
+            </div>
+            <div class="users-card__body">
+              <div class="users-card__row users-card__row--stack"><span class="users-card__label">{{ $t('employee.position') }}</span><div class="tag-wrap"><el-tag v-for="r in item.roles" :key="r" class="role-tag">{{ RoleValueFilter(r, roles) }}</el-tag><span v-if="!item.roles || !item.roles.length" class="table-empty-value">--</span></div></div>
+              <div class="users-card__row"><span class="users-card__label">{{ $t('Account.nickname') }}</span><span class="users-card__value">{{ item.nickname && item.nickname.length ? item.nickname : '未绑定' }}</span></div>
+              <div class="users-card__row"><span class="users-card__label">{{ $t('employee.phone') }}</span><span class="users-card__value">{{ item.phone || '--' }}</span></div>
+              <div class="users-card__row"><span class="users-card__label">{{ $t('Account.sex') }}</span><el-tag class="sex-tag">{{ SexFilter(item.sex) }}</el-tag></div>
+              <div class="users-card__row"><span class="users-card__label">{{ $t('employee.birthday') }}</span><span class="users-card__value">{{ item.birthday || '--' }}</span></div>
+              <div class="users-card__row users-card__row--stack"><span class="users-card__label">{{ $t('employee.address') }}</span><p class="users-card__note">{{ item.address || '--' }}</p></div>
+              <div class="users-card__row"><span class="users-card__label">{{ $t('employee.last_login_time') }}</span><span class="users-card__value">{{ item.last_login_time || '--' }}</span></div>
+              <div class="users-card__row"><span class="users-card__label">到期时间</span><span class="users-card__value">{{ item.expire_time || '未设置' }}</span></div>
+              <div class="users-card__row users-card__row--stack"><span class="users-card__label">{{ $t('employee.msg') }}</span><div class="tag-wrap"><el-tag v-if="item.recharge_msg" class="msg-tag msg-tag-bas">BAS</el-tag><el-tag v-if="item.sign_msg" class="msg-tag msg-tag-app">APP</el-tag><span v-if="!item.recharge_msg && !item.sign_msg" class="table-empty-value">--</span></div></div>
+            </div>
+            <div class="users-card__actions">
+              <el-button type="primary" plain size="small" class="compact-btn user-edit-btn" @click="handleUpdate(item)">{{ $t('employee.edit') }}</el-button>
+              <el-button size="small" type="danger" plain class="compact-btn user-delete-btn" @click="handleDelete(item)">{{ $t('employee.delete') }}</el-button>
+            </div>
+          </article>
         </div>
-        <div class="users-card__body">
-          <div class="users-card__row users-card__row--stack"><span class="users-card__label">{{ $t('employee.position') }}</span><div class="tag-wrap"><el-tag v-for="r in item.roles" :key="r" class="role-tag">{{ RoleValueFilter(r, roles) }}</el-tag><span v-if="!item.roles || !item.roles.length" class="table-empty-value">--</span></div></div>
-          <div class="users-card__row"><span class="users-card__label">{{ $t('Account.nickname') }}</span><span class="users-card__value">{{ item.nickname && item.nickname.length ? item.nickname : '未绑定' }}</span></div>
-          <div class="users-card__row"><span class="users-card__label">{{ $t('employee.phone') }}</span><span class="users-card__value">{{ item.phone || '--' }}</span></div>
-          <div class="users-card__row"><span class="users-card__label">{{ $t('Account.sex') }}</span><el-tag class="sex-tag">{{ SexFilter(item.sex) }}</el-tag></div>
-          <div class="users-card__row"><span class="users-card__label">{{ $t('employee.birthday') }}</span><span class="users-card__value">{{ item.birthday || '--' }}</span></div>
-          <div class="users-card__row users-card__row--stack"><span class="users-card__label">{{ $t('employee.address') }}</span><p class="users-card__note">{{ item.address || '--' }}</p></div>
-          <div class="users-card__row"><span class="users-card__label">{{ $t('employee.last_login_time') }}</span><span class="users-card__value">{{ item.last_login_time || '--' }}</span></div>
-          <div class="users-card__row"><span class="users-card__label">到期时间</span><span class="users-card__value">{{ item.expire_time || '未设置' }}</span></div>
-          <div class="users-card__row users-card__row--stack"><span class="users-card__label">{{ $t('employee.msg') }}</span><div class="tag-wrap"><el-tag v-if="item.recharge_msg" class="msg-tag msg-tag-bas">BAS</el-tag><el-tag v-if="item.sign_msg" class="msg-tag msg-tag-app">APP</el-tag><span v-if="!item.recharge_msg && !item.sign_msg" class="table-empty-value">--</span></div></div>
-        </div>
-        <div class="users-card__actions">
-          <el-button type="primary" plain size="small" class="compact-btn user-edit-btn" @click="handleUpdate(item)">{{ $t('employee.edit') }}</el-button>
-          <el-button size="small" type="danger" plain class="compact-btn user-delete-btn" @click="handleDelete(item)">{{ $t('employee.delete') }}</el-button>
-        </div>
-      </article>
-    </div>
+      </template>
+
+      <template #badge="{ row }">
+        <el-tag :class="statusClass(row.status)" class="user-status-tag">{{ statusFilter(row.status) }}</el-tag>
+      </template>
+
+      <template #actions="{ row }">
+        <el-button type="primary" plain size="small" class="compact-btn user-edit-btn" @click="handleUpdate(row)">{{ $t('employee.edit') }}</el-button>
+        <el-button size="small" type="danger" plain class="compact-btn user-delete-btn" @click="handleDelete(row)">{{ $t('employee.delete') }}</el-button>
+      </template>
+    </responsive-table>
 
     <pagination
       v-show="total > 0"
@@ -353,19 +375,26 @@ import {
 } from '@/api/employee'
 import waves from '@/directive/waves'
 import Pagination from '@/components/Pagination/index.vue'
+import ResponsiveTable from '@/components/ResponsiveTable/index.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { mapState } from 'pinia'
 import { useAppStore } from '@/store/modules/app'
 
 export default {
   name: 'SetupUsersPage',
-  components: { Pagination },
+  components: { Pagination, ResponsiveTable },
   directives: { waves },
 
   data() {
     return {
       tableKey: 0,
       list: [],
+      userColumns: [
+        { prop: 'name', label: '姓名' },
+        { prop: 'dmrid', label: 'DMR-ID' },
+        { prop: 'phone', label: '电话' },
+        { prop: 'expire_time', label: '到期时间' }
+      ],
       total: 0,
       listLoading: true,
       listQuery: {
@@ -468,6 +497,18 @@ export default {
     handleFilter() {
       this.listQuery.page = 1
       this.getList()
+    },
+    handleLoadMore() {
+      if (this.list.length >= this.total || this.listLoading) return
+      this.listQuery.page += 1
+      this.listLoading = true
+      fetchEmployeeAllList(this.listQuery).then(response => {
+        const items = response?.data?.items || []
+        this.list = [...this.list, ...items]
+        this.total = response?.data?.total || this.total
+      }).finally(() => {
+        this.listLoading = false
+      })
     },
     sortChange(data) {
       const { prop, order } = data

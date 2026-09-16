@@ -78,6 +78,7 @@ declare module 'vue' {
     Pagination: typeof import('./components/Pagination/index.vue')['default']
     PanThumb: typeof import('./components/PanThumb/index.vue')['default']
     RealtimeMonitorPanel: typeof import('./components/platform/RealtimeMonitorPanel.vue')['default']
+    ResponsiveTable: typeof import('./components/ResponsiveTable/index.vue')['default']
     RightPanel: typeof import('./components/RightPanel/index.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

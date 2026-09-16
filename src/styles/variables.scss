@@ -20,3 +20,7 @@ $subMenuBg:#0b1625;
 $subMenuHover:#1a3050;
 
 $sideBarWidth: 210px;
+
+// 响应式断点（与 src/utils/device.js 的 BREAKPOINT 保持一致）
+$bp-mobile: 768px;
+$bp-tablet: 1024px;

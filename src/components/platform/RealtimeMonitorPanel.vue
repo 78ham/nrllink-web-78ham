@@ -78,13 +78,13 @@ export default {
     Bell,
     Connection
   },
-  emits: ['stats-change'],
   props: {
     pulsePhaseMs: {
       type: Number,
       default: () => (typeof window !== 'undefined' ? Date.now() % 800 : 0)
     }
   },
+  emits: ['stats-change'],
   data() {
     return {
       websock: null,
@@ -263,28 +263,28 @@ export default {
     },
     handleMonitorJSON(payload) {
       switch (payload.type) {
-      case 'snapshot':
-        this.rooms = Array.isArray(payload.rooms) ? payload.rooms : []
-        this.recentCalls = Array.isArray(payload.recent_calls) ? payload.recent_calls : []
-        this.subscribedRoomKeys = Array.isArray(payload.subscriptions) ? payload.subscriptions : []
-        this.applyLiveStats(payload)
-        break
-      case 'stats':
-        this.applyLiveStats(payload, true)
-        break
-      case 'room_state':
-        if (payload.room) {
-          this.mergeRoomState(payload.room)
-        }
-        break
-      case 'recent_calls':
-        this.recentCalls = Array.isArray(payload.recent_calls) ? payload.recent_calls : []
-        break
-      case 'subscriptions':
-        this.subscribedRoomKeys = Array.isArray(payload.subscriptions) ? payload.subscriptions : []
-        break
-      default:
-        break
+        case 'snapshot':
+          this.rooms = Array.isArray(payload.rooms) ? payload.rooms : []
+          this.recentCalls = Array.isArray(payload.recent_calls) ? payload.recent_calls : []
+          this.subscribedRoomKeys = Array.isArray(payload.subscriptions) ? payload.subscriptions : []
+          this.applyLiveStats(payload)
+          break
+        case 'stats':
+          this.applyLiveStats(payload, true)
+          break
+        case 'room_state':
+          if (payload.room) {
+            this.mergeRoomState(payload.room)
+          }
+          break
+        case 'recent_calls':
+          this.recentCalls = Array.isArray(payload.recent_calls) ? payload.recent_calls : []
+          break
+        case 'subscriptions':
+          this.subscribedRoomKeys = Array.isArray(payload.subscriptions) ? payload.subscriptions : []
+          break
+        default:
+          break
       }
     },
     mergeRoomState(roomState) {

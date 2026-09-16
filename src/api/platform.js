@@ -15,18 +15,17 @@ export function fetchPlatformList(data) {
   })
 }
 
-
 export function fetchSiteSettings() {
- return request({
-  url: '/platform/site-settings',
-  method: 'get'
- })
+  return request({
+    url: '/platform/site-settings',
+    method: 'get'
+  })
 }
 
 export function updateSiteSettings(data) {
- return request({
-  url: '/platform/site-settings/update',
-  method: 'post',
-  data
- })
+  return request({
+    url: '/platform/site-settings/update',
+    method: 'post',
+    data
+  })
 }

@@ -85,14 +85,11 @@ export const constantRoutes = [{
 
 {
   path: '/chat',
-  component: Layout,
-  redirect: '/chat/index',
+  redirect: '/dashboard',
+  hidden: true,
   children: [{
     path: 'index',
-    component: () =>
-      import('@/views/chat/index.vue'),
-    name: 'Chat',
-    meta: { title: 'chat', icon: 'message', noCache: false }
+    redirect: '/dashboard'
   }]
 },
 
@@ -155,6 +152,16 @@ export const asyncRoutes = [
       meta: {
         title: 'relay',
         roles: ['ham'] // or you can only set roles in sub nav
+      }
+    },
+    {
+      path: 'bm-network',
+      component: () =>
+        import('@/views/pub/bm-network.vue'),
+      name: 'bmNetwork',
+      meta: {
+        title: 'bmNetwork',
+        roles: ['ham']
       }
     }
 

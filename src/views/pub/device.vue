@@ -54,366 +54,443 @@
 
     </div>
 
-    <div v-if="showtable" class="table-shell table-responsive">
-      <el-table
-        :key="tableKey"
-        v-loading="listLoading"
-        :data="list"
-        border
-        fit
-        highlight-current-row
-        style="width: 100%"
-        @sort-change="sortChange"
-      >
-        <el-table-column fixed :label="$t('Account.id')" prop="id" sortable="custom" align="center" min-width="110">
-          <template #default="scope">
-            <span>{{ scope.row.id }}</span>
-          </template>
-        </el-table-column>
+    <responsive-table
+      :data="list"
+      :columns="deviceColumns"
+      :loading="listLoading"
+      title-key="callsign"
+      row-key="id"
+      :has-more="list.length < total"
+      @load-more="handleLoadMore"
+      @refresh="getList"
+    >
+      <template #table>
+        <div v-if="showtable" class="table-shell table-responsive">
+          <el-table
+            :key="tableKey"
+            v-loading="listLoading"
+            :data="list"
+            border
+            fit
+            highlight-current-row
+            style="width: 100%"
+            @sort-change="sortChange"
+          >
+            <el-table-column fixed :label="$t('Account.id')" prop="id" sortable="custom" align="center" min-width="110">
+              <template #default="scope">
+                <span>{{ scope.row.id }}</span>
+              </template>
+            </el-table-column>
 
-        <el-table-column
+            <el-table-column
               fixed
               prop="callsign"
               :label="$t('device.callsign')"
               min-width="150"
-          align="center"
-          :sortable="true"
-        >
-          <template #default="scope">
-            <div class="tag-wrap">
-              <el-tag :type="scope.row.is_online ? 'success' : 'info'" :class="scope.row.is_online ? 'callsign-online-tag' : 'callsign-offline-tag'">{{ scope.row.callsign + "-" +
-                scope.row.ssid
-              }}
-              </el-tag>
+              align="center"
+              :sortable="true"
+            >
+              <template #default="scope">
+                <div class="tag-wrap">
+                  <el-tag :type="scope.row.is_online ? 'success' : 'info'" :class="scope.row.is_online ? 'callsign-online-tag' : 'callsign-offline-tag'">{{ scope.row.callsign + "-" +
+                    scope.row.ssid
+                  }}
+                  </el-tag>
+                </div>
+              </template>
+            </el-table-column>
+
+            <el-table-column prop="dmrid" :label="$t('device.dmrid')" min-width="100" align="center" :sortable="true">
+              <template #default="scope">
+                <div class="tag-wrap">
+                  <el-tag :type="scope.row.is_online ? 'primary' : 'info'">{{ scope.row.dmrid }}
+                  </el-tag>
+                </div>
+              </template>
+            </el-table-column>
+
+            <el-table-column :label="$t('device.status')" prop="status" min-width="170" align="center">
+              <template #default="scope">
+                <div class="status-actions">
+                  <el-button
+                    :type="safeButtonType(((scope.row.status ?? 0) & 1) === 1 ? 'danger' : 'info')"
+                    size="small"
+                    plain
+                    class="compact-btn status-receive-btn"
+                    @click="updateStatus(scope.row, 1)"
+                  >{{ (scope.row.status & 1) === 1 ? $t('device.disableReceive') :
+                    $t('device.receive')
+                  }}</el-button>
+
+                  <el-button
+                    :type="safeButtonType(((scope.row.status ?? 0) & 2) === 2 ? 'danger' : 'info')"
+                    size="small"
+                    plain
+                    class="compact-btn status-transmit-btn"
+                    @click="updateStatus(scope.row, 2)"
+                  >{{ (scope.row.status & 2) === 2 ? $t('device.disableTransmit') :
+                    $t('device.transmit')
+                  }}</el-button>
+                </div>
+              </template>
+            </el-table-column>
+
+            <el-table-column :label="$t('device.priority')" prop="priority" min-width="100" align="center" :sortable="true">
+              <template #default="scope">
+                <span>{{ scope.row.priority }}</span>
+              </template>
+            </el-table-column>
+
+            <el-table-column :label="$t('device.name')" prop="name" min-width="220" align="center" :sortable="true">
+              <template #default="scope">
+                <span>{{ scope.row.ssid === 200 && scope.row.name === '' ? $t('device.serverLink') : scope.row.name }}</span>
+              </template>
+            </el-table-column>
+
+            <el-table-column :label="$t('device.qth')" prop="qth" min-width="220" align="center" :sortable="true">
+              <template #default="scope">
+                <span>{{ scope.row.qth }}</span>
+              </template>
+            </el-table-column>
+
+            <el-table-column :label="$t('device.currentGroup')" prop="group_id" min-width="180" align="center" :sortable="true">
+              <template #default="scope">
+                <span v-if="scope.row.group_id > 0 && scope.row.group_id < 999">
+                  {{ $t('device.personalRoom') }}{{ scope.row.group_id }}</span>
+                <span v-else>{{
+                  ValueFilter(scope.row.group_id, groupsOptions)
+                }}</span>
+              </template>
+            </el-table-column>
+
+            <el-table-column
+              :label="$t('Account.actions')"
+              align="center"
+              min-width="320"
+              class-name="small-padding fixed-width"
+            >
+              <template #default="{ row }">
+                <div class="operation-actions">
+                  <el-button
+                    v-if="checkPermission(['admin']) || row.callsign === callsign"
+                    size="small"
+                    type="primary"
+                    plain
+                    class="compact-btn action-edit-btn"
+                    @click="handleUpdate(row)"
+                  >{{ $t("device.edit") }}</el-button>
+
+                  <el-button
+                    v-if="checkPermission(['admin']) || row.callsign === callsign"
+                    :disabled="row.is_online === false"
+                    size="small"
+                    type="warning"
+                    plain
+                    class="compact-btn action-change-btn"
+                    @click="handleChange(row)"
+                  >{{ $t("device.change") }}</el-button>
+
+                  <el-button
+                    v-if="checkPermission(['admin']) || row.callsign === callsign"
+                    :disabled="row.is_online === false"
+                    size="small"
+                    type="success"
+                    plain
+                    class="compact-btn action-at-btn"
+                    @click="handleOpenAT(row)"
+                  >{{ $t("device.at") }}</el-button>
+
+                  <el-button
+                    v-if="row.dev_model === 202"
+                    size="small"
+                    type="info"
+                    plain
+                    class="compact-btn action-bm-btn"
+                    @click="$router.push('/public/bm-network')"
+                  >BM网络</el-button>
+                  <el-button
+                    v-if="checkPermission(['admin']) || row.callsign === callsign"
+                    size="small"
+                    type="danger"
+                    plain
+                    class="compact-btn action-delete-btn"
+                    @click="handleDelete(row)"
+                  >{{ $t('employee.delete') }}</el-button>
+                </div>
+              </template>
+            </el-table-column>
+
+            <el-table-column prop="dev_rf_type" :label="$t('device.rfTypeLabel')" min-width="140" align="center" :sortable="true">
+              <template #default="scope">
+                <span>{{ ValueFilter(scope.row.rf_type, DevRFtypeOptions) }}</span>
+              </template>
+            </el-table-column>
+
+            <el-table-column prop="tunner" :label="$t('device.channelFrequency')" min-width="190" align="center">
+              <template #default="scope">
+                <div v-if="scope.row.device_parm" class="tag-wrap">
+                  <el-tag v-if="scope.row.rf_type == 1">
+                    R{{ scope.row.device_parm.one_recive_freq }}/T{{
+                      scope.row.device_parm.one_transmit_freq
+                    }}
+                  </el-tag>
+                  <el-tag v-if="scope.row.rf_type == 2">
+                    R{{ scope.row.device_parm.two_recive_freq }}/T{{
+                      scope.row.device_parm.two_transmit_freq
+                    }}
+                  </el-tag>
+                  <el-tag v-if="scope.row.rf_type == 3">{{ $t('device.channelLabel') }}{{ scope.row.device_parm.moto_channel }}
+                    {{ getChannelName(scope.row) }}
+                  </el-tag>
+                </div>
+              </template>
+            </el-table-column>
+
+            <el-table-column :label="$t('device.model')" prop="dev_model" min-width="150" align="center" :sortable="true">
+              <template #default="scope">
+                <span>{{ ValueFilter(scope.row.dev_model, DevModelOptions) }}</span>
+              </template>
+            </el-table-column>
+
+            <el-table-column :label="$t('device.totalVoiceTime')" prop="voice_time" min-width="120" align="center" :sortable="true">
+              <template #default="scope">
+                <span>{{ formatVoiceTime(scope.row.voice_time) }}</span>
+              </template>
+            </el-table-column>
+
+            <el-table-column :label="$t('device.codecCaps')" prop="supported_codecs" min-width="140" align="center">
+              <template #default="scope">
+                <div class="codec-tags">
+                  <el-tag v-if="scope.row.supported_codecs & 1" size="small" type="info" class="codec-tag">G.711</el-tag>
+                  <el-tag v-if="scope.row.supported_codecs & 2" size="small" type="warning" class="codec-tag">Opus</el-tag>
+                  <el-tag v-if="scope.row.supported_codecs & 4" size="small" type="success" class="codec-tag">Codec2</el-tag>
+                </div>
+              </template>
+            </el-table-column>
+
+            <el-table-column :label="$t('device.totalTraffic')" prop="traffic" min-width="120" align="center" :sortable="true">
+              <template #default="scope">
+                <span>{{ formatFileSize(scope.row.traffic) }}</span>
+              </template>
+            </el-table-column>
+
+            <el-table-column :label="$t('device.lastVoiceDuration')" prop="last_voice_duration" min-width="150" align="center" :sortable="true">
+              <template #default="scope">
+                <span>{{ formatVoiceTime(scope.row.last_voice_duration) }}</span>
+              </template>
+            </el-table-column>
+
+            <el-table-column :label="$t('device.lastVoiceTime')" prop="last_voice_end_time" min-width="160" align="center" :sortable="true">
+              <template #default="scope">
+                <span>{{ parseTime(scope.row.last_voice_end_time) }}</span>
+              </template>
+            </el-table-column>
+
+          </el-table>
+        </div>
+
+        <div v-if="showtable == false" class="box-grid">
+          <div
+            v-for="item in list"
+            :key="item.id"
+            class="box-item"
+          >
+            <div class="box-header">
+              <el-tag :type="item.is_online ? 'success' : 'info'" size="small" effect="dark" class="id-tag">{{ item.id }}</el-tag>
+              <span class="callsign">{{ item.callsign }}-{{ item.ssid }}</span>
+              <el-tag size="small" type="info">DMR {{ item.dmrid }}</el-tag>
+              <el-tag v-if="item.status == 1" size="small" type="danger">🈲</el-tag>
             </div>
-          </template>
-        </el-table-column>
-
-        <el-table-column prop="dmrid" :label="$t('device.dmrid')" min-width="100" align="center" :sortable="true">
-          <template #default="scope">
-            <div class="tag-wrap">
-              <el-tag :type="scope.row.is_online ? 'primary' : 'info'">{{ scope.row.dmrid }}
-              </el-tag>
+            <div class="box-info">
+              <div class="info-row">
+                <span class="label">{{ $t('device.name') }}:</span>
+                <span class="value">{{ item.ssid === 200 && item.name === '' ? $t('device.serverLink') : item.name || '-' }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">{{ $t('device.model') }}:</span>
+                <span class="value">{{ ValueFilter(item.dev_model, DevModelOptions) }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">{{ $t('device.codecCaps') }}:</span>
+                <span class="value">
+                  <el-tag v-if="item.supported_codecs & 1" size="small" type="info">G.711</el-tag>
+                  <el-tag v-if="item.supported_codecs & 2" size="small" type="warning">Opus</el-tag>
+                  <el-tag v-if="item.supported_codecs & 4" size="small" type="success">Codec2</el-tag>
+                  <template v-if="!item.supported_codecs">-</template>
+                </span>
+              </div>
+              <div class="info-row">
+                <span class="label">{{ $t('device.priority') }}:</span>
+                <span class="value">{{ item.priority }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">{{ $t('device.rfTypeLabel') }}:</span>
+                <span class="value">{{ ValueFilter(item.rf_type, DevRFtypeOptions) }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">{{ $t('device.channelFrequency') }}:</span>
+                <span class="value freq">
+                  <template v-if="item.device_parm">
+                    <template v-if="item.rf_type == 1">R{{ item.device_parm.one_recive_freq }}/T{{ item.device_parm.one_transmit_freq }}</template>
+                    <template v-else-if="item.rf_type == 2">R{{ item.device_parm.two_recive_freq }}/T{{ item.device_parm.two_transmit_freq }}</template>
+                    <template v-else-if="item.rf_type == 3">{{ $t('device.channelLabel') }}{{ item.device_parm.moto_channel }} {{ getChannelName(item) }}</template>
+                  </template>
+                  <template v-else>-</template>
+                </span>
+              </div>
+              <div class="info-row">
+                <span class="label">{{ $t('device.currentGroup') }}:</span>
+                <span class="value">
+                  <template v-if="item.group_id > 0 && item.group_id < 1000">{{ $t('device.privateGroup') }}</template>
+                  <template v-else>{{ ValueFilter(item.group_id, groupsOptions) }}</template>
+                </span>
+              </div>
+              <div class="info-row">
+                <span class="label">{{ $t('device.owner') }}:</span>
+                <span class="value">{{ ValueFilter(item.ower_id, userOptions) }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">{{ $t('device.totalVoiceTime') }}:</span>
+                <span class="value">{{ formatVoiceTime(item.voice_time) }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">{{ $t('device.totalTraffic') }}:</span>
+                <span class="value">{{ formatFileSize(item.traffic) }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">{{ $t('device.lastVoiceDuration') }}:</span>
+                <span class="value">{{ formatVoiceTime(item.last_voice_duration) }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">{{ $t('device.lastVoiceTime') }}:</span>
+                <span class="value">{{ parseTime(item.last_voice_end_time) }}</span>
+              </div>
             </div>
-          </template>
-        </el-table-column>
-
-        <el-table-column :label="$t('device.status')" prop="status" min-width="170" align="center">
-          <template #default="scope">
-            <div class="status-actions">
-              <el-button
-                :type="safeButtonType(((scope.row.status ?? 0) & 1) === 1 ? 'danger' : 'info')"
-                size="small"
-                plain
-                class="compact-btn status-receive-btn"
-                @click="updateStatus(scope.row, 1)"
-              >{{ (scope.row.status & 1) === 1 ? $t('device.disableReceive') :
-                $t('device.receive')
-              }}</el-button>
-              
-              <el-button
-                :type="safeButtonType(((scope.row.status ?? 0) & 2) === 2 ? 'danger' : 'info')"
-                size="small"
-                plain
-                class="compact-btn status-transmit-btn"
-                @click="updateStatus(scope.row, 2)"
-              >{{ (scope.row.status & 2) === 2 ? $t('device.disableTransmit') :
-                $t('device.transmit')
-              }}</el-button>
+            <div class="box-footer">
+              <div class="status-btns">
+                <el-button
+                  :type="((item.status ?? 0) & 1) === 1 ? 'danger' : 'success'"
+                  size="small"
+                  plain
+                  class="compact-btn status-receive-btn"
+                  :disabled="item.is_online === false"
+                  @click="updateStatus(item, 1)"
+                >{{ ((item.status ?? 0) & 1) === 1 ? $t('device.disableReceive') : $t('device.receive') }}</el-button>
+                <el-button
+                  :type="((item.status ?? 0) & 2) === 2 ? 'danger' : 'success'"
+                  size="small"
+                  plain
+                  class="compact-btn status-transmit-btn"
+                  :disabled="item.is_online === false"
+                  @click="updateStatus(item, 2)"
+                >{{ ((item.status ?? 0) & 2) === 2 ? $t('device.disableTransmit') : $t('device.transmit') }}</el-button>
+              </div>
+              <div class="action-btns">
+                <el-button
+                  v-if="checkPermission(['admin']) || item.callsign === callsign"
+                  type="warning"
+                  plain
+                  size="small"
+                  class="compact-btn action-change-btn"
+                  :disabled="item.is_online === false"
+                  @click="handleChange(item)"
+                >{{ $t("device.change") }}</el-button>
+                <el-button
+                  v-if="checkPermission(['admin']) || item.callsign === callsign"
+                  type="success"
+                  plain
+                  size="small"
+                  class="compact-btn action-at-btn"
+                  :disabled="item.is_online === false"
+                  @click="handleOpenAT(item)"
+                >{{ $t("device.at") }}</el-button>
+                <el-button
+                  v-if="checkPermission(['admin']) || item.callsign === callsign"
+                  type="primary"
+                  plain
+                  size="small"
+                  class="compact-btn action-edit-btn"
+                  @click="handleUpdate(item)"
+                >{{ $t("device.edit") }}</el-button>
+                <el-button
+                  v-if="item.dev_model === 202"
+                  size="small"
+                  type="info"
+                  plain
+                  class="compact-btn action-bm-btn"
+                  @click="$router.push('/public/bm-network')"
+                >BM网络</el-button>
+                <el-button
+                  v-if="checkPermission(['admin']) || item.callsign === callsign"
+                  type="danger"
+                  plain
+                  size="small"
+                  class="compact-btn action-delete-btn"
+                  @click="handleDelete(item)"
+                >{{ $t('employee.delete') }}</el-button>
+              </div>
             </div>
-          </template>
-        </el-table-column>
+          </div>
+        </div>
+      </template>
 
-        <el-table-column :label="$t('device.priority')" prop="priority" min-width="100" align="center" :sortable="true">
-          <template #default="scope">
-            <span>{{ scope.row.priority }}</span>
-          </template>
-        </el-table-column>
+      <template #badge="{ row }">
+        <el-tag :type="row.is_online ? 'success' : 'info'" size="small">
+          {{ row.is_online ? '在线' : '离线' }}
+        </el-tag>
+      </template>
 
-        <el-table-column :label="$t('device.name')" prop="name" min-width="220" align="center" :sortable="true">
-          <template #default="scope">
-            <span>{{ scope.row.ssid === 200 && scope.row.name === '' ? $t('device.serverLink') : scope.row.name }}</span>
-          </template>
-        </el-table-column>
-
-        <el-table-column :label="$t('device.qth')" prop="qth" min-width="220" align="center" :sortable="true">
-          <template #default="scope">
-            <span>{{ scope.row.qth }}</span>
-          </template>
-        </el-table-column>
-
-        <el-table-column :label="$t('device.currentGroup')" prop="group_id" min-width="180" align="center" :sortable="true">
-          <template #default="scope">
-            <span v-if="scope.row.group_id > 0 && scope.row.group_id < 999">
-              {{ $t('device.personalRoom') }}{{ scope.row.group_id }}</span>
-            <span v-else>{{
-              ValueFilter(scope.row.group_id, groupsOptions)
-            }}</span>
-          </template>
-        </el-table-column>
-
-        <el-table-column
-          :label="$t('Account.actions')"
-          align="center"
-          min-width="320"
-          class-name="small-padding fixed-width"
-        >
-          <template #default="{ row }">
-            <div class="operation-actions">
-              <el-button
-                v-if="checkPermission(['admin']) || row.callsign === callsign"
-                size="small"
-                type="primary"
-                plain
-                class="compact-btn action-edit-btn"
-                @click="handleUpdate(row)"
-              >{{ $t("device.edit") }}</el-button>
-
-              <el-button
-                v-if="checkPermission(['admin']) || row.callsign === callsign"
-                :disabled="row.is_online === false"
-                size="small"
-                type="warning"
-                plain
-                class="compact-btn action-change-btn"
-                @click="handleChange(row)"
-              >{{ $t("device.change") }}</el-button>
-
-              <el-button
-                v-if="checkPermission(['admin']) || row.callsign === callsign"
-                :disabled="row.is_online === false"
-                size="small"
-                type="success"
-                plain
-                class="compact-btn action-at-btn"
-                @click="handleOpenAT(row)"
-              >{{ $t("device.at") }}</el-button>
-
-              <el-button
-                v-if="checkPermission(['admin']) || row.callsign === callsign"
-                size="small"
-                type="danger"
-                plain
-                class="compact-btn action-delete-btn"
-                @click="handleDelete(row)"
-              >{{ $t('employee.delete') }}</el-button>
-            </div>
-          </template>
-        </el-table-column>
-
-        <el-table-column prop="dev_rf_type" :label="$t('device.rfTypeLabel')" min-width="140" align="center" :sortable="true">
-          <template #default="scope">
-            <span>{{ ValueFilter(scope.row.rf_type, DevRFtypeOptions) }}</span>
-          </template>
-        </el-table-column>
-
-        <el-table-column prop="tunner" :label="$t('device.channelFrequency')" min-width="190" align="center">
-          <template #default="scope">
-            <div v-if="scope.row.device_parm" class="tag-wrap">
-              <el-tag v-if="scope.row.rf_type == 1">
-                R{{ scope.row.device_parm.one_recive_freq }}/T{{
-                  scope.row.device_parm.one_transmit_freq
-                }}
-              </el-tag>
-              <el-tag v-if="scope.row.rf_type == 2">
-                R{{ scope.row.device_parm.two_recive_freq }}/T{{
-                  scope.row.device_parm.two_transmit_freq
-                }}
-              </el-tag>
-              <el-tag v-if="scope.row.rf_type == 3">{{ $t('device.channelLabel') }}{{ scope.row.device_parm.moto_channel }}
-                {{ getChannelName(scope.row) }}
-              </el-tag>
-            </div>
-          </template>
-        </el-table-column>
-
-        <el-table-column :label="$t('device.model')" prop="dev_model" min-width="150" align="center" :sortable="true">
-          <template #default="scope">
-            <span>{{ ValueFilter(scope.row.dev_model, DevModelOptions) }}</span>
-          </template>
-        </el-table-column>
-
-        <el-table-column :label="$t('device.totalVoiceTime')" prop="voice_time" min-width="120" align="center" :sortable="true">
-          <template #default="scope">
-            <span>{{ formatVoiceTime(scope.row.voice_time) }}</span>
-          </template>
-        </el-table-column>
-
-        <el-table-column :label="$t('device.codecCaps')" prop="supported_codecs" min-width="140" align="center">
-          <template #default="scope">
-            <div class="codec-tags">
-              <el-tag v-if="scope.row.supported_codecs & 1" size="small" type="info" class="codec-tag">G.711</el-tag>
-              <el-tag v-if="scope.row.supported_codecs & 2" size="small" type="warning" class="codec-tag">Opus</el-tag>
-              <el-tag v-if="scope.row.supported_codecs & 4" size="small" type="success" class="codec-tag">Codec2</el-tag>
-            </div>
-          </template>
-        </el-table-column>
-
-        <el-table-column :label="$t('device.totalTraffic')" prop="traffic" min-width="120" align="center" :sortable="true">
-          <template #default="scope">
-            <span>{{ formatFileSize(scope.row.traffic) }}</span>
-          </template>
-        </el-table-column>
-
-        <el-table-column :label="$t('device.lastVoiceDuration')" prop="last_voice_duration" min-width="150" align="center" :sortable="true">
-          <template #default="scope">
-            <span>{{ formatVoiceTime(scope.row.last_voice_duration) }}</span>
-          </template>
-        </el-table-column>
-
-        <el-table-column :label="$t('device.lastVoiceTime')" prop="last_voice_end_time" min-width="160" align="center" :sortable="true">
-          <template #default="scope">
-            <span>{{ parseTime(scope.row.last_voice_end_time) }}</span>
-          </template>
-        </el-table-column>
-
-      </el-table>
-    </div>
+      <template #actions="{ row }">
+        <el-button
+          :type="safeButtonType(((row.status ?? 0) & 1) === 1 ? 'danger' : 'info')"
+          size="small"
+          plain
+          class="compact-btn status-receive-btn"
+          @click="updateStatus(row, 1)"
+        >{{ (row.status & 1) === 1 ? $t('device.disableReceive') : $t('device.receive') }}</el-button>
+        <el-button
+          :type="safeButtonType(((row.status ?? 0) & 2) === 2 ? 'danger' : 'info')"
+          size="small"
+          plain
+          class="compact-btn status-transmit-btn"
+          @click="updateStatus(row, 2)"
+        >{{ (row.status & 2) === 2 ? $t('device.disableTransmit') : $t('device.transmit') }}</el-button>
+        <el-button
+          v-if="checkPermission(['admin']) || row.callsign === callsign"
+          type="success"
+          plain
+          size="small"
+          class="compact-btn action-at-btn"
+          :disabled="row.is_online === false"
+          @click="handleOpenAT(row)"
+        >{{ $t("device.at") }}</el-button>
+        <el-button
+          v-if="checkPermission(['admin']) || row.callsign === callsign"
+          type="primary"
+          plain
+          size="small"
+          class="compact-btn action-edit-btn"
+          @click="handleUpdate(row)"
+        >{{ $t("device.edit") }}</el-button>
+        <el-button
+          v-if="row.dev_model === 202"
+          size="small"
+          type="info"
+          plain
+          class="compact-btn action-bm-btn"
+          @click="$router.push('/public/bm-network')"
+        >BM网络</el-button>
+      </template>
+    </responsive-table>
 
     <pagination
-      class="platform-theme-pagination"
-      v-show="total > 0"
+      v-show="total > 0 && device !== 'mobile'"
       v-model:page="listQuery.page"
       v-model:limit="listQuery.limit"
+      class="platform-theme-pagination"
       :total="total"
       @pagination="getList"
     />
-
-    <div v-if="showtable == false" class="box-grid">
-      <div
-        v-for="item in list"
-        :key="item.id"
-        class="box-item"
-      >
-        <div class="box-header">
-          <el-tag :type="item.is_online ? 'success' : 'info'" size="small" effect="dark" class="id-tag">{{ item.id }}</el-tag>
-          <span class="callsign">{{ item.callsign }}-{{ item.ssid }}</span>
-          <el-tag size="small" type="info">DMR {{ item.dmrid }}</el-tag>
-          <el-tag v-if="item.status == 1" size="small" type="danger">🈲</el-tag>
-        </div>
-        <div class="box-info">
-          <div class="info-row">
-            <span class="label">{{ $t('device.name') }}:</span>
-            <span class="value">{{ item.ssid === 200 && item.name === '' ? $t('device.serverLink') : item.name || '-' }}</span>
-          </div>
-          <div class="info-row">
-            <span class="label">{{ $t('device.model') }}:</span>
-            <span class="value">{{ ValueFilter(item.dev_model, DevModelOptions) }}</span>
-          </div>
-          <div class="info-row">
-            <span class="label">{{ $t('device.codecCaps') }}:</span>
-            <span class="value">
-              <el-tag v-if="item.supported_codecs & 1" size="small" type="info">G.711</el-tag>
-              <el-tag v-if="item.supported_codecs & 2" size="small" type="warning">Opus</el-tag>
-              <el-tag v-if="item.supported_codecs & 4" size="small" type="success">Codec2</el-tag>
-              <template v-if="!item.supported_codecs">-</template>
-            </span>
-          </div>
-          <div class="info-row">
-            <span class="label">{{ $t('device.priority') }}:</span>
-            <span class="value">{{ item.priority }}</span>
-          </div>
-          <div class="info-row">
-            <span class="label">{{ $t('device.rfTypeLabel') }}:</span>
-            <span class="value">{{ ValueFilter(item.rf_type, DevRFtypeOptions) }}</span>
-          </div>
-          <div class="info-row">
-            <span class="label">{{ $t('device.channelFrequency') }}:</span>
-            <span class="value freq">
-              <template v-if="item.device_parm">
-                <template v-if="item.rf_type == 1">R{{ item.device_parm.one_recive_freq }}/T{{ item.device_parm.one_transmit_freq }}</template>
-                <template v-else-if="item.rf_type == 2">R{{ item.device_parm.two_recive_freq }}/T{{ item.device_parm.two_transmit_freq }}</template>
-                <template v-else-if="item.rf_type == 3">{{ $t('device.channelLabel') }}{{ item.device_parm.moto_channel }} {{ getChannelName(item) }}</template>
-              </template>
-              <template v-else>-</template>
-            </span>
-          </div>
-          <div class="info-row">
-            <span class="label">{{ $t('device.currentGroup') }}:</span>
-            <span class="value">
-              <template v-if="item.group_id > 0 && item.group_id < 1000">{{ $t('device.privateGroup') }}</template>
-              <template v-else>{{ ValueFilter(item.group_id, groupsOptions) }}</template>
-            </span>
-          </div>
-          <div class="info-row">
-            <span class="label">{{ $t('device.owner') }}:</span>
-            <span class="value">{{ ValueFilter(item.ower_id, userOptions) }}</span>
-          </div>
-          <div class="info-row">
-            <span class="label">{{ $t('device.totalVoiceTime') }}:</span>
-            <span class="value">{{ formatVoiceTime(item.voice_time) }}</span>
-          </div>
-          <div class="info-row">
-            <span class="label">{{ $t('device.totalTraffic') }}:</span>
-            <span class="value">{{ formatFileSize(item.traffic) }}</span>
-          </div>
-          <div class="info-row">
-            <span class="label">{{ $t('device.lastVoiceDuration') }}:</span>
-            <span class="value">{{ formatVoiceTime(item.last_voice_duration) }}</span>
-          </div>
-          <div class="info-row">
-            <span class="label">{{ $t('device.lastVoiceTime') }}:</span>
-            <span class="value">{{ parseTime(item.last_voice_end_time) }}</span>
-          </div>
-        </div>
-        <div class="box-footer">
-          <div class="status-btns">
-            <el-button
-              :type="((item.status ?? 0) & 1) === 1 ? 'danger' : 'success'"
-              size="small"
-              plain
-              class="compact-btn status-receive-btn"
-              :disabled="item.is_online === false"
-              @click="updateStatus(item, 1)"
-            >{{ ((item.status ?? 0) & 1) === 1 ? $t('device.disableReceive') : $t('device.receive') }}</el-button>
-            <el-button
-              :type="((item.status ?? 0) & 2) === 2 ? 'danger' : 'success'"
-              size="small"
-              plain
-              class="compact-btn status-transmit-btn"
-              :disabled="item.is_online === false"
-              @click="updateStatus(item, 2)"
-            >{{ ((item.status ?? 0) & 2) === 2 ? $t('device.disableTransmit') : $t('device.transmit') }}</el-button>
-          </div>
-          <div class="action-btns">
-            <el-button
-              v-if="checkPermission(['admin']) || item.callsign === callsign"
-              type="warning"
-              plain
-              size="small"
-              class="compact-btn action-change-btn"
-              :disabled="item.is_online === false"
-              @click="handleChange(item)"
-            >{{ $t("device.change") }}</el-button>
-            <el-button
-              v-if="checkPermission(['admin']) || item.callsign === callsign"
-              type="success"
-              plain
-              size="small"
-              class="compact-btn action-at-btn"
-              :disabled="item.is_online === false"
-              @click="handleOpenAT(item)"
-            >{{ $t("device.at") }}</el-button>
-            <el-button
-              v-if="checkPermission(['admin']) || item.callsign === callsign"
-              type="primary"
-              plain
-              size="small"
-              class="compact-btn action-edit-btn"
-              @click="handleUpdate(item)"
-            >{{ $t("device.edit") }}</el-button>
-            <el-button
-              v-if="checkPermission(['admin']) || item.callsign === callsign"
-              type="danger"
-              plain
-              size="small"
-              class="compact-btn action-delete-btn"
-              @click="handleDelete(item)"
-            >{{ $t('employee.delete') }}</el-button>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <el-dialog
       v-model="dialogFormVisible"
@@ -441,8 +518,8 @@
 
         <el-form-item :label="$t('device.grouproom')" prop="group_id">
           <el-select
-            popper-class="platform-theme-select-dropdown"
             v-model="temp.group_id"
+            popper-class="platform-theme-select-dropdown"
             filterable
             clearable
             style="width: 90%"
@@ -507,7 +584,6 @@
             <el-input v-model="temp.chan_name[channel]" />
           </el-form-item>
         </div>
-
 
       </el-form>
 
@@ -587,8 +663,8 @@
               <!-- <el-input v-model="temp.device_parm.dest_domainname" style="width: 150px" /> -->
 
               <el-select
-                popper-class="platform-theme-select-dropdown"
                 v-model="temp.device_parm.dest_domainname"
+                popper-class="platform-theme-select-dropdown"
                 filterable
                 allow-create
                 default-first-option
@@ -766,8 +842,8 @@
           <el-collapse-item :title="$t('device.motoSection')" name="3">
             <el-form-item :label="$t('device.channelSwitch') + ':'" prop="moto_channel">
               <el-select
-            popper-class="platform-theme-select-dropdown"
                 v-model="temp.device_parm.moto_channel"
+                popper-class="platform-theme-select-dropdown"
                 style="width: 95%"
                 @change="
                   changeByte('moto_channel', temp.device_parm.moto_channel)
@@ -820,8 +896,8 @@
             </el-form-item>
             <el-form-item :label="$t('device.relayTemplate') + ':'" prop="current_relay">
               <el-select
-            popper-class="platform-theme-select-dropdown"
                 v-model="current_relay"
+                popper-class="platform-theme-select-dropdown"
                 style="width: 95%"
                 filterable
                 clearable
@@ -887,8 +963,8 @@
 
             <el-form-item :label="$t('device.relayTemplate') + ':'" prop="current_relay">
               <el-select
-            popper-class="platform-theme-select-dropdown"
                 v-model="current_relay"
+                popper-class="platform-theme-select-dropdown"
                 style="width: 95%"
                 filterable
                 clearable
@@ -929,8 +1005,8 @@
     <el-dialog
       v-model="dialogFormATVisible"
       width="70%"
-      class="platform-theme-dialog"
-      :title="textMap[dialogStatus]"
+      class="platform-theme-dialog device-at-dialog"
+      :title="textMap[dialogStatus] || 'AT指令'"
       :center="device === 'mobile'"
       :fullscreen="device === 'mobile'"
     >
@@ -938,91 +1014,132 @@
         ref="deviceATForm"
         :rules="rules"
         :model="tempat"
-        label-position="right"
-        label-width="120px"
-        style="width: 85%; margin-left: 5px"
+        :label-position="device === 'mobile' ? 'top' : 'right'"
+        :label-width="device === 'mobile' ? 'auto' : '120px'"
+        :style="device === 'mobile' ? 'width: 100%' : 'width: 85%; margin-left: 5px'"
+        class="device-at-form"
       >
-
         <el-form-item :label="$t('device.deviceInfoLabel')" prop="version">
-          {{ tempat.version }}
-
+          <span class="device-at-version">{{ tempat.version || '--' }}</span>
         </el-form-item>
 
-        <el-form-item v-for="v, k in tempat.atmap" :key="k" :label="k + '='" :prop="k">
-          <el-select
-            popper-class="platform-theme-select-dropdown"
-            v-if="k === 'AT+D_IP'"
-            v-model="tempat.atmap[k]"
-            filterable
-            allow-create
-            default-first-option
-            :placeholder="$t('device.selectServer')"
-          >
-            <el-option
-              v-for="item in platformOptions"
-              :key="item.id"
-              :label="item.host + '-' + item.name + '-' + '-' + $t('device.online') + ':' +
-                item.online + ',' + $t('device.peak') + ':' + item.total"
-              :value="item.host"
-            />
-          </el-select>
+        <el-collapse v-model="atActiveCollapse" class="device-at-collapse">
+          <el-collapse-item title="常用网络与系统参数" name="basic">
+            <template v-for="(v, k) in tempat.atmap" :key="k">
+              <el-form-item
+                v-if="isBasicAtKey(k)"
+                :label="k + '='"
+                :prop="k"
+                class="at-form-item"
+              >
+                <div class="at-control-row">
+                  <el-select
+                    v-if="k === 'AT+D_IP'"
+                    v-model="tempat.atmap[k]"
+                    popper-class="platform-theme-select-dropdown"
+                    filterable
+                    allow-create
+                    default-first-option
+                    :placeholder="$t('device.selectServer')"
+                  >
+                    <el-option
+                      v-for="item in platformOptions"
+                      :key="item.id"
+                      :label="item.host + '-' + item.name + '-' + '-' + $t('device.online') + ':' +
+                        item.online + ',' + $t('device.peak') + ':' + item.total"
+                      :value="item.host"
+                    />
+                  </el-select>
 
-          <el-select
-            popper-class="platform-theme-select-dropdown"
-            v-else-if="['AT+APRS', 'AT+DHCP', 'AT+DUPLEX', 'AT+LOOP', 'AT+PTT_RES'].includes(k)"
-            v-model="tempat.atmap[k]"
-            default-first-option
-          >
-            <el-option v-for="item, idx in ['ON', 'OFF',]" :key="idx" :label="item" :value="item" />
-          </el-select>
+                  <el-select
+                    v-else-if="['AT+APRS', 'AT+DHCP', 'AT+DUPLEX', 'AT+LOOP', 'AT+PTT_RES'].includes(k)"
+                    v-model="tempat.atmap[k]"
+                    popper-class="platform-theme-select-dropdown"
+                    default-first-option
+                  >
+                    <el-option v-for="(item, idx) in ['ON', 'OFF']" :key="idx" :label="item" :value="item" />
+                  </el-select>
 
-          <el-select
-            v-else-if="k === 'AT+DCD'"
-            popper-class="platform-theme-select-dropdown"
-            v-model="tempat.atmap[k]"
-            default-first-option
-          >
-            <el-option
-              v-for="item, idx in ['SQL_LO', 'VOX', 'MANUAL', 'DISABLE',]"
-              :key="idx"
-              :label="item"
-              :value="item"
-            />
-          </el-select>
+                  <el-select
+                    v-else-if="k === 'AT+DCD'"
+                    v-model="tempat.atmap[k]"
+                    popper-class="platform-theme-select-dropdown"
+                    default-first-option
+                  >
+                    <el-option
+                      v-for="(item, idx) in ['SQL_LO', 'VOX', 'MANUAL', 'DISABLE']"
+                      :key="idx"
+                      :label="item"
+                      :value="item"
+                    />
+                  </el-select>
 
-          <el-select
-            v-else-if="k === 'AT+PTT_EN'"
-            popper-class="platform-theme-select-dropdown"
-            v-model="tempat.atmap[k]"
-            default-first-option
-          >
-            <el-option v-for="item, idx in ['ENABLE', 'DISABLE',]" :key="idx" :label="item" :value="item" />
-          </el-select>
+                  <el-select
+                    v-else-if="k === 'AT+PTT_EN'"
+                    v-model="tempat.atmap[k]"
+                    popper-class="platform-theme-select-dropdown"
+                    default-first-option
+                  >
+                    <el-option v-for="(item, idx) in ['ENABLE', 'DISABLE']" :key="idx" :label="item" :value="item" />
+                  </el-select>
 
-          <el-select
-            v-else-if="['AT+PW', 'AT+PTT_IO'].includes(k)"
-            popper-class="platform-theme-select-dropdown"
-            v-model="tempat.atmap[k]"
-            default-first-option
-          >
-            <el-option v-for="item, idx in ['H', 'L',]" :key="idx" :label="item" :value="item" />
-          </el-select>
+                  <el-select
+                    v-else-if="['AT+PW', 'AT+PTT_IO'].includes(k)"
+                    v-model="tempat.atmap[k]"
+                    popper-class="platform-theme-select-dropdown"
+                    default-first-option
+                  >
+                    <el-option v-for="(item, idx) in ['H', 'L']" :key="idx" :label="item" :value="item" />
+                  </el-select>
 
-          <el-input v-else v-model="tempat.atmap[k]" style="width: 215px;" />
-          <el-button @click="handleChangeAT(tempat.callsign, tempat.ssid, k, tempat.atmap[k])">{{ $t('device.execute') }} </el-button>
-          {{ ATREADMEOptions[k] }}
+                  <el-input v-else v-model="tempat.atmap[k]" class="at-val-input" />
+                  <el-button size="small" type="primary" plain class="at-exec-btn" @click="handleChangeAT(tempat.callsign, tempat.ssid, k, tempat.atmap[k])">
+                    {{ $t('device.execute') }}
+                  </el-button>
+                  <span v-if="ATREADMEOptions[k]" class="at-readme-hint">{{ ATREADMEOptions[k] }}</span>
+                </div>
+              </el-form-item>
+            </template>
+          </el-collapse-item>
 
-        </el-form-item>
-        <el-form-item :label="$t('device.customAt')">
-          <el-input v-model="tempatcommand" style="width: 10%;" />=
-          <el-input v-model="tempatdata" style="width: 18%;" />
-          <el-button @click="handleChangeAT(tempat.callsign, tempat.ssid, tempatcommand, tempatdata)">{{ $t('device.execute') }} </el-button>
-        </el-form-item>
+          <el-collapse-item title="高级无线与硬件参数" name="advanced">
+            <template v-for="(v, k) in tempat.atmap" :key="k">
+              <el-form-item
+                v-if="!isBasicAtKey(k)"
+                :label="k + '='"
+                :prop="k"
+                class="at-form-item"
+              >
+                <div class="at-control-row">
+                  <el-input v-model="tempat.atmap[k]" class="at-val-input" />
+                  <el-button size="small" type="primary" plain class="at-exec-btn" @click="handleChangeAT(tempat.callsign, tempat.ssid, k, tempat.atmap[k])">
+                    {{ $t('device.execute') }}
+                  </el-button>
+                  <span v-if="ATREADMEOptions[k]" class="at-readme-hint">{{ ATREADMEOptions[k] }}</span>
+                </div>
+              </el-form-item>
+            </template>
+          </el-collapse-item>
 
+          <el-collapse-item title="自定义 AT 指令" name="custom">
+            <el-form-item :label="$t('device.customAt')" class="custom-at-form-item">
+              <div class="custom-at-row">
+                <el-input v-model="tempatcommand" placeholder="如 AT+READ" class="custom-at-cmd" />
+                <span class="custom-at-eq">=</span>
+                <el-input v-model="tempatdata" placeholder="参数值" class="custom-at-val" />
+                <el-button type="primary" @click="handleChangeAT(tempat.callsign, tempat.ssid, tempatcommand, tempatdata)">
+                  {{ $t('device.execute') }}
+                </el-button>
+              </div>
+            </el-form-item>
+          </el-collapse-item>
+        </el-collapse>
       </el-form>
 
       <template #footer>
-        <div class="dialog-footer" />
+        <div class="dialog-footer">
+          <el-button @click="dialogFormATVisible = false">{{ $t('device.close') }}</el-button>
+        </div>
       </template>
     </el-dialog>
 
@@ -1081,6 +1198,7 @@ import {
 } from '@/utils'
 
 import Pagination from '@/components/Pagination/index.vue' // secondary package based on el-pagination
+import ResponsiveTable from '@/components/ResponsiveTable/index.vue'
 import { mapState } from 'pinia'
 import { useAppStore } from '@/store/modules/app'
 import { useUserStore } from '@/store/modules/user'
@@ -1088,7 +1206,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 
 export default {
   name: 'ComplexTable',
-  components: { Pagination },
+  components: { Pagination, ResponsiveTable },
   directives: { waves },
   data() {
     const validateFreq = (rule, value, callback) => {
@@ -1105,6 +1223,15 @@ export default {
     return {
       tableKey: 0,
       list: [],
+      deviceColumns: [
+        { prop: 'callsign', label: '呼号/SSID', formatter: (row) => `${row.callsign || '--'}-${row.ssid ?? ''}` },
+        { prop: 'name', label: '名称' },
+        { prop: 'dmrid', label: 'DMR-ID' },
+        { prop: 'group_id', label: '当前组', formatter: (row) => (row.group_id > 0 && row.group_id < 999) ? `个人房间${row.group_id}` : (ValueFilter(row.group_id, this.groupsOptions) || row.group_id) },
+        { prop: 'priority', label: '优先级' },
+        { prop: 'traffic', label: '总流量', formatter: (row) => formatFileSize(row.traffic) }
+      ],
+      atActiveCollapse: ['basic'],
       current_relay: {
         up_freq: '430.0000',
         down_freq: '430.0000',
@@ -1252,6 +1379,23 @@ export default {
 
         this.listLoading = false
       }).catch(() => { this.listLoading = false })
+    },
+
+    handleLoadMore() {
+      if (this.list.length >= this.total || this.listLoading) return
+      this.listQuery.page += 1
+      this.listLoading = true
+      this.fetchDeviceList(this.listQuery).then((response) => {
+        const items = (response.data.items || []).map(item => this.normalizeDeviceRow(item))
+        this.list = [...this.list, ...items]
+        this.total = response.data.total
+      }).finally(() => {
+        this.listLoading = false
+      })
+    },
+
+    isBasicAtKey(k) {
+      return ['AT+D_IP', 'AT+DHCP', 'AT+APRS', 'AT+DUPLEX', 'AT+LOOP', 'AT+PTT_EN', 'AT+PTT_RES', 'AT+PW', 'AT+PTT_IO', 'AT+DCD'].includes(k)
     },
 
     normalizeChanName(chanName) {
@@ -2187,6 +2331,61 @@ export default {
 
   .box-footer :deep(.compact-btn) {
     width: 100%;
+  }
+}
+
+.device-at-dialog {
+  .device-at-version {
+    font-weight: 600;
+    color: var(--color-text-primary, #303133);
+  }
+
+  .at-control-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    width: 100%;
+
+    .at-val-input {
+      width: 215px;
+      max-width: 100%;
+    }
+
+    .at-readme-hint {
+      font-size: 12px;
+      color: var(--color-text-secondary, #909399);
+      margin-left: 4px;
+    }
+  }
+
+  .custom-at-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    width: 100%;
+
+    .custom-at-cmd {
+      flex: 1 1 120px;
+    }
+    .custom-at-eq {
+      font-weight: bold;
+      color: var(--color-text-secondary, #909399);
+    }
+    .custom-at-val {
+      flex: 2 1 160px;
+    }
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .device-at-dialog {
+    .at-control-row {
+      .at-val-input {
+        width: 100%;
+      }
+    }
   }
 }
 </style>

@@ -11,15 +11,17 @@ export default defineConfig(({ mode }) => {
   const baseApi = env.VITE_BASE_API || '/dev-api'
   const generateDts = mode !== 'production'
 
+  const isTest = Boolean(process.env.VITEST || mode === 'test')
+
   return {
     plugins: [
       vue(),
       AutoImport({
-        resolvers: [ElementPlusResolver({ importStyle: 'css' })],
+        resolvers: [ElementPlusResolver({ importStyle: isTest ? false : 'css' })],
         dts: generateDts ? 'src/auto-imports.d.ts' : false
       }),
       Components({
-        resolvers: [ElementPlusResolver({ importStyle: 'css', directives: true })],
+        resolvers: [ElementPlusResolver({ importStyle: isTest ? false : 'css', directives: true })],
         dts: generateDts ? 'src/components.d.ts' : false
       }),
       createSvgIconsPlugin({
