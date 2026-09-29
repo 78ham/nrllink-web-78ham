@@ -387,21 +387,22 @@ import checkPermission from '@/utils/permission' // 权限判断函数
 import waves from '@/directive/waves' // waves directive
 import { parseTime, ValueFilter } from '@/utils'
 import { ServerTypeOptions } from '@/utils/system'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
+import { createCrudListMethods } from '@/composables/useCrudList'
 // import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 import { mapState } from 'pinia'
 import { useAppStore } from '@/store/modules/app'
 import { useUserStore } from '@/store/modules/user'
 
 export default {
-  name: 'ComplexTable',
+  // keep-alive include 按组件名精确匹配 cachedViews 中的路由名，必须与路由 name 一致
+  // eslint-disable-next-line vue/component-definition-name-casing
+  name: 'relay',
   directives: { waves },
   data() {
     return {
       tableKey: 0,
       list: [],
-
-      chartData: {},
       devicesOptions: [],
       ServerTypeOptions,
       ctcssOptions,
@@ -414,7 +415,6 @@ export default {
         ower_callsign: '',
         page: 1
       },
-      showReviewer: false,
       temp: {
         id: undefined,
         name: ''
@@ -454,6 +454,19 @@ export default {
     deleteRelay,
     ValueFilter,
     parseTime,
+    ...createCrudListMethods({
+      fetchList: fetchRelayList,
+      download: {
+        headers: ['ID', '频点名称', '上行频率', '下行频率', '发射亚音频', '接收亚音频'],
+        fields: ['id', 'name', 'up_freq', 'down_freq', 'send_cxcss', 'recive_cxcss'],
+        filename: 'relay-list'
+      },
+      remove: deleteRelay,
+      afterRemove: 'splice',
+      confirmText: '此操作将永久删除该频点, 是否继续?',
+      cancelledText: '已取消删除',
+      removedText: '操作完成'
+    }),
     relayStatusLabel(status) {
       if (status === 1 || status === '1' || status === true) return this.$t('relay.enabled')
       if (status === 0 || status === '0' || status === false) return this.$t('relay.disabled')
@@ -466,34 +479,6 @@ export default {
       if (status === 0 || status === '0' || status === false || status === 'offline') return 'status-offline'
       return 'status-neutral'
     },
-    getList() {
-      this.listLoading = true
-      this.fetchRelayList(this.listQuery).then(response => {
-        this.list = response?.data?.items || []
-        this.total = response?.data?.total || this.list.length
-      }).finally(() => {
-        this.listLoading = false
-      })
-    },
-    handleFilter() {
-      this.listQuery.page = 1
-      this.getList()
-    },
-
-    sortChange(data) {
-      const { prop, order } = data
-      if (prop === 'id') {
-        this.sortByID(order)
-      }
-    },
-    sortByID(order) {
-      if (order === 'ascending') {
-        this.listQuery.sort = '+id'
-      } else {
-        this.listQuery.sort = '-id'
-      }
-      this.handleFilter()
-    },
     resetTemp() {
       this.temp = {
         id: undefined,
@@ -503,23 +488,14 @@ export default {
         status: 1
       }
     },
-    handleCreate() {
-      this.resetTemp()
-      this.dialogStatus = 'create'
-      this.dialogFormVisible = true
-      this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-      })
-    },
     createData() {
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
-          // this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
           createRelay(this.temp).then(response => {
             this.getList()
             this.dialogFormVisible = false
             ElMessage.success(response?.data?.message || '创建成功')
-          })
+          }).catch(() => {})
         }
       })
     },
@@ -532,21 +508,10 @@ export default {
       }
       return '未指定'
     },
-
-    handleUpdate(row) {
-      this.temp = Object.assign({}, row) // copy obj
-      //  this.temp.timestamp = new Date(this.temp.timestamp);
-      this.dialogStatus = 'update'
-      this.dialogFormVisible = true
-      this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-      })
-    },
     updateData() {
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          //    tempData.timestamp = +new Date(tempData.timestamp); // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
           updateRelay(tempData).then(response => {
             for (const v of this.list) {
               if (v.id === this.temp.id) {
@@ -557,84 +522,9 @@ export default {
             }
             this.dialogFormVisible = false
             ElMessage.success(response?.data?.message || '更新成功')
-          })
+          }).catch(() => {})
         }
       })
-    },
-    handleDelete(row) {
-      ElMessageBox.confirm('此操作将永久删除该频点, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      })
-        .then(() => {
-          deleteRelay(row).then(response => {
-            const message = response?.data?.message || '操作完成'
-            ElMessage.success(message)
-            this.listLoading = false
-          })
-          const index = this.list.indexOf(row)
-          this.list.splice(index, 1)
-
-          ElMessage.success('删除成功!')
-        })
-        .catch(() => {
-          ElMessage.info('已取消删除')
-        })
-    },
-    async handleDownload() {
-      this.downloadLoading = true
-      // console.log(this.list)
-      if (this.list === null) {
-        this.downloadLoading = false
-        return
-      }
-      const excel = await import('@/vendor/Export2Excel')
-      const tHeader = ['姓名', '电话', '性别', '出生年月日']
-      const filterVal = ['name', 'phone', 'sex']
-      const data = this.formatJson(filterVal, this.list)
-      await excel.export_json_to_excel({
-        header: tHeader,
-        data,
-        filename: 'device-list'
-      })
-      this.downloadLoading = false
-    },
-
-    handleUpload() {
-    },
-
-    formatJson(filterVal, jsonData) {
-      return jsonData.map(v =>
-        filterVal.map(j => {
-          if (j === 'timestamp') {
-            return parseTime(v[j])
-          } else {
-            return v[j]
-          }
-        })
-      )
-    },
-
-    returnIndex(id, array) {
-      for (const index in array) {
-        if (array[index].id === id) {
-          //  console.log('id:',id,index,array)
-          return index
-        }
-      }
-      // console.log("return 0")
-      return 0
-    },
-
-    hasin(id, array) {
-      //    console.log(id,array)
-      for (const i of array) {
-        if (i === id) {
-          return true
-        }
-      }
-      return false
     }
   }
 }

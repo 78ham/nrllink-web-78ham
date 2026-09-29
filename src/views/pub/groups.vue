@@ -126,7 +126,8 @@ import { fetchMyDeviceList, updateDevice } from '@/api/device'
 // import { fetchServerList } from '@/api/server'
 
 import waves from '@/directive/waves' // waves directive
-import { parseTime, ValueFilter } from '@/utils'
+import { ValueFilter } from '@/utils'
+import { createCrudListMethods } from '@/composables/useCrudList'
 import { groupTypeOptions } from '@/utils/system'
 import { ElMessage } from 'element-plus'
 // import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -134,7 +135,9 @@ import { mapState } from 'pinia'
 import { useAppStore } from '@/store/modules/app'
 
 export default {
-  name: 'ComplexTable',
+  // keep-alive include 按组件名精确匹配 cachedViews 中的路由名，必须与路由 name 一致
+  // eslint-disable-next-line vue/component-definition-name-casing
+  name: 'grouproom',
   directives: { waves },
   data() {
     return {
@@ -145,8 +148,6 @@ export default {
       mydevicesOptions: [],
       groupodevlist: null,
       activeNames: [],
-
-      chartData: {},
       userTimeLinelist: null,
       activeName: 'first',
       total: 0,
@@ -156,7 +157,6 @@ export default {
 
         // sort: "+id"
       },
-      showReviewer: false,
       rooms: [
 
       ],
@@ -188,7 +188,7 @@ export default {
 
     this.fetchMyDeviceList({}).then(response => {
       this.mydevicesOptions = Object.values(response.data.items)
-    })
+    }).catch(() => {})
   },
   mounted() {
     window.addEventListener('resize', this.syncDialogScreenMode, { passive: true })
@@ -204,6 +204,13 @@ export default {
     fetchGroupListMini,
     fetchGroupDevicesList,
     ValueFilter,
+    ...createCrudListMethods({
+      download: {
+        headers: ['ID', '群组名称', '类型', '在线设备数', '设备总数', '状态'],
+        fields: ['id', 'name', 'type', 'online_dev_number', 'total_dev_number', 'status'],
+        filename: 'group-list'
+      }
+    }),
     syncDialogScreenMode() {
       if (typeof window === 'undefined') {
         return
@@ -217,11 +224,6 @@ export default {
           devlist: Array.isArray(group.devlist) ? group.devlist : []
         }))
       }).catch(() => {})
-    },
-
-    handleFilter() {
-      this.listQuery.page = 1
-      this.getList()
     },
     getJoinableDevices(group) {
       return this.mydevicesOptions.filter(device => !this.hasindevlist(device.id, group.devmap))
@@ -257,103 +259,14 @@ export default {
     },
     changeGroup(tempData, groupid) {
       tempData.group_id = groupid
-
-      //    tempData.timestamp = +new Date(tempData.timestamp); // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
       updateDevice(tempData).then(response => {
         this.getList()
         this.joinDevicesDialogVisible = false
         ElMessage.success(response?.data?.message || '操作成功')
-      })
+      }).catch(() => {})
     },
-    sortChange(data) {
-      const { prop, order } = data
-      if (prop === 'id') {
-        this.sortByID(order)
-      }
-    },
-    sortByID(order) {
-      if (order === 'ascending') {
-        this.listQuery.sort = '+id'
-      } else {
-        this.listQuery.sort = '-id'
-      }
-      this.handleFilter()
-    },
-    async handleDownload() {
-      this.downloadLoading = true
-      // console.log(this.list)
-      if (this.list === null) {
-        this.downloadLoading = false
-        return
-      }
-      const excel = await import('@/vendor/Export2Excel')
-      const tHeader = ['姓名', '电话', '性别', '出生年月日']
-      const filterVal = ['name', 'phone', 'sex']
-      const data = this.formatJson(filterVal, this.list)
-      await excel.export_json_to_excel({
-        header: tHeader,
-        data,
-        filename: 'device-list'
-      })
-      this.downloadLoading = false
-    },
-
-    handleUpload() {
-      // this.UploadLoading = true;
-      // import("@/vendor/Export2Excel").then(excel => {
-      //   const tHeader = ["姓名", "电话", "性别", "出生年月日", "意向账号", "意向等级"];
-      //   const filterVal = [
-      //     "name",
-      //     "phone",
-      //     "sex",
-      //     "intendent_course",
-      //     "intendent_level"
-      //   ];
-      //   const data = this.formatJson(filterVal, this.list);
-      //   excel.export_json_to_excel({
-      //     header: tHeader,
-      //     data,
-      //     filename: "table-list"
-      //   });
-      //   this.downloadLoading = false;
-      // });
-    },
-
-    formatJson(filterVal, jsonData) {
-      return jsonData.map(v =>
-        filterVal.map(j => {
-          if (j === 'timestamp') {
-            return parseTime(v[j])
-          } else {
-            return v[j]
-          }
-        })
-      )
-    },
-
-    returnIndex(id, array) {
-      for (const index in array) {
-        if (array[index].id === id) {
-          //  console.log('id:',id,index,array)
-          return index
-        }
-      }
-      // console.log("return 0")
-      return 0
-    },
-
     hasindevlist(id, devlist) {
       return Object.values(devlist || {}).some(item => item.id === id)
-    },
-
-    hasin(id, array) {
-      //    console.log(id,array)
-      for (const i of array) {
-        if (i === id) {
-          return true
-        }
-      }
-      return false
     }
   }
 }

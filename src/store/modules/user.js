@@ -63,15 +63,15 @@ export const useUserStore = defineStore('user', {
         this.token = ''
         this.roles = []
         this.routes = []
-        this.id = 0
+        this.id = ''
         this.name = ''
         this.phone = ''
         this.callsign = ''
         this.dmrid = ''
         this.mdcid = ''
-        this.status = 0
+        this.status = ''
         this.expire_time = ''
-        this.package_type = 0
+        this.package_type = ''
         this.billing_enabled = false
         this.avatar = ''
         this.introduction = ''
@@ -88,7 +88,7 @@ export const useUserStore = defineStore('user', {
     async changeRoles(role) {
       // DEV only: role switching for testing
       if (import.meta.env.PROD) {
-        console.warn('[DEV] changeRoles is development-only, ignoring in production')
+        console.warn('[PROD] changeRoles is development-only, ignoring in production')
         return []
       }
       const token = `${role}-token`

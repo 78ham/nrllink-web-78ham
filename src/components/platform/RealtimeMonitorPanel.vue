@@ -90,6 +90,7 @@ export default {
       websock: null,
       wsConnected: false,
       wsRetryTimer: null,
+      wsRetryDelay: 2000,
       wsPingTimer: null,
       monitorDestroyed: false,
       rooms: [],
@@ -163,7 +164,11 @@ export default {
         this.wsPingTimer = null
       }
       if (this.websock) {
-        this.websock.close()
+        try {
+          this.websock.close(1000, 'component destroy')
+        } catch (error) {
+          console.error('Failed to close monitor websocket:', error)
+        }
         this.websock = null
       }
       if (this.audioContext) {
@@ -201,6 +206,7 @@ export default {
       ws.binaryType = 'arraybuffer'
       ws.onopen = () => {
         this.wsConnected = true
+        this.wsRetryDelay = 2000 // 连接成功后重置退避
         this.wsPingTimer = window.setInterval(() => {
           if (this.websock && this.websock.readyState === WebSocket.OPEN) {
             this.websock.send(JSON.stringify({ action: 'ping' }))
@@ -219,9 +225,12 @@ export default {
         }
         this.websock = null
         if (!this.monitorDestroyed) {
+          // 指数退避重连：2s 起步、上限 30s，避免后端不可用时的无效重连风暴
+          const delay = this.wsRetryDelay
+          this.wsRetryDelay = Math.min(delay * 2, 30000)
           this.wsRetryTimer = window.setTimeout(() => {
             this.connectMonitorWebSocket()
-          }, 2000)
+          }, delay)
         }
       }
       this.websock = ws
@@ -243,23 +252,8 @@ export default {
       }
     },
     handleWindowUnload() {
-      this.monitorDestroyed = true
-      if (this.wsRetryTimer) {
-        clearTimeout(this.wsRetryTimer)
-        this.wsRetryTimer = null
-      }
-      if (this.wsPingTimer) {
-        clearInterval(this.wsPingTimer)
-        this.wsPingTimer = null
-      }
-      if (this.websock) {
-        try {
-          this.websock.close(1000, 'page unload')
-        } catch (error) {
-          console.error('Failed to close monitor websocket:', error)
-        }
-        this.websock = null
-      }
+      // 与组件卸载同一套清理逻辑（页面即将离开，音频资源一并释放）
+      this.destroyCallMonitor()
     },
     handleMonitorJSON(payload) {
       switch (payload.type) {

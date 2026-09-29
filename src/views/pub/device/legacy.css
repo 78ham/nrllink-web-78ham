@@ -1,0 +1,48 @@
+.text {
+  font-size: 14px;
+}
+
+.el-table .warning-row {
+  background: oldlace;
+}
+
+.el-table .success-row {
+  background: #0df3e8;
+}
+
+.item {
+  margin-bottom: 18px;
+}
+
+.maindiv {
+  width: 100%;
+  height: auto;
+  /* 不要使用定高度，后果自负 */
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.blockdiv {
+  margin: 5px;
+}
+
+.clearfix:before,
+.clearfix:after {
+  display: table;
+  content: "";
+}
+
+.clearfix:after {
+  clear: both;
+}
+
+.el-card__body {
+  padding: 20px;
+}
+
+.box-card {
+  width: 340px;
+  float: left;
+  margin-right: 10px;
+  margin-bottom: 10px;
+}

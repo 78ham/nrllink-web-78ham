@@ -305,6 +305,7 @@ import {
 import waves from '@/directive/waves'
 import Pagination from '@/components/Pagination/index.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { createCrudListMethods } from '@/composables/useCrudList'
 import { mapState } from 'pinia'
 import { useAppStore } from '@/store/modules/app'
 
@@ -396,6 +397,17 @@ export default {
     this.stopAutoApproveDaemon()
   },
   methods: {
+    ...createCrudListMethods({
+      fetchList: listReg,
+      download: {
+        headers: ['ID', '姓名', '呼号', '状态'],
+        fields: ['id', 'name', 'callsign', 'status'],
+        filename: 'register-list',
+        transformRow(row) {
+          return { ...row, status: this.statusFilter(row.status) }
+        }
+      }
+    }),
     statusFilter(status) {
       const statusMap = {
         1: '未审核',
@@ -407,33 +419,6 @@ export default {
       if (status === 2) return 'status-approved'
       if (status === 1) return 'status-pending'
       return 'status-neutral'
-    },
-    getList() {
-      this.listLoading = true
-      listReg(this.listQuery).then(response => {
-        this.list = response?.data?.items || []
-        this.total = response?.data?.total || 0
-      }).finally(() => {
-        this.listLoading = false
-      })
-    },
-    handleFilter() {
-      this.listQuery.page = 1
-      this.getList()
-    },
-    sortChange(data) {
-      const { prop, order } = data
-      if (prop === 'id') {
-        this.sortByID(order)
-      }
-    },
-    sortByID(order) {
-      if (order === 'ascending') {
-        this.listQuery.sort = '+id'
-      } else {
-        this.listQuery.sort = '-id'
-      }
-      this.handleFilter()
     },
     showcertificateFullScreenImage() {
       this.showcertificateFullScreen = true
@@ -498,7 +483,7 @@ export default {
             }
             this.dialogFormVisible = false
             ElMessage.success(response?.data?.message || '更新成功')
-          })
+          }).catch(() => {})
         }
       })
     },
@@ -517,7 +502,7 @@ export default {
               type: response?.code === 20000 ? 'success' : 'warning',
               duration: 2000
             })
-          })
+          }).catch(() => {})
         }
       })
     },
@@ -540,26 +525,13 @@ export default {
           ElMessage.info('已取消删除')
         })
     },
-    async handleDownload() {
-      this.downloadLoading = true
-      const excel = await import('@/vendor/Export2Excel')
-      const tHeader = ['更新时间', '电话', '角色', '工号', '角色']
-      const filterVal = ['update_time', 'phone', 'zhiwu', 'employee_id', 'roles']
-      const data = this.formatJson(filterVal, this.list)
-      await excel.export_json_to_excel({
-        header: tHeader,
-        data,
-        filename: 'table-list'
-      })
-      this.downloadLoading = false
-    },
-    formatJson(filterVal, jsonData) {
-      return jsonData.map(v =>
-        filterVal.map(j => v[j])
-      )
-    },
     handleSelectionChange(val) {
       this.multipleSelection = val || []
+    },
+    // 并发提交一批审批请求，返回成功数（取代逐条串行 await，避免 N+1 慢请求）
+    async approveBatch(targets) {
+      const results = await Promise.allSettled(targets.map(item => addReg(item)))
+      return results.filter(r => r.status === 'fulfilled' && r.value && r.value.code === 20000).length
     },
     async handleQuickApprove(row) {
       try {
@@ -594,18 +566,7 @@ export default {
       }
 
       this.batchApproving = true
-      let successCount = 0
-      for (const item of targets) {
-        try {
-          const res = await addReg(item)
-          if (res && res.code === 20000) {
-            successCount++
-          }
-        } catch (e) {
-          console.error(`Failed to approve ${item.callsign}:`, e)
-        }
-      }
-
+      const successCount = await this.approveBatch(targets)
       this.batchApproving = false
       ElMessage.success(`批量审批完成：成功审批 ${successCount} / ${targets.length} 人`)
       this.getList()
@@ -628,18 +589,7 @@ export default {
       }
 
       this.batchApproving = true
-      let successCount = 0
-      for (const item of targets) {
-        try {
-          const res = await addReg(item)
-          if (res && res.code === 20000) {
-            successCount++
-          }
-        } catch (e) {
-          console.error(`Failed to approve ${item.callsign}:`, e)
-        }
-      }
-
+      const successCount = await this.approveBatch(targets)
       this.batchApproving = false
       ElMessage.success(`一键审批完成：成功自动审批 ${successCount} 位用户`)
       this.getList()
@@ -671,24 +621,15 @@ export default {
     },
     async runAutoApproveCheck() {
       if (!this.autoApproveEnabled) return
+      if (document.hidden) return // 页面不可见时暂停，回到可见后由下一个轮询周期自动恢复
       try {
         const response = await listReg({ ...this.listQuery, page: 1, limit: 50 })
         const items = response?.data?.items || []
         const pendings = items.filter(i => i.status === 1)
 
         if (pendings.length > 0) {
-          let newlyApproved = 0
-          for (const item of pendings) {
-            try {
-              const res = await addReg(item)
-              if (res && res.code === 20000) {
-                newlyApproved++
-                this.autoApprovedCount++
-              }
-            } catch (e) {
-              console.error('Auto approve failed for item:', item, e)
-            }
-          }
+          const newlyApproved = await this.approveBatch(pendings)
+          this.autoApprovedCount += newlyApproved
 
           if (newlyApproved > 0) {
             ElMessage.success(`【自动审批】已自动审批通过 ${newlyApproved} 位新注册用户`)

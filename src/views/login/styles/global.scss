@@ -1,0 +1,280 @@
+@import url('@/styles/platform-theme.scss');
+
+.login-container {
+  .el-input {
+    display: inline-block;
+    height: 47px;
+    flex: 1;
+    min-width: 0;
+
+    input,
+    .el-input__inner {
+      box-sizing: border-box;
+      background: transparent !important;
+      border: 0px;
+      -webkit-appearance: none;
+      border-radius: 0px;
+      padding: 12px 5px 12px 15px;
+      color: var(--platform-ink) !important;
+      height: 47px;
+      caret-color: var(--platform-ink);
+      font-size: 16px;
+
+      &:-webkit-autofill {
+        box-shadow: 0 0 0px 1000px var(--platform-surface) inset !important;
+        -webkit-text-fill-color: var(--platform-ink) !important;
+      }
+
+      &::placeholder {
+        color: var(--platform-ink-dim);
+        opacity: 1;
+      }
+    }
+  }
+
+  .el-input__wrapper {
+    width: 100%;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: 0px;
+    padding: 0;
+  }
+
+  .el-input__wrapper.is-focus {
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  .el-input__wrapper:hover {
+    background: transparent !important;
+  }
+
+  .el-form-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: var(--platform-surface) !important;
+    border: 1px solid var(--platform-border) !important;
+    border-radius: 12px !important;
+    color: var(--platform-ink);
+    padding-right: 40px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .el-form-item:hover {
+    border-color: var(--platform-border-strong) !important;
+    box-shadow: 0 0 0 1px var(--platform-accent-10) inset;
+  }
+}
+
+.portal-dialog,
+.portal-dialog.el-dialog {
+  &.el-dialog {
+    margin: 0 !important;
+    width: min(92vw, 520px) !important;
+    height: auto !important;
+    max-height: calc(100vh - 40px);
+    border-radius: 26px;
+    overflow: hidden;
+    background: var(--platform-shell) !important;
+    border: 1px solid var(--platform-border) !important;
+    box-shadow: 0 28px 80px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--platform-accent-08) inset !important;
+  }
+
+  .login-button-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 10px 0;
+    box-sizing: border-box;
+
+    .login-button {
+      width: 200px !important;
+      min-width: 200px !important;
+      height: 48px !important;
+      font-size: 16px !important;
+      border-radius: 14px !important;
+      background: linear-gradient(90deg, var(--platform-accent) 0%, var(--platform-accent-2) 100%) !important;
+      border: none !important;
+      box-shadow: 0 14px 34px var(--platform-accent-22), 0 0 0 1px rgba(255, 255, 255, 0.14) inset !important;
+      transition: all 0.3s ease;
+      font-weight: 600 !important;
+      letter-spacing: 0.6px;
+      display: flex !important;
+      justify-content: center;
+      align-items: center;
+      margin: 0 auto;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 18px 44px var(--platform-accent-25), 0 0 18px var(--platform-accent-22) !important;
+      }
+    }
+  }
+
+  .el-dialog__header {
+    padding: 22px 24px 14px !important;
+    border-bottom: 1px solid var(--platform-border-light);
+    background: transparent !important;
+  }
+
+  .el-dialog__title {
+    color: var(--platform-ink) !important;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+  }
+
+  .el-dialog__headerbtn {
+    top: 18px !important;
+    right: 18px !important;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--platform-surface-68);
+    transition: background 0.2s ease, transform 0.2s ease;
+
+    .el-dialog__close {
+      color: var(--platform-ink-dim) !important;
+      font-size: 18px;
+    }
+
+    &:hover {
+      background: var(--platform-surface-88);
+      transform: scale(1.04);
+    }
+  }
+
+  .el-dialog__body {
+    padding: 22px 24px 24px !important;
+    color: var(--platform-ink);
+    background: transparent !important;
+  }
+
+  .el-input {
+    display: inline-block;
+    height: 47px;
+    flex: 1;
+    min-width: 0;
+
+    input,
+    .el-input__inner {
+      box-sizing: border-box;
+      background: transparent !important;
+      border: 0;
+      -webkit-appearance: none;
+      border-radius: 0;
+      padding: 12px 5px 12px 15px;
+      color: var(--platform-ink) !important;
+      height: 47px;
+      caret-color: var(--platform-ink);
+      font-size: 16px;
+
+      &:-webkit-autofill {
+        box-shadow: 0 0 0 1000px var(--platform-surface) inset !important;
+        -webkit-text-fill-color: var(--platform-ink) !important;
+      }
+
+      &::placeholder {
+        color: var(--platform-ink-dim);
+        opacity: 1;
+      }
+    }
+  }
+
+  .el-input__wrapper {
+    width: 100%;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: 0;
+    padding: 0;
+  }
+
+  .el-input__wrapper.is-focus,
+  .el-input__wrapper:hover {
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .el-form-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: var(--platform-surface) !important;
+    border: 1px solid var(--platform-border) !important;
+    border-radius: 12px !important;
+    color: var(--platform-ink);
+    padding-right: 40px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .el-form-item:hover {
+    border-color: var(--platform-border-strong) !important;
+    box-shadow: 0 0 0 1px var(--platform-accent-10) inset;
+  }
+}
+
+.register-dialog {
+  &.el-dialog {
+    width: min(96vw, 1320px) !important;
+    max-height: calc(100vh - 40px);
+    background: var(--platform-shell) !important;
+  }
+
+  .el-dialog__body {
+    padding-top: 18px !important;
+    max-height: calc(100vh - 120px);
+    overflow: auto;
+  }
+}
+
+.portal-dialog-overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: var(--platform-deep-90) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  .el-overlay-dialog {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+}
+
+.platform-theme-login-dropdown {
+  border: 1px solid var(--platform-border) !important;
+  border-radius: 18px !important;
+  background: var(--platform-shell) !important;
+  box-shadow: 0 24px 56px rgba(0, 0, 0, 0.42), 0 0 0 1px var(--platform-border-strong) inset !important;
+  overflow: hidden;
+
+  .el-dropdown-menu {
+    padding: 8px;
+    background: transparent !important;
+  }
+
+  .el-dropdown-menu__item {
+    min-width: 148px;
+    margin: 4px 0;
+    border-radius: 12px;
+    color: var(--platform-ink-dim) !important;
+    font-weight: 600;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  }
+
+  .el-dropdown-menu__item:not(.is-disabled):hover,
+  .el-dropdown-menu__item:not(.is-disabled):focus {
+    background: linear-gradient(90deg, var(--platform-accent) 0%, var(--platform-accent-2) 100%) !important;
+    color: var(--platform-ink) !important;
+    transform: translateX(2px);
+  }
+
+  .el-popper__arrow::before {
+    background: var(--platform-surface) !important;
+    border-color: var(--platform-border) !important;
+  }
+}

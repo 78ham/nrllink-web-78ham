@@ -599,549 +599,28 @@
       </template>
     </el-dialog>
 
-    <el-dialog
+    <param-dialog
+      ref="paramDialog"
       v-model="dialogFormChangeVisible"
-      :title="$t('device.parameterEdit')"
-      width="70%"
-      class="platform-theme-dialog"
-      :center="device === 'mobile'"
-      :fullscreen="device === 'mobile'"
-    >
-      <el-form
-        ref="devicedataForm"
-        :rules="parmrules"
-        :model="temp.device_parm"
-        label-position="right"
-        label-width="100px"
-        style="width: 90%; margin-left: 5px"
-      >
-        <el-form-item :label="$t('device.deviceInfo') + ':'" prop="dev">
-          {{ temp.callsign }}-{{ temp.ssid }} {{ temp.name }}
-        </el-form-item>
+      v-model:current-relay="current_relay"
+      :temp="temp"
+      :parmrules="parmrules"
+      :platform-options="platformOptions"
+      :relay-options="relayOptions"
+      :device="device"
+      @saved="getList"
+    />
 
-        <el-collapse accordion>
-          <el-collapse-item :title="$t('device.ipPasswordSettings')" name="1">
-            <!-- IP and Password Settings -->
-
-            <el-form-item :label="$t('device.callsign') + ':'" prop="callsign">
-              <el-input
-                v-model="temp.device_parm.callsign"
-                :placeholder="$t('device.callsignPlaceholder')"
-                style="width: 100px"
-                :disabled="!checkPermission(['admin'])"
-              />
-            </el-form-item>
-
-            <el-form-item :label="$t('device.deviceNumber') + ':'" prop="ssid">
-              <el-input v-model="temp.device_parm.ssid" style="width: 80px" /><el-button
-                type="primary"
-                @click="changeByte('newcallsignssid', temp.device_parm.callsign + '-' + temp.device_parm.ssid)"
-              >{{ $t('device.save') }}</el-button>
-            </el-form-item>
-
-            <el-form-item :label="$t('device.localPassword') + ':'" prop="local_password">
-              <el-input v-model="temp.device_parm.local_password" style="width: 150px" :disabled="true" />
-            </el-form-item>
-
-            <el-form-item :label="$t('device.localIp') + ':'" prop="local_ipaddr">
-              <el-input v-model="temp.device_parm.local_ipaddr" style="width: 150px" />
-            </el-form-item>
-
-            <el-form-item :label="$t('device.netmask') + ':'" prop="netmask">
-              <el-input v-model="temp.device_parm.netmask" style="width: 150px" />
-            </el-form-item>
-
-            <el-form-item :label="$t('device.gateway') + ':'" prop="gateway">
-              <el-input v-model="temp.device_parm.gateway" style="width: 150px" />
-            </el-form-item>
-
-            <el-form-item :label="$t('device.dnsAddress') + ':'" prop="dns_ipaddr">
-              <el-input v-model="temp.device_parm.dns_ipaddr" style="width: 150px" />
-            </el-form-item>
-
-            <el-form-item :label="$t('device.targetAddress') + ':'" prop="dest_domainname">
-              <!-- <el-input v-model="temp.device_parm.dest_domainname" style="width: 150px" /> -->
-
-              <el-select
-                v-model="temp.device_parm.dest_domainname"
-                popper-class="platform-theme-select-dropdown"
-                filterable
-                allow-create
-                default-first-option
-                :placeholder="$t('device.selectServer')"
-              >
-                <el-option
-                  v-for="item in platformOptions"
-                  :key="item.id"
-                  :label="item.name + '-' + item.host + '-' + $t('device.online') + ':' + item.online + ',' + $t('device.peak') + ':' + item.total"
-                  :value="item.host"
-                />
-              </el-select>
-
-              <el-popconfirm
-                :title="$t('device.confirmTargetAddress')"
-                :confirm-button-text="$t('device.saveConfirm')"
-                :cancel-button-text="$t('device.discard')"
-                @confirm="changeIP(temp.device_parm)"
-              >
-                <template #reference>
-                  <el-button type="primary">{{ $t('device.save') }}</el-button>
-                </template>
-              </el-popconfirm>
-            </el-form-item>
-
-          </el-collapse-item>
-
-          <el-collapse-item :title="$t('device.settings')" name="2">
-            <el-form-item prop="name" for="">
-              <template #label>
-                <span id="device-dcd-select-label">{{ $t('device.dcdSelect') }}:</span>
-              </template>
-              <el-radio-group
-                v-model="temp.device_parm.dcd_select"
-                aria-labelledby="device-dcd-select-label"
-                @change="changeByte('dcd_select', temp.device_parm.dcd_select)"
-              >
-                <el-radio :value="0">{{ $t('device.off') }}</el-radio>
-                <el-radio :value="1">{{ $t('device.manual') }}</el-radio>
-                <el-radio :value="2">SQL_LO</el-radio>
-                <el-radio :value="3">SQL_HI</el-radio>
-                <el-radio :value="4">VOX </el-radio>
-              </el-radio-group>
-            </el-form-item>
-
-            <el-form-item :label="$t('device.pttEnable') + ':'" prop="ptt_enable">
-              <el-switch
-                v-model="temp.device_parm.ptt_enable"
-                active-color="#1890ff"
-                inactive-color="#dcdfe6"
-                :active-value="1"
-                :inactive-value="0"
-                @change="changeByte('ptt_enable', temp.device_parm.ptt_enable)"
-              />
-            </el-form-item>
-
-            <el-form-item prop="ptt_level_reversed" for="">
-              <template #label>
-                <span id="device-ptt-level-label">{{ $t('device.pttLevel') }}:</span>
-              </template>
-              <el-radio-group
-                v-model="temp.device_parm.ptt_level_reversed"
-                aria-labelledby="device-ptt-level-label"
-                @change="
-                  changeByte(
-                    'ptt_level_reversed',
-                    temp.device_parm.ptt_level_reversed
-                  )
-                "
-              >
-                <el-radio :value="1">{{ $t('device.highLevel') }}</el-radio>
-                <el-radio :value="0">{{ $t('device.lowLevel') }}</el-radio>
-              </el-radio-group>
-            </el-form-item>
-
-            <el-form-item label="M/Y PTT:" prop="ptt_resistive">
-              <el-switch
-                v-model="temp.device_parm.ptt_resistive"
-                active-color="#1890ff"
-                inactive-color="#dcdfe6"
-                :active-value="1"
-                :inactive-value="0"
-                @change="
-                  changeByte('ptt_resistive', temp.device_parm.ptt_resistive)
-                "
-              />
-            </el-form-item>
-
-            <el-form-item :label="$t('device.monitor') + ':'" prop="monitor">
-              <el-switch
-                v-model="temp.device_parm.monitor"
-                active-color="#1890ff"
-                inactive-color="#dcdfe6"
-                :active-value="1"
-                :inactive-value="0"
-                @change="changeByte('monitor', temp.device_parm.monitor)"
-              />
-            </el-form-item>
-
-            <el-form-item :label="$t('device.modulePower') + ':'" prop="realy_status">
-              <el-switch
-                v-model="temp.device_parm.realy_status"
-                active-color="#1890ff"
-                inactive-color="#dcdfe6"
-                :active-text="$t('device.modulePowerLow')"
-                :inactive-text="$t('device.modulePowerHigh')"
-                :active-value="1"
-                :inactive-value="0"
-                @change="
-                  changeByte('realy_status', temp.device_parm.realy_status)
-                "
-              />
-            </el-form-item>
-
-            <el-form-item :label="$t('device.moduleSupply') + ':'" prop="one_uv_power">
-              <el-switch
-                v-model="temp.device_parm.one_uv_power"
-                active-color="#1890ff"
-                inactive-color="#dcdfe6"
-                :active-value="1"
-                :inactive-value="0"
-                @change="
-                  changeByte('one_uv_power', temp.device_parm.one_uv_power)
-                "
-              />
-            </el-form-item>
-
-            <el-form-item prop="key_func" for="">
-              <template #label>
-                <span id="device-key-func-label">{{ $t('device.keyFunction') }}:</span>
-              </template>
-              <el-radio-group
-                v-model="temp.device_parm.key_func"
-                aria-labelledby="device-key-func-label"
-                @change="changeByte('key_func', temp.device_parm.key_func)"
-              >
-                <el-radio :value="0">{{ $t('device.relay') }}</el-radio>
-                <el-radio :value="1">PTT</el-radio>
-              </el-radio-group>
-
-            </el-form-item>
-
-            <el-form-item :label="$t('device.addTailVoice') + ':'" prop="name">
-              <el-slider
-                v-model="temp.device_parm.add_tail_voice"
-                :min="15"
-                :max="1000"
-                show-input
-                :format-tooltip="formatTailVoice"
-                style="width: 95%"
-                @change="
-                  changeByte('add_tail_voice', temp.device_parm.add_tail_voice)
-                "
-              />
-            </el-form-item>
-
-            <el-form-item :label="$t('device.removeTailVoice') + ':'" prop="name">
-              <el-slider
-                v-model="temp.device_parm.remove_tail_voice"
-                :max="1000"
-                show-input
-                :format-tooltip="formatTailVoice"
-                style="width: 95%"
-                @change="
-                  changeByte(
-                    'remove_tail_voice',
-                    temp.device_parm.remove_tail_voice
-                  )
-                "
-              />
-            </el-form-item>
-
-          </el-collapse-item>
-
-          <el-collapse-item :title="$t('device.motoSection')" name="3">
-            <el-form-item :label="$t('device.channelSwitch') + ':'" prop="moto_channel">
-              <el-select
-                v-model="temp.device_parm.moto_channel"
-                popper-class="platform-theme-select-dropdown"
-                style="width: 95%"
-                @change="
-                  changeByte('moto_channel', temp.device_parm.moto_channel)
-                "
-              ><el-option lable="0" :value="0" />
-                <el-option v-for="(item, index) in 16" :key="index" :label="item" :value="item" />
-              </el-select>
-            </el-form-item>
-          </el-collapse-item>
-
-          <el-collapse-item :title="$t('device.module1wSection')" name="4">
-            <el-form-item :label="$t('device.receiveFreq1w') + ':'" prop="one_recive_freq">
-              <el-input v-model="temp.device_parm.one_recive_freq" style="width: 150px" />
-            </el-form-item>
-
-            <el-form-item :label="$t('device.transmitFreq1w') + ':'" prop="one_transmit_freq">
-              <el-input v-model="temp.device_parm.one_transmit_freq" style="width: 150px" />
-            </el-form-item>
-
-            <el-form-item :label="$t('device.receiveCtcss1w') + ':'" prop="recive_dumb">
-              <!-- <el-input
-                v-model="temp.device_parm.one_recive_cxcss"
-                style="width: 150px"
-              /> -->
-              <el-select v-model="temp.device_parm.one_recive_cxcss" style="width: 150px">
-                <el-option v-for="item in ctcssOptions" :key="item.id" :label="item.name" :value="item.id" />
-              </el-select>
-            </el-form-item>
-
-            <el-form-item :label="$t('device.transmitCtcss1w') + ':'" prop="transmit_dumb">
-              <!-- <el-input
-                v-model="temp.device_parm.one_transmit_cxcss"
-                style="width: 150px"
-              /> -->
-              <el-select v-model="temp.device_parm.one_transmit_cxcss" style="width: 150px">
-                <el-option v-for="item in ctcssOptions" :key="item.id" :label="item.name" :value="item.id" />
-              </el-select>
-            </el-form-item>
-
-            <el-form-item :label="$t('device.volume1w') + ':'" prop="one_volume">
-              <el-slider v-model="temp.device_parm.one_volume" :max="9" show-input style="width: 95%" />
-            </el-form-item>
-
-            <el-form-item :label="$t('device.sql1w') + ':'" prop="one_sql_level">
-              <el-slider v-model="temp.device_parm.one_sql_level" :max="9" show-input style="width: 95%" />
-            </el-form-item>
-
-            <el-form-item :label="$t('device.micGain1w') + ':'" prop="one_mic_sensitivity">
-              <el-slider v-model="temp.device_parm.one_mic_sensitivity" :max="8" show-input style="width: 95%" />
-            </el-form-item>
-            <el-form-item :label="$t('device.relayTemplate') + ':'" prop="current_relay">
-              <el-select
-                v-model="current_relay"
-                popper-class="platform-theme-select-dropdown"
-                style="width: 95%"
-                filterable
-                clearable
-                value-key="id"
-                @change="applyrelay"
-              >
-                <el-option
-                  :label="$t('device.emptyTemplate')"
-                  :value="{
-                    id: 0,
-                    up_freq: '430.0000',
-                    down_freq: '430.0000',
-                    send_ctss: '0',
-                    recive_ctss: '0',
-                  }"
-                />
-                <el-option
-                  v-for="item in relayOptions"
-                  :key="item.id"
-                  :label="item.name + ' ' + item.up_freq + ' ' + item.down_freq"
-                  :value="item"
-                />
-              </el-select>
-            </el-form-item>
-
-            <el-button type="primary" @click="update1w(temp.device_parm)">{{ $t('device.save1w') }}</el-button>
-          </el-collapse-item>
-
-          <el-collapse-item :title="$t('device.module2wSection')" name="5">
-            <el-form-item :label="$t('device.receiveFreq2w') + ':'" prop="two_recive_freq">
-              <el-input v-model="temp.device_parm.two_recive_freq" style="width: 150px" />
-            </el-form-item>
-
-            <el-form-item :label="$t('device.transmitFreq2w') + ':'" prop="two_transimit_freq">
-              <el-input v-model="temp.device_parm.two_transmit_freq" style="width: 150px" />
-            </el-form-item>
-
-            <el-form-item :label="$t('device.receiveCtcss2w') + ':'" prop="two_recive_cxcss">
-              <el-input v-model="temp.device_parm.two_recive_cxcss" style="width: 150px" />
-            </el-form-item>
-
-            <el-form-item :label="$t('device.transmitCtcss2w') + ':'" prop="two_transmit_cxcss">
-              <el-input v-model="temp.device_parm.two_transmit_cxcss" style="width: 150px" />
-            </el-form-item>
-
-            <el-form-item :label="$t('device.volume2w') + ':'" prop="name">
-              <el-select v-model="temp.device_parm.two_volume" style="width: 150px">
-                <el-option v-for="item in 9" :key="item" :label="item" :value="item" />
-              </el-select>
-            </el-form-item>
-
-            <el-form-item :label="$t('device.sql2w') + ':'" prop="two_sql_level">
-              <el-select v-model="temp.device_parm.two_sql_level" style="width: 150px">
-                <el-option v-for="item in 9" :key="item" :label="item" :value="item" />
-              </el-select>
-            </el-form-item>
-
-            <el-form-item :label="$t('device.micGain2w') + ':'" prop="two_mic_level">
-              <el-select v-model="temp.device_parm.two_mic_level" style="width: 150px">
-                <el-option v-for="item in 9" :key="item" :label="item" :value="item" />
-              </el-select>
-            </el-form-item>
-
-            <el-form-item :label="$t('device.relayTemplate') + ':'" prop="current_relay">
-              <el-select
-                v-model="current_relay"
-                popper-class="platform-theme-select-dropdown"
-                style="width: 95%"
-                filterable
-                clearable
-                value-key="id"
-                @change="applyrelay2w"
-              >
-                <el-option
-                  :label="$t('device.emptyTemplate')"
-                  :value="{
-                    id: 0,
-                    up_freq: '430.0000',
-                    down_freq: '430.0000',
-                    send_ctss: '0',
-                    recive_ctss: '0',
-                  }"
-                />
-                <el-option
-                  v-for="item in relayOptions"
-                  :key="item.id"
-                  :label="item.name + ' ' + item.up_freq + ' ' + item.down_freq"
-                  :value="item"
-                />
-              </el-select>
-            </el-form-item>
-
-            <el-button type="primary" @click="update2w(temp.device_parm)">{{ $t('device.save2w') }}</el-button>
-          </el-collapse-item>
-        </el-collapse>
-      </el-form>
-
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button @click="dialogFormChangeVisible = false">{{ $t('device.close') }}</el-button>
-        </div>
-      </template>
-    </el-dialog>
-
-    <el-dialog
+    <at-command-dialog
       v-model="dialogFormATVisible"
-      width="70%"
-      class="platform-theme-dialog device-at-dialog"
       :title="textMap[dialogStatus] || 'AT指令'"
-      :center="device === 'mobile'"
-      :fullscreen="device === 'mobile'"
-    >
-      <el-form
-        ref="deviceATForm"
-        :rules="rules"
-        :model="tempat"
-        :label-position="device === 'mobile' ? 'top' : 'right'"
-        :label-width="device === 'mobile' ? 'auto' : '120px'"
-        :style="device === 'mobile' ? 'width: 100%' : 'width: 85%; margin-left: 5px'"
-        class="device-at-form"
-      >
-        <el-form-item :label="$t('device.deviceInfoLabel')" prop="version">
-          <span class="device-at-version">{{ tempat.version || '--' }}</span>
-        </el-form-item>
-
-        <el-collapse v-model="atActiveCollapse" class="device-at-collapse">
-          <el-collapse-item title="常用网络与系统参数" name="basic">
-            <template v-for="(v, k) in tempat.atmap" :key="k">
-              <el-form-item
-                v-if="isBasicAtKey(k)"
-                :label="k + '='"
-                :prop="k"
-                class="at-form-item"
-              >
-                <div class="at-control-row">
-                  <el-select
-                    v-if="k === 'AT+D_IP'"
-                    v-model="tempat.atmap[k]"
-                    popper-class="platform-theme-select-dropdown"
-                    filterable
-                    allow-create
-                    default-first-option
-                    :placeholder="$t('device.selectServer')"
-                  >
-                    <el-option
-                      v-for="item in platformOptions"
-                      :key="item.id"
-                      :label="item.host + '-' + item.name + '-' + '-' + $t('device.online') + ':' +
-                        item.online + ',' + $t('device.peak') + ':' + item.total"
-                      :value="item.host"
-                    />
-                  </el-select>
-
-                  <el-select
-                    v-else-if="['AT+APRS', 'AT+DHCP', 'AT+DUPLEX', 'AT+LOOP', 'AT+PTT_RES'].includes(k)"
-                    v-model="tempat.atmap[k]"
-                    popper-class="platform-theme-select-dropdown"
-                    default-first-option
-                  >
-                    <el-option v-for="(item, idx) in ['ON', 'OFF']" :key="idx" :label="item" :value="item" />
-                  </el-select>
-
-                  <el-select
-                    v-else-if="k === 'AT+DCD'"
-                    v-model="tempat.atmap[k]"
-                    popper-class="platform-theme-select-dropdown"
-                    default-first-option
-                  >
-                    <el-option
-                      v-for="(item, idx) in ['SQL_LO', 'VOX', 'MANUAL', 'DISABLE']"
-                      :key="idx"
-                      :label="item"
-                      :value="item"
-                    />
-                  </el-select>
-
-                  <el-select
-                    v-else-if="k === 'AT+PTT_EN'"
-                    v-model="tempat.atmap[k]"
-                    popper-class="platform-theme-select-dropdown"
-                    default-first-option
-                  >
-                    <el-option v-for="(item, idx) in ['ENABLE', 'DISABLE']" :key="idx" :label="item" :value="item" />
-                  </el-select>
-
-                  <el-select
-                    v-else-if="['AT+PW', 'AT+PTT_IO'].includes(k)"
-                    v-model="tempat.atmap[k]"
-                    popper-class="platform-theme-select-dropdown"
-                    default-first-option
-                  >
-                    <el-option v-for="(item, idx) in ['H', 'L']" :key="idx" :label="item" :value="item" />
-                  </el-select>
-
-                  <el-input v-else v-model="tempat.atmap[k]" class="at-val-input" />
-                  <el-button size="small" type="primary" plain class="at-exec-btn" @click="handleChangeAT(tempat.callsign, tempat.ssid, k, tempat.atmap[k])">
-                    {{ $t('device.execute') }}
-                  </el-button>
-                  <span v-if="ATREADMEOptions[k]" class="at-readme-hint">{{ ATREADMEOptions[k] }}</span>
-                </div>
-              </el-form-item>
-            </template>
-          </el-collapse-item>
-
-          <el-collapse-item title="高级无线与硬件参数" name="advanced">
-            <template v-for="(v, k) in tempat.atmap" :key="k">
-              <el-form-item
-                v-if="!isBasicAtKey(k)"
-                :label="k + '='"
-                :prop="k"
-                class="at-form-item"
-              >
-                <div class="at-control-row">
-                  <el-input v-model="tempat.atmap[k]" class="at-val-input" />
-                  <el-button size="small" type="primary" plain class="at-exec-btn" @click="handleChangeAT(tempat.callsign, tempat.ssid, k, tempat.atmap[k])">
-                    {{ $t('device.execute') }}
-                  </el-button>
-                  <span v-if="ATREADMEOptions[k]" class="at-readme-hint">{{ ATREADMEOptions[k] }}</span>
-                </div>
-              </el-form-item>
-            </template>
-          </el-collapse-item>
-
-          <el-collapse-item title="自定义 AT 指令" name="custom">
-            <el-form-item :label="$t('device.customAt')" class="custom-at-form-item">
-              <div class="custom-at-row">
-                <el-input v-model="tempatcommand" placeholder="如 AT+READ" class="custom-at-cmd" />
-                <span class="custom-at-eq">=</span>
-                <el-input v-model="tempatdata" placeholder="参数值" class="custom-at-val" />
-                <el-button type="primary" @click="handleChangeAT(tempat.callsign, tempat.ssid, tempatcommand, tempatdata)">
-                  {{ $t('device.execute') }}
-                </el-button>
-              </div>
-            </el-form-item>
-          </el-collapse-item>
-        </el-collapse>
-      </el-form>
-
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button @click="dialogFormATVisible = false">{{ $t('device.close') }}</el-button>
-        </div>
-      </template>
-    </el-dialog>
+      :tempat="tempat"
+      :rules="rules"
+      :platform-options="platformOptions"
+      :at-readme-options="ATREADMEOptions"
+      :device="device"
+      @execute="handleChangeAT"
+    />
 
   </div>
 </template>
@@ -1164,11 +643,7 @@ import {
   updateDevice,
   queryDevice,
   deleteDevice,
-  changeDeviceAT,
-
-  changeDeviceParm,
-  changeDevice1w,
-  changeDevice2w
+  changeDeviceAT
 } from '@/api/device'
 
 import { fetchPlatformList } from '@/api/platform'
@@ -1199,14 +674,19 @@ import {
 
 import Pagination from '@/components/Pagination/index.vue' // secondary package based on el-pagination
 import ResponsiveTable from '@/components/ResponsiveTable/index.vue'
+import AtCommandDialog from './device/AtCommandDialog.vue'
+import ParamDialog from './device/ParamDialog.vue'
+import { createCrudListMethods } from '@/composables/useCrudList'
 import { mapState } from 'pinia'
 import { useAppStore } from '@/store/modules/app'
 import { useUserStore } from '@/store/modules/user'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 
 export default {
-  name: 'ComplexTable',
-  components: { Pagination, ResponsiveTable },
+  // keep-alive include 按组件名精确匹配 cachedViews 中的路由名，必须与路由 name 一致
+  // eslint-disable-next-line vue/component-definition-name-casing
+  name: 'totaldevices',
+  components: { Pagination, ResponsiveTable, AtCommandDialog, ParamDialog },
   directives: { waves },
   data() {
     const validateFreq = (rule, value, callback) => {
@@ -1231,7 +711,6 @@ export default {
         { prop: 'priority', label: '优先级' },
         { prop: 'traffic', label: '总流量', formatter: (row) => formatFileSize(row.traffic) }
       ],
-      atActiveCollapse: ['basic'],
       current_relay: {
         up_freq: '430.0000',
         down_freq: '430.0000',
@@ -1251,8 +730,6 @@ export default {
       ctcssOptions,
       relayOptions: [],
       userOptions: [],
-      chartData: {},
-
       userTimeLinelist: null,
       activeName: '',
       total: 0,
@@ -1267,9 +744,6 @@ export default {
         limit: 10,
         sort: '-id'
       },
-      showReviewer: false,
-      tempatcommand: '',
-      tempatdata: '',
       tempat: {
         callsign: undefined,
         ssid: undefined,
@@ -1336,15 +810,15 @@ export default {
 
     this.fetchPlatformList({}).then((response) => {
       this.platformOptions = response.data.items
-    })
+    }).catch(() => {})
 
     this.fetchRelayList({}).then((response) => {
       this.relayOptions = response.data.items
-    })
+    }).catch(() => {})
 
     this.fetchGroupListMini({}).then((response) => {
       this.groupsOptions = response.data
-    })
+    }).catch(() => {})
     this.getList()
   },
 
@@ -1362,41 +836,31 @@ export default {
     updateDevice,
     queryDevice,
     deleteDevice,
-    changeDeviceParm,
-    changeDevice1w,
-    changeDevice2w,
     fetchRelayList,
     changeDeviceAT,
 
-    getList() {
-      this.listLoading = true
-      this.fetchDeviceList(this.listQuery).then((response) => {
-        // console.log('device list:', response.data)
-        this.total = response.data.total
-        this.list = (response.data.items || []).map(item => this.normalizeDeviceRow(item))
-
-        // this.handleFilter()
-
-        this.listLoading = false
-      }).catch(() => { this.listLoading = false })
-    },
-
-    handleLoadMore() {
-      if (this.list.length >= this.total || this.listLoading) return
-      this.listQuery.page += 1
-      this.listLoading = true
-      this.fetchDeviceList(this.listQuery).then((response) => {
-        const items = (response.data.items || []).map(item => this.normalizeDeviceRow(item))
-        this.list = [...this.list, ...items]
-        this.total = response.data.total
-      }).finally(() => {
-        this.listLoading = false
-      })
-    },
-
-    isBasicAtKey(k) {
-      return ['AT+D_IP', 'AT+DHCP', 'AT+APRS', 'AT+DUPLEX', 'AT+LOOP', 'AT+PTT_EN', 'AT+PTT_RES', 'AT+PW', 'AT+PTT_IO', 'AT+DCD'].includes(k)
-    },
+    ...createCrudListMethods({
+      fetchList: fetchDeviceList,
+      mapItem(row) {
+        return this.normalizeDeviceRow(row)
+      },
+      download: {
+        headers: ['ID', '呼号', '设备名称', 'DMRID', '型号', '在线状态', '群组ID', '当前中继'],
+        fields: ['id', 'callsign', 'name', 'dmrid', 'model', 'is_online', 'group_id', 'current_relay'],
+        filename: 'device-list',
+        transformRow(row) {
+          return { ...row, is_online: row.is_online ? '在线' : '离线' }
+        }
+      },
+      remove: deleteDevice,
+      afterRemove: 'reload',
+      confirmTitle: vm => vm.$t('device.notice'),
+      confirmText: vm => vm.$t('device.deleteConfirm'),
+      confirmButtonText: vm => vm.$t('employee.confirm'),
+      cancelButtonText: vm => vm.$t('employee.cancel'),
+      cancelledText: vm => vm.$t('device.deleteCancelled'),
+      removedText: vm => vm.$t('device.completed')
+    }),
 
     normalizeChanName(chanName) {
       return chanName && typeof chanName === 'object' ? chanName : []
@@ -1453,28 +917,9 @@ export default {
             } else {
               ElMessage.warning(response?.data?.message || this.$t('device.requestFailed'))
             }
-          })
+          }).catch(() => {})
         }
       })
-    },
-
-    handleDelete(row) {
-      ElMessageBox.confirm(this.$t('device.deleteConfirm'), this.$t('device.notice'), {
-        confirmButtonText: this.$t('employee.confirm'),
-        cancelButtonText: this.$t('employee.cancel'),
-        type: 'warning'
-      })
-        .then(() => {
-          deleteDevice(row).then(response => {
-            const message = response?.data?.message || this.$t('device.completed')
-            ElMessage.success(message)
-            this.getList()
-            this.listLoading = false
-          })
-        })
-        .catch(() => {
-          ElMessage.info(this.$t('device.deleteCancelled'))
-        })
     },
 
     updateStatus(tempData, key) {
@@ -1509,34 +954,9 @@ export default {
         } else {
           ElMessage.warning(response?.data?.message || this.$t('device.requestFailed'))
         }
-      })
+      }).catch(() => {})
     },
 
-    update1w(device_parm) {
-      this.$refs['devicedataForm'].validate((valid) => {
-        if (valid) {
-          changeDevice1w(device_parm).then((response) => {
-            this.getList()
-
-            ElMessage.success(response?.data?.message || this.$t('device.save1wSuccess'))
-          })
-        } else {
-          alert(this.$t('device.freqValidation'))
-          // console.log('Form validation failed');
-          return false
-        }
-      })
-      //    tempData.timestamp = +new Date(tempData.timestamp); // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
-    },
-
-    update2w(device_parm) {
-      //    tempData.timestamp = +new Date(tempData.timestamp); // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
-      changeDevice2w(device_parm).then((response) => {
-        this.getList()
-
-        ElMessage.success(response?.data?.message || this.$t('device.save2w'))
-      })
-    },
     handleChange(row) {
       queryDevice(row).then((response) => {
         this.temp = this.normalizeDeviceRow(response.data.items)
@@ -1550,10 +970,10 @@ export default {
           this.devicedialogStatus = 'change'
           this.dialogFormChangeVisible = true
           this.$nextTick(() => {
-            this.$refs['devicedataForm'].clearValidate()
+            this.$refs.paramDialog.clearFormValidation()
           })
         }
-      }) // copy obj
+      }).catch(() => {}) // copy obj
       //  this.temp.timestamp = new Date(this.temp.timestamp);
     },
 
@@ -1585,7 +1005,7 @@ export default {
           //   this.$refs['deviceATForm'].clearValidate()
           // })
         }
-      }) // copy obj
+      }).catch(() => {}) // copy obj
       //  this.temp.timestamp = new Date(this.temp.timestamp);
     },
 
@@ -1606,72 +1026,8 @@ export default {
         } else {
           ElMessage.error(response?.data?.message || this.$t('device.atFailed'))
         }
-      }) // copy obj
+      }).catch(() => {}) // copy obj
       //  this.temp.timestamp = new Date(this.temp.timestamp);
-    },
-
-    applyrelay(val) {
-      if (val !== 0) {
-        this.temp.device_parm.one_recive_freq = val.down_freq
-        this.temp.device_parm.one_transmit_freq = val.up_freq
-        this.temp.device_parm.one_recive_cxcss = val.recive_ctss
-        this.temp.device_parm.one_transmit_cxcss = val.send_ctss
-      }
-    },
-
-    applyrelay2w(val) {
-      if (val !== 0) {
-        this.temp.device_parm.two_recive_freq = val.down_freq + '0'
-        this.temp.device_parm.two_transmit_freq = val.up_freq + '0'
-        this.temp.device_parm.two_recive_cxcss = this.ValueFilter(
-          val.recive_ctss,
-          ctcssOptions
-        )
-        this.temp.device_parm.two_transmit_cxcss = this.ValueFilter(
-          val.send_ctss,
-          ctcssOptions
-        )
-      }
-    },
-
-    changeByte(name, val) {
-      changeDeviceParm(
-        'DMRID=' +
-        this.temp.dmrid +
-        '&callsign=' +
-        this.temp.callsign +
-        '&ssid=' +
-        this.temp.ssid +
-        '&' +
-        name +
-        '=' +
-        val
-      ).then((response) => {
-        ElMessage.info(response?.data?.message || this.$t('device.operationCompleted'))
-      })
-    },
-
-    changeIP(val) {
-      changeDeviceParm(
-        'DMRID=' +
-        this.temp.dmrid +
-        '&callsign=' +
-        this.temp.callsign +
-        '&ssid=' +
-        this.temp.ssid +
-        '&local_ipaddr=' +
-        val.local_ipaddr +
-        '&gateway=' +
-        val.gateway +
-        '&netmask=' +
-        val.netmask +
-        '&dns_ipaddr=' +
-        val.dns_ipaddr +
-        '&dest_domainname=' +
-        val.dest_domainname
-      ).then((response) => {
-        ElMessage.info(response?.data?.message || this.$t('device.operationCompleted'))
-      })
     },
 
     handleModifiStatus(row, status) {
@@ -1684,41 +1040,6 @@ export default {
       this.handleFilter()
     },
 
-    handleFilter() {
-      this.listQuery.page = 1
-      this.getList()
-    },
-
-    filterOnline(dev) {
-      return this.listQuery.displayOnline === false || dev.is_online === true
-    },
-
-    filterCallsign(dev) {
-      return (
-        this.listQuery.callsign === '' || dev.callsign === this.listQuery.callsign
-      )
-    },
-
-    filterGroup(dev) {
-      return (
-        this.listQuery.group_id === '' || dev.group_id === this.listQuery.group_id
-      )
-    },
-
-    sortChange(data) {
-      const { prop, order } = data
-      if (prop === 'id') {
-        this.sortByID(order)
-      }
-    },
-    sortByID(order) {
-      if (order === 'ascending') {
-        this.listQuery.sort = '+id'
-      } else {
-        this.listQuery.sort = '-id'
-      }
-      this.handleFilter()
-    },
     handleSizeChange: function(size) {
       this.pageSize = size
       // console.log(this.pageSize) //每页下拉显示数据
@@ -1726,9 +1047,6 @@ export default {
     handleCurrentChange: function(currentPage) {
       this.currentPage = currentPage
       // console.log(this.currentPage) //点击第几页
-    },
-    formatTailVoice(val) {
-      return val * 5 + 'ms'
     },
 
     resetTemp() {
@@ -1738,654 +1056,11 @@ export default {
         name_pref: '',
         type: 0,
         status: 1
-
-        // timestamp: new Date(),
-        // roles: [],
-        // password: ""
       }
-    },
-
-    async handleDownload() {
-      this.downloadLoading = true
-      // console.log(this.list)
-      if (this.list === null) {
-        this.downloadLoading = false
-        return
-      }
-      const excel = await import('@/vendor/Export2Excel')
-      const tHeader = ['姓名', '电话', '性别', '出生年月日']
-      const filterVal = ['name', 'phone', 'sex']
-      const data = this.formatJson(filterVal, this.list)
-      await excel.export_json_to_excel({
-        header: tHeader,
-        data,
-        filename: 'device-list'
-      })
-      this.downloadLoading = false
-    },
-
-    handleUpload() {
-      // this.UploadLoading = true;
-
-    },
-
-    formatJson(filterVal, jsonData) {
-      return jsonData.map((v) =>
-        filterVal.map((j) => {
-          if (j === 'timestamp') {
-            return parseTime(v[j])
-          } else {
-            return v[j]
-          }
-        })
-      )
-    },
-
-    returnIndex(id, array) {
-      for (const index in array) {
-        if (array[index].id === id) {
-          //  console.log('id:',id,index,array)
-          return index
-        }
-      }
-      // console.log("return 0")
-      return 0
-    },
-
-    hasin(id, array) {
-      //    console.log(id,array)
-      for (const i of array) {
-        if (i === id) {
-          return true
-        }
-      }
-      return false
     }
   }
 }
 </script>
 
-<style>
-.text {
-  font-size: 14px;
-}
-
-.el-table .warning-row {
-  background: oldlace;
-}
-
-.el-table .success-row {
-  background: #0df3e8;
-}
-
-.item {
-  margin-bottom: 18px;
-}
-
-.maindiv {
-  width: 100%;
-  height: auto;
-  /* 不要使用定高度，后果自负 */
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.blockdiv {
-  margin: 5px;
-}
-
-.clearfix:before,
-.clearfix:after {
-  display: table;
-  content: "";
-}
-
-.clearfix:after {
-  clear: both;
-}
-
-.el-card__body {
-  padding: 20px;
-}
-
-.box-card {
-  width: 340px;
-  float: left;
-  margin-right: 10px;
-  margin-bottom: 10px;
-}
-</style>
-
-<style lang="scss" scoped>
-.filter-container {
-  margin-bottom: 20px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  align-items: center;
-
-  .filter-item {
-    margin-bottom: 0;
-    margin-right: 0;
-
-    &.search-input,
-    &.group-select {
-      width: 240px;
-
-      @media (max-width: 768px) {
-        width: 100%;
-      }
-    }
-
-    &.action-btn {
-      height: 36px;
-      padding: 0 20px;
-    }
-
-    &.action-row {
-      display: flex;
-      align-items: center;
-    }
-
-    &.switch-row {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    &.status-switch,
-    &.view-switch {
-      margin-left: 10px;
-    }
-  }
-
-  .action-row .action-btn {
-    height: 36px;
-    padding: 0 20px;
-  }
-
-  .switch-row :deep(.status-switch),
-  .switch-row :deep(.view-switch) {
-    margin-left: 0;
-  }
-
-  :deep(.status-switch),
-  :deep(.view-switch) {
-    --el-switch-on-color: linear-gradient(90deg, #26efc7 0%, #3f8dff 100%);
-    --el-switch-off-color: rgba(104, 176, 255, 0.22);
-
-    .el-switch__core {
-      border: 1px solid rgba(104, 176, 255, 0.18) !important;
-      background: rgba(14, 28, 49, 0.92) !important;
-      box-shadow: 0 0 0 1px rgba(104, 176, 255, 0.08) inset;
-    }
-
-    &.is-checked .el-switch__core {
-      background: linear-gradient(90deg, rgba(38, 239, 199, 0.9) 0%, rgba(63, 141, 255, 0.92) 100%) !important;
-      border-color: rgba(54, 240, 203, 0.36) !important;
-      box-shadow: 0 8px 20px rgba(63, 141, 255, 0.18);
-    }
-
-    .el-switch__action {
-      background: #f4f8ff !important;
-      box-shadow: 0 2px 8px rgba(4, 11, 24, 0.28);
-    }
-
-    .el-switch__label,
-    .el-switch__label * {
-      color: var(--platform-ink-dim) !important;
-    }
-
-    .el-switch__label.is-active,
-    .el-switch__label.is-active * {
-      color: var(--platform-ink) !important;
-    }
-  }
-}
-
-.table-shell {
-  padding: 10px;
-}
-
-.table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-
-.device-page {
-  .compact-btn {
-    padding: 6px 12px;
-    margin: 0 4px !important;
-    font-size: 12px;
-    border-radius: 10px;
-    transition: all 0.25s ease;
-    white-space: nowrap;
-
-    &:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 8px 18px rgba(3, 9, 21, 0.18);
-    }
-
-    span {
-      margin-left: 0 !important;
-    }
-  }
-
-  .callsign-online-tag {
-    color: var(--action-at-text, #96ffe7) !important;
-    border-color: var(--action-at-border, rgba(54, 240, 203, 0.42)) !important;
-    background: var(--action-at-bg, linear-gradient(135deg, rgba(16, 86, 77, 0.42) 0%, rgba(14, 55, 74, 0.28) 100%)) !important;
-    box-shadow: 0 0 0 1px rgba(54, 240, 203, 0.08) inset, 0 10px 24px rgba(54, 240, 203, 0.12);
-  }
-
-  .callsign-offline-tag {
-    color: var(--platform-chip-text, rgba(228, 239, 255, 0.82)) !important;
-    border-color: var(--platform-chip-border, rgba(104, 176, 255, 0.18)) !important;
-    background: var(--platform-chip-bg, rgba(12, 31, 58, 0.8)) !important;
-  }
-
-  .status-receive-btn {
-    color: var(--action-receive-text, #95ffea) !important;
-    border-color: var(--action-receive-border, rgba(54, 240, 203, 0.42)) !important;
-    background: var(--action-receive-bg, rgba(14, 86, 78, 0.18)) !important;
-
-    &:hover,
-    &:focus {
-      color: var(--action-receive-hover-text, #dcfff8) !important;
-      border-color: var(--action-receive-hover-border, rgba(54, 240, 203, 0.72)) !important;
-      background: var(--action-receive-hover-bg, rgba(18, 101, 90, 0.3)) !important;
-      box-shadow: 0 10px 24px var(--action-receive-shadow, rgba(54, 240, 203, 0.16));
-    }
-
-    &.is-disabled,
-    &.is-disabled:hover,
-    &.is-disabled:focus {
-      color: var(--action-receive-disabled-text, rgba(149, 255, 234, 0.45)) !important;
-      border-color: var(--action-receive-disabled-border, rgba(54, 240, 203, 0.16)) !important;
-      background: var(--action-receive-disabled-bg, rgba(14, 86, 78, 0.08)) !important;
-      box-shadow: none;
-    }
-  }
-
-  .status-transmit-btn {
-    color: var(--action-transmit-text, #ffd8a1) !important;
-    border-color: var(--action-transmit-border, rgba(255, 183, 89, 0.42)) !important;
-    background: var(--action-transmit-bg, rgba(104, 64, 18, 0.2)) !important;
-
-    &:hover,
-    &:focus {
-      color: var(--action-transmit-hover-text, #fff0d4) !important;
-      border-color: var(--action-transmit-hover-border, rgba(255, 183, 89, 0.72)) !important;
-      background: var(--action-transmit-hover-bg, rgba(129, 79, 22, 0.32)) !important;
-      box-shadow: 0 10px 24px var(--action-transmit-shadow, rgba(255, 183, 89, 0.18));
-    }
-
-    &.is-disabled,
-    &.is-disabled:hover,
-    &.is-disabled:focus {
-      color: var(--action-transmit-disabled-text, rgba(255, 216, 161, 0.45)) !important;
-      border-color: var(--action-transmit-disabled-border, rgba(255, 183, 89, 0.16)) !important;
-      background: var(--action-transmit-disabled-bg, rgba(104, 64, 18, 0.08)) !important;
-      box-shadow: none;
-    }
-  }
-
-  .action-edit-btn {
-    color: var(--action-edit-text, #9cccff) !important;
-    border-width: 1px !important;
-    border-style: solid !important;
-    border-color: var(--action-edit-border, rgba(111, 182, 255, 0.68)) !important;
-    background: var(--action-edit-bg, rgba(34, 67, 112, 0.22)) !important;
-    box-shadow: 0 0 0 1px var(--action-edit-shadow, rgba(111, 182, 255, 0.18)) inset;
-
-    &:hover,
-    &:focus {
-      color: var(--action-edit-hover-text, #d9eeff) !important;
-      border-color: var(--action-edit-hover-border, rgba(111, 182, 255, 0.9)) !important;
-      background: var(--action-edit-hover-bg, rgba(43, 84, 140, 0.34)) !important;
-      box-shadow: 0 0 0 1px var(--action-edit-shadow, rgba(111, 182, 255, 0.24)) inset, 0 10px 24px var(--action-edit-shadow, rgba(63, 141, 255, 0.18));
-    }
-  }
-
-  .action-change-btn {
-    color: var(--action-change-text, #ffd58f) !important;
-    border-color: var(--action-change-border, rgba(247, 187, 67, 0.42)) !important;
-    background: var(--action-change-bg, rgba(122, 88, 17, 0.18)) !important;
-
-    &:hover,
-    &:focus {
-      color: var(--action-change-hover-text, #ffe6ba) !important;
-      border-color: var(--action-change-hover-border, rgba(247, 187, 67, 0.72)) !important;
-      background: var(--action-change-hover-bg, rgba(140, 101, 20, 0.3)) !important;
-      box-shadow: 0 10px 24px var(--action-change-shadow, rgba(247, 187, 67, 0.16));
-    }
-  }
-
-  .action-at-btn {
-    color: var(--action-at-text, #8ff9de) !important;
-    border-color: var(--action-at-border, rgba(54, 240, 203, 0.42)) !important;
-    background: var(--action-at-bg, rgba(14, 86, 78, 0.18)) !important;
-
-    &:hover,
-    &:focus {
-      color: var(--action-at-hover-text, #d4fff4) !important;
-      border-color: var(--action-at-hover-border, rgba(54, 240, 203, 0.72)) !important;
-      background: var(--action-at-hover-bg, rgba(18, 101, 90, 0.3)) !important;
-      box-shadow: 0 10px 24px var(--action-at-shadow, rgba(54, 240, 203, 0.16));
-    }
-  }
-
-  .action-delete-btn {
-    color: var(--action-delete-text, #ffb0b7) !important;
-    border-color: var(--action-delete-border, rgba(255, 122, 122, 0.42)) !important;
-    background: var(--action-delete-bg, rgba(116, 31, 46, 0.18)) !important;
-
-    &:hover,
-    &:focus {
-      color: var(--action-delete-hover-text, #ffd7db) !important;
-      border-color: var(--action-delete-hover-border, rgba(255, 122, 122, 0.74)) !important;
-      background: var(--action-delete-hover-bg, rgba(136, 38, 54, 0.3)) !important;
-      box-shadow: 0 10px 24px var(--action-delete-shadow, rgba(255, 122, 122, 0.16));
-    }
-  }
-
-  .status-actions,
-  .operation-actions {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 4px;
-  }
-}
-
-.channel-grid {
-  width: 100%;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: 24px;
-}
-
-.channel-form-item {
-  margin-right: 0;
-}
-
-.channel-form-item :deep(.el-input) {
-  width: 100%;
-}
-
-.clearfix:before,
-.clearfix:after {
-  display: table;
-  content: "";
-}
-
-.clearfix:after {
-  clear: both;
-}
-
-@media (max-width: 768px) {
-  .channel-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.box-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-}
-
-.box-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 12px;
-}
-
-.box-item {
-  background: var(--platform-shell);
-  border-radius: 20px;
-  border: 1px solid var(--platform-border-light);
-  padding: 10px 12px;
-  transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
-  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
-
-  &:hover {
-    transform: translateY(-2px);
-    border-color: var(--platform-border-strong);
-    box-shadow: 0 16px 34px var(--platform-accent-12);
-  }
-}
-
-.box-header {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 8px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--platform-border-light);
-
-  :deep(.el-tag) {
-    color: var(--platform-chip-text, var(--platform-ink-dim)) !important;
-    border-color: var(--platform-chip-border, var(--platform-border-light)) !important;
-    background: var(--platform-chip-bg, var(--platform-surface-80)) !important;
-  }
-
-  :deep(.id-tag) {
-    color: var(--platform-id-text, var(--platform-ink)) !important;
-    border-color: var(--platform-id-border, var(--platform-border)) !important;
-    background: var(--platform-id-bg, var(--platform-surface-88)) !important;
-  }
-
-  .id-tag {
-    flex-shrink: 0;
-  }
-
-  .callsign {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--platform-ink);
-  }
-}
-
-.box-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-bottom: 8px;
-}
-
-.info-row {
-  display: grid;
-  grid-template-columns: 76px minmax(0, 1fr);
-  align-items: start;
-  gap: 8px;
-  font-size: 12px;
-  line-height: 1.45;
-
-  .label {
-    color: var(--platform-note-text, rgba(228, 239, 255, 0.54));
-    white-space: nowrap;
-  }
-
-  .value {
-    color: var(--platform-ink-dim);
-    min-width: 0;
-    word-break: break-word;
-    white-space: normal;
-
-    &.freq {
-      font-size: 11px;
-      color: var(--action-at-text, #8ff9de);
-    }
-  }
-}
-
-.box-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding-top: 8px;
-  border-top: 1px solid var(--platform-border-light);
-}
-
-.status-btns,
-.action-btns {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.box-footer {
-  align-items: flex-start;
-}
-
-.box-footer :deep(.compact-btn) {
-  min-width: 64px;
-  padding: 5px 10px;
-  margin: 0 !important;
-  font-size: 12px;
-  line-height: 1.1;
-}
-
-@media (max-width: 768px) {
-  .filter-container {
-    .filter-item {
-      &.search-input,
-      &.group-select {
-        width: 100% !important;
-        flex: 1 1 100%;
-      }
-
-      &.action-row {
-        width: min(100%, 280px) !important;
-        flex: 0 0 100%;
-        margin-left: auto !important;
-        margin-right: auto !important;
-      }
-
-      &.switch-row {
-        width: 100% !important;
-        flex: 0 0 100%;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-      }
-    }
-  }
-
-  .action-row .action-btn {
-    width: 100%;
-  }
-
-  .switch-row :deep(.status-switch),
-  .switch-row :deep(.view-switch) {
-    width: 100%;
-    justify-content: flex-start;
-
-    .el-switch__label {
-      flex: initial;
-      margin-left: 12px;
-    }
-
-    .el-switch__label--right {
-      text-align: left;
-    }
-  }
-
-  .box-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .box-item {
-    padding: 12px;
-    border-radius: 18px;
-  }
-
-  .box-header {
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
-
-    .callsign {
-      min-width: 0;
-      word-break: break-word;
-    }
-  }
-
-  .info-row {
-    grid-template-columns: 72px minmax(0, 1fr);
-  }
-
-  .box-footer {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-  }
-
-  .status-btns,
-  .action-btns {
-    width: 100%;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-
-  .box-footer :deep(.compact-btn) {
-    width: 100%;
-  }
-}
-
-.device-at-dialog {
-  .device-at-version {
-    font-weight: 600;
-    color: var(--color-text-primary, #303133);
-  }
-
-  .at-control-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    width: 100%;
-
-    .at-val-input {
-      width: 215px;
-      max-width: 100%;
-    }
-
-    .at-readme-hint {
-      font-size: 12px;
-      color: var(--color-text-secondary, #909399);
-      margin-left: 4px;
-    }
-  }
-
-  .custom-at-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    width: 100%;
-
-    .custom-at-cmd {
-      flex: 1 1 120px;
-    }
-    .custom-at-eq {
-      font-weight: bold;
-      color: var(--color-text-secondary, #909399);
-    }
-    .custom-at-val {
-      flex: 2 1 160px;
-    }
-  }
-}
-
-@media screen and (max-width: 768px) {
-  .device-at-dialog {
-    .at-control-row {
-      .at-val-input {
-        width: 100%;
-      }
-    }
-  }
-}
-</style>
+<style src="./device/legacy.css"></style>
+<style lang="scss" scoped src="./device/device.scss"></style>

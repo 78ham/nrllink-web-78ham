@@ -1,77 +1,35 @@
 export default {
+  app: {
+    updateReady: 'Update Ready',
+    newVersionAvailable: 'A new version is available. Refresh now?',
+    refreshNow: 'Refresh Now',
+    later: 'Later'
+  },
   route: {
-    chat: 'Chat',
-    all: 'All Rankings',
     relay: 'Relay Management',
     devgroup: 'Device Group',
     server: 'Node Management',
     publicgroup: 'Group Management',
     grouproom: 'Group Room',
-    myhome: 'Private Area',
-    groups: 'Public Groups',
     totaldevices: 'Device List',
     bmNetwork: 'BM Network',
-    mydevices: 'My Devices',
-    rooms: 'My Rooms',
-    config: 'Area Configuration',
-    month: 'This Month',
-    notices: 'Notices',
-    report: 'Report Statistics',
-    userquery: 'User Query',
-    groupquery: 'Group Query',
 
-    appquery: 'Application Query',
-    signstats: 'User Statistics',
     users: 'User Management',
     register: 'Registration Management',
-    wxusermgr: 'WeChat Users',
 
-    data: 'Data Management',
-    basminutes: 'BAS Trend',
-    ipgroupminutes: 'IP Group Trend',
-    basmgr: 'BAS Management',
-    topnuserlist: 'TopN Users',
-    area: 'Area Management',
-    areastats: 'Area Statistics',
     dashboard: 'Platform Statistics',
-    Account: 'Account/IP Management',
     renew: 'Renew Account',
     billingPackages: 'Billing Packages',
 
-    download: 'Data Download',
     log: 'Log Management',
     siteSettings: 'Site Settings',
     serverRegistration: 'Register My Server',
     setup: 'System Settings',
     operatorlog: 'Operation Log',
-    guide: 'Guide Page',
-    permission: 'Permission Test Page',
-    rolePermission: 'Role Permission',
-    pagePermission: 'Page Permission',
-    directivePermission: 'Directive Permission',
-    icons: 'Icons',
-    backToTop: 'Back To Top',
-    dragDialog: 'Drag Dialog',
-    dragSelect: 'Drag Select',
-    dragKanban: 'Drag Kanban',
-    charts: 'Charts',
-    keyboardChart: 'Keyboard Chart',
-    lineChart: 'Line Chart',
-    mixChart: 'Mix Chart',
-    example: 'Comprehensive Example',
-    nested: 'Nested Routes',
-    employee: 'Employee Management',
     rolemgr: 'Role Management',
     page401: '401',
     page404: '404',
-    errorLog: 'Error Log',
-    zip: 'Zip',
-    pdf: 'PDF',
-    exportZip: 'Export Zip',
-    theme: 'Theme',
-    clipboardDemo: 'Clipboard',
     i18n: 'Internationalization',
-    externalLink: 'External Link',
     profile: 'Profile'
   },
   siteSettings: {
@@ -329,9 +287,6 @@ export default {
     platformIcp: 'ICP Filing',
     platformLanguage: 'Current Language'
   },
-  documentation: {
-    documentation: 'Nanjing Xinfeng Network Technology Co., Ltd.'
-  },
   permission: {
     addRole: 'Add Role',
     editPermission: 'Edit Permission',
@@ -342,39 +297,6 @@ export default {
     confirm: 'Confirm',
     cancel: 'Cancel'
 
-  },
-  guide: {
-    description: 'The guide page is useful for people entering the project for the first time. You can briefly introduce the functions of the project. This Demo is based on ',
-    button: 'Open Guide'
-  },
-  components: {
-    documentation: 'Documentation',
-    tinymceTips: 'Rich text is a core feature of the management backend, but it is also a place with many pitfalls. I also took many detours in the process of selecting rich text. I have basically used all the common rich texts on the market, and finally chose Tinymce after weighing the pros and cons. For more detailed rich text comparison and introduction, see',
-    dropzoneTips: 'Because our company\'s business has special needs, and we need to upload to Qiniu, we didn\'t use a third-party library and chose to encapsulate it ourselves. The code is very simple, you can see the specific code here @/components/Dropzone',
-    stickyTips: 'When the page scrolls to the preset position, it will stick to the top',
-    backToTopTips1: 'When the page scrolls to the specified position, a back-to-top button will appear in the lower right corner',
-    backToTopTips2: 'You can customize the style, show/hide, appearance height, and return position of the button. If you need text prompts, you can use Element\'s el-tooltip element externally',
-    imageUploadTips: 'Because when I used it, it only had the vue@1 version, and it was incompatible with mockjs, so I modified it myself. If you want to use it, it is still recommended to use the official version first.'
-  },
-  user: {
-    id: 'ID',
-    name: 'Application Name',
-    type: 'Application Type',
-    avg_delay: 'TCP Delay',
-    avg_first_delay: 'First Packet Delay',
-    lost: 'Packet Loss',
-    detail: 'Details',
-    chart: 'Chart',
-    timestamp: 'Operation Time',
-    country: 'Country',
-    province: 'Province',
-    city: 'City',
-    area_name: 'Area',
-    server_url: 'Server Address',
-    is_Account: 'Identity',
-    subscribe_scene: 'Subscription Scene',
-    subscribe_time: 'Subscription Time',
-    subscribe: 'Subscription Status'
   },
   register: {
     name: 'Name',
@@ -479,40 +401,6 @@ export default {
     cancel: 'Cancel',
     confirm: 'Confirm'
   },
-  userquery: {
-    dynamicTips1: 'Fixed header, sorted by header order',
-    dynamicTips2: 'Non-fixed header, sorted by click order',
-    dragTips1: 'Default order',
-    dragTips2: 'Order after dragging',
-    importance: 'Importance',
-    import: 'Batch Import',
-    phone: 'Phone Number',
-    sex: 'Gender',
-    show: 'View',
-    name: 'User Name',
-    Account_number: 'Account/IP Count',
-    Account: 'Account/IP',
-    start_date: 'Start Date',
-    end_date: 'End Date',
-    status: 'User Status',
-    actions: 'Actions',
-    type: 'Type',
-    note: 'Note',
-    search: 'Search',
-    add: 'Add',
-    export: 'Export',
-    reviewer: 'Reviewer',
-    id: 'ID',
-    password: 'Login Password',
-    zhiwu: 'Role',
-    role: 'Role',
-    edit: 'Edit',
-    publish: 'Active',
-    draft: 'On Leave',
-    delete: 'Delete',
-    cancel: 'Cancel',
-    confirm: 'Confirm'
-  },
   employee: {
     dmrid: 'DMR-ID',
     mdcid: 'MDC-ID',
@@ -553,31 +441,6 @@ export default {
     delete: 'Delete',
     cancel: 'Cancel',
     confirm: 'Confirm'
-  },
-  example: {
-    warning: 'Create and edit pages cannot be cached by keep-alive, because keep-alive\'s include currently does not support caching based on routes, so caching is currently based on component name. If you want to achieve a similar caching effect, you can use browser caching solutions such as localStorage. Or do not use keep-alive\'s include, and directly cache all pages. See details'
-  },
-  errorLog: {
-    tips: 'Please click the bug icon in the upper right corner',
-    description: 'Modern management backends are mostly SPAs, which enhances user experience but also increases the possibility of page problems. A small oversight may lead to the deadlock of the entire page. Fortunately, the Vue official website provides a method to capture and handle exceptions, where you can perform error handling or exception reporting.',
-    documentation: 'Documentation Introduction'
-  },
-  excel: {
-    export: 'Export',
-    selectedExport: 'Export Selected Items',
-    placeholder: 'Please enter the file name (default excel-list)'
-  },
-  zip: {
-    export: 'Export',
-    placeholder: 'Please enter the file name (default file)'
-  },
-  pdf: {
-    tips: 'Here use window.print() to implement the function of downloading pdf'
-  },
-  theme: {
-    change: 'Change Theme',
-    documentation: 'Theme Documentation',
-    tips: 'Tips: It is different from the theme-pick on the navbar. They are two different theme changing methods, each with different application scenarios. Please refer to the documentation for details.'
   },
   tagsView: {
     refresh: 'Refresh',
@@ -620,6 +483,27 @@ export default {
     lossRate: 'Packet Loss',
     lastHeartbeat: 'Last Heartbeat',
     selectDevice: 'Select NRL-BM Device',
-    selectNetwork: 'Select BM Network'
+    selectNetwork: 'Select BM Network',
+    selectDevicePlaceholder: 'Select an NRL-BM device',
+    selectNetworkPlaceholder: 'Select a target BM network',
+    configListTitle: 'BM Network Configs',
+    actions: 'Actions',
+    edit: 'Edit',
+    delete: 'Delete',
+    enabled: 'Enabled',
+    disabled: 'Disabled',
+    cancel: 'Cancel',
+    save: 'Save',
+    note: 'Note',
+    startSuccess: 'Bridge started',
+    stopSuccess: 'Bridge stopped',
+    createSuccess: 'Created',
+    updateSuccess: 'Updated',
+    deleteSuccess: 'Deleted',
+    deleteConfirm: 'Delete config "{name}"?',
+    nameServerRequired: 'Name and server address are required',
+    demoBanner: 'Backend API not ready yet: the data below is demo data and does not reflect real status',
+    demoFallback: 'Backend API not ready — fell back to demo data',
+    statusPollStopped: 'Status polling paused (backend API not ready)'
   }
 }

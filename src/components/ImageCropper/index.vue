@@ -842,19 +842,19 @@ export default {
     }
   },
   created() {
-    // 绑定按键esc隐藏此插件事件
-    document.addEventListener('keyup', (e) => {
+    // 绑定按键esc隐藏此插件事件（保存引用，卸载时移除，避免重复挂载导致监听器堆积）
+    this.handleEscKeyup = (e) => {
       if (this.value && (e.key == 'Escape' || e.keyCode == 27)) {
         this.off()
       }
-    })
+    }
+    document.addEventListener('keyup', this.handleEscKeyup)
+  },
+  beforeUnmount() {
+    document.removeEventListener('keyup', this.handleEscKeyup)
   }
 }
 </script>
-
-<!--
-<style lang='sass' src="./scss/upload.scss">
-</style> -->
 
 <style>
 @charset "UTF-8";

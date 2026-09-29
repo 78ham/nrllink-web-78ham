@@ -8,6 +8,16 @@
       </div>
     </div>
 
+    <!-- Demo-mode banner: shown whenever real API failed and demo data is displayed -->
+    <el-alert
+      v-if="isDemoMode"
+      :title="$t('bm.demoBanner')"
+      type="warning"
+      show-icon
+      :closable="false"
+      class="bm-demo-banner"
+    />
+
     <!-- Active Bridge Control Panel -->
     <div class="bm-bridge-panel">
       <div class="panel-header">
@@ -22,7 +32,7 @@
           <label>{{ $t('bm.selectDevice') }}</label>
           <el-select
             v-model="selectedDeviceId"
-            placeholder="请选择 NRL-BM 设备"
+            :placeholder="$t('bm.selectDevicePlaceholder')"
             class="bm-select"
             @change="onDeviceChange"
           >
@@ -39,7 +49,7 @@
           <label>{{ $t('bm.selectNetwork') }}</label>
           <el-select
             v-model="selectedNetworkId"
-            placeholder="请选择目标 BM 网络"
+            :placeholder="$t('bm.selectNetworkPlaceholder')"
             class="bm-select"
           >
             <el-option
@@ -97,7 +107,7 @@
     <!-- BM Network Configuration List -->
     <div class="bm-network-list-section">
       <div class="section-toolbar">
-        <h3>BM 网络连接配置</h3>
+        <h3>{{ $t('bm.configListTitle') }}</h3>
         <el-button type="primary" class="add-network-btn" @click="handleCreateNetwork">
           {{ $t('bm.addConfig') }}
         </el-button>
@@ -139,13 +149,13 @@
                 <span>{{ row.heartbeat_interval }}s</span>
               </template>
             </el-table-column>
-            <el-table-column label="操作" width="160" align="center">
+            <el-table-column :label="$t('bm.actions')" width="160" align="center">
               <template #default="{ row }">
                 <el-button type="primary" plain size="small" @click="handleEditNetwork(row)">
-                  编辑
+                  {{ $t('bm.edit') }}
                 </el-button>
                 <el-button type="danger" plain size="small" @click="handleDeleteNetwork(row)">
-                  删除
+                  {{ $t('bm.delete') }}
                 </el-button>
               </template>
             </el-table-column>
@@ -154,16 +164,16 @@
 
         <template #badge="{ row }">
           <el-tag :type="row.status === 1 ? 'success' : 'info'" size="small">
-            {{ row.status === 1 ? '已启用' : '已禁用' }}
+            {{ row.status === 1 ? $t('bm.enabled') : $t('bm.disabled') }}
           </el-tag>
         </template>
 
         <template #actions="{ row }">
           <el-button type="primary" plain size="small" @click="handleEditNetwork(row)">
-            编辑
+            {{ $t('bm.edit') }}
           </el-button>
           <el-button type="danger" plain size="small" @click="handleDeleteNetwork(row)">
-            删除
+            {{ $t('bm.delete') }}
           </el-button>
         </template>
       </responsive-table>
@@ -207,14 +217,14 @@
         <el-form-item :label="$t('bm.heartbeat')" prop="heartbeat_interval">
           <el-input-number v-model="form.heartbeat_interval" :min="5" :max="300" />
         </el-form-item>
-        <el-form-item label="备注" prop="note">
+        <el-form-item :label="$t('bm.note')" prop="note">
           <el-input v-model="form.note" type="textarea" />
         </el-form-item>
       </el-form>
 
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="saveNetwork">保存</el-button>
+        <el-button @click="dialogVisible = false">{{ $t('bm.cancel') }}</el-button>
+        <el-button type="primary" @click="saveNetwork">{{ $t('bm.save') }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -271,6 +281,7 @@ export default {
       loading: false,
       bridgeLoading: false,
       pollFailCount: 0,
+      isDemoMode: false,
       networkList: [...DEFAULT_NETWORKS],
       bmDeviceList: [],
       selectedDeviceId: undefined,
@@ -334,12 +345,15 @@ export default {
     loadNetworks() {
       this.loading = true
       fetchBMNetworks().then(res => {
+        this.isDemoMode = false
         const items = res?.data?.items || []
         this.networkList = items.length ? items : [...DEFAULT_NETWORKS]
         if (this.networkList.length && !this.selectedNetworkId) {
           this.selectedNetworkId = this.networkList[0].id
         }
       }).catch(() => {
+        this.isDemoMode = true
+        ElMessage.warning(this.$t('bm.demoFallback'))
         if (!this.networkList.length) {
           this.networkList = [...DEFAULT_NETWORKS]
         }
@@ -352,6 +366,7 @@ export default {
     },
     loadBMDevices() {
       fetchDeviceList({ page: 1, limit: 100 }).then(res => {
+        this.isDemoMode = false
         const allItems = res?.data?.items || []
         // Filter NRL-BM devices (model 202)
         const bmDevices = allItems.filter(item => item.dev_model === 202)
@@ -361,6 +376,8 @@ export default {
           this.checkBridgeStatus()
         }
       }).catch(() => {
+        this.isDemoMode = true
+        ElMessage.warning(this.$t('bm.demoFallback'))
         if (!this.bmDeviceList.length) {
           this.bmDeviceList = [
             { id: 1, callsign: 'BG5ABC', ssid: 1, name: 'NRL-BM 演示节点', dev_model: 202 }
@@ -376,6 +393,7 @@ export default {
     },
     checkBridgeStatus() {
       if (!this.selectedDeviceId) return
+      if (document.hidden) return // 页面不可见时暂停，恢复可见后由下一个轮询周期接续
       fetchBMBridgeStatus({ device_id: this.selectedDeviceId }).then(res => {
         this.pollFailCount = 0
         if (res?.data) {
@@ -387,6 +405,7 @@ export default {
         if (this.pollFailCount >= 2 && this.statusPollTimer) {
           clearInterval(this.statusPollTimer)
           this.statusPollTimer = null
+          ElMessage.warning(this.$t('bm.statusPollStopped'))
         }
       })
     },
@@ -398,11 +417,11 @@ export default {
     },
     handleStartBridge() {
       if (!this.selectedDeviceId) {
-        ElMessage.warning('请选择 NRL-BM 设备')
+        ElMessage.warning(this.$t('bm.selectDevicePlaceholder'))
         return
       }
       if (!this.selectedNetworkId) {
-        ElMessage.warning('请选择目标 BM 网络')
+        ElMessage.warning(this.$t('bm.selectNetworkPlaceholder'))
         return
       }
       this.bridgeLoading = true
@@ -410,9 +429,11 @@ export default {
         device_id: this.selectedDeviceId,
         network_id: this.selectedNetworkId
       }).then(() => {
-        ElMessage.success(this.$t('bm.startBridge') + ' 成功')
+        this.isDemoMode = false
+        ElMessage.success(this.$t('bm.startSuccess'))
         this.checkBridgeStatus()
       }).catch(() => {
+        this.isDemoMode = true
         this.bridgeStatus = {
           status: 1,
           rx_packets: 16,
@@ -420,7 +441,7 @@ export default {
           loss_rate: 0,
           last_heartbeat: new Date().toLocaleTimeString()
         }
-        ElMessage.success(this.$t('bm.startBridge') + ' 成功（演示模式）')
+        ElMessage.warning(this.$t('bm.demoFallback'))
       }).finally(() => {
         this.bridgeLoading = false
       })
@@ -431,14 +452,16 @@ export default {
       stopBMBridge({
         device_id: this.selectedDeviceId
       }).then(() => {
-        ElMessage.success(this.$t('bm.stopBridge') + ' 成功')
+        this.isDemoMode = false
+        ElMessage.success(this.$t('bm.stopSuccess'))
         this.checkBridgeStatus()
       }).catch(() => {
+        this.isDemoMode = true
         this.bridgeStatus = {
           ...this.bridgeStatus,
           status: 0
         }
-        ElMessage.success(this.$t('bm.stopBridge') + ' 成功（演示模式）')
+        ElMessage.warning(this.$t('bm.demoFallback'))
       }).finally(() => {
         this.bridgeLoading = false
       })
@@ -467,29 +490,33 @@ export default {
       this.dialogVisible = true
     },
     handleDeleteNetwork(row) {
-      ElMessageBox.confirm(`确认删除配置 "${row.name}" 吗？`, '删除确认', {
+      ElMessageBox.confirm(this.$t('bm.deleteConfirm', { name: row.name }), this.$t('bm.delete'), {
         type: 'warning'
       }).then(() => {
         deleteBMNetwork({ id: row.id }).then(() => {
-          ElMessage.success('删除成功')
+          this.isDemoMode = false
+          ElMessage.success(this.$t('bm.deleteSuccess'))
           this.loadNetworks()
         }).catch(() => {
+          this.isDemoMode = true
           this.networkList = this.networkList.filter(item => item.id !== row.id)
-          ElMessage.success('删除成功（演示模式）')
+          ElMessage.warning(this.$t('bm.demoFallback'))
         })
       }).catch(() => {})
     },
     saveNetwork() {
       if (!this.form.name || !this.form.server_address) {
-        ElMessage.warning('名称和服务器地址不能为空')
+        ElMessage.warning(this.$t('bm.nameServerRequired'))
         return
       }
       const api = this.isEdit ? updateBMNetwork : createBMNetwork
       api(this.form).then(() => {
-        ElMessage.success(this.isEdit ? '更新成功' : '创建成功')
+        this.isDemoMode = false
+        ElMessage.success(this.isEdit ? this.$t('bm.updateSuccess') : this.$t('bm.createSuccess'))
         this.dialogVisible = false
         this.loadNetworks()
       }).catch(() => {
+        this.isDemoMode = true
         if (this.isEdit) {
           const idx = this.networkList.findIndex(n => n.id === this.form.id)
           if (idx !== -1) {
@@ -499,7 +526,7 @@ export default {
           const newId = (this.networkList.length ? Math.max(...this.networkList.map(n => n.id)) : 0) + 1
           this.networkList.unshift({ ...this.form, id: newId })
         }
-        ElMessage.success(this.isEdit ? '更新成功（演示模式）' : '创建成功（演示模式）')
+        ElMessage.warning(this.$t('bm.demoFallback'))
         this.dialogVisible = false
       })
     }
@@ -508,6 +535,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.bm-demo-banner {
+  margin-bottom: 20px;
+}
+
 .bm-network-page {
   padding: 20px;
 

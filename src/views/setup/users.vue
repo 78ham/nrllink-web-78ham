@@ -376,7 +376,8 @@ import {
 import waves from '@/directive/waves'
 import Pagination from '@/components/Pagination/index.vue'
 import ResponsiveTable from '@/components/ResponsiveTable/index.vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
+import { createCrudListMethods } from '@/composables/useCrudList'
 import { mapState } from 'pinia'
 import { useAppStore } from '@/store/modules/app'
 
@@ -405,9 +406,6 @@ export default {
         namephone: '',
         role: ''
       },
-      importanceOptions: [1, 2, 3],
-      statusOptions: ['在职', '休假', '删除'],
-      showReviewer: false,
       temp: {
         id: undefined,
         name: '',
@@ -433,8 +431,6 @@ export default {
         update: 'Edit',
         create: 'Create'
       },
-      dialogPvVisible: false,
-      pvData: [],
       rules: {
         callsign: [{ required: true, message: '呼号是必选项', trigger: 'change' }],
         name: [{ required: true, message: '姓名是必选项', trigger: 'change' }],
@@ -453,9 +449,25 @@ export default {
     this.getList()
     getRoles({}).then(response => {
       this.roles = response.data
-    })
+    }).catch(() => {})
   },
   methods: {
+    ...createCrudListMethods({
+      fetchList: fetchEmployeeAllList,
+      download: {
+        headers: ['ID', '姓名', '呼号', '电话', '状态', '到期时间'],
+        fields: ['id', 'name', 'callsign', 'phone', 'status', 'expire_time'],
+        filename: 'user-list',
+        transformRow(row) {
+          return { ...row, status: this.statusFilter(row.status) }
+        }
+      },
+      remove: deleteEmployee,
+      afterRemove: 'splice',
+      confirmText: (vm, row) => `此操作将永久删除用户:${row.name}-${row.callsign}, 是否继续?`,
+      cancelledText: '已取消删除',
+      removedText: '操作完成'
+    }),
     SexFilter(type) {
       const sexMap = {
         '0': '女',
@@ -485,45 +497,6 @@ export default {
       }
       return '未知'
     },
-    getList() {
-      this.listLoading = true
-      fetchEmployeeAllList(this.listQuery).then(response => {
-        this.list = response?.data?.items || []
-        this.total = response?.data?.total || 0
-      }).finally(() => {
-        this.listLoading = false
-      })
-    },
-    handleFilter() {
-      this.listQuery.page = 1
-      this.getList()
-    },
-    handleLoadMore() {
-      if (this.list.length >= this.total || this.listLoading) return
-      this.listQuery.page += 1
-      this.listLoading = true
-      fetchEmployeeAllList(this.listQuery).then(response => {
-        const items = response?.data?.items || []
-        this.list = [...this.list, ...items]
-        this.total = response?.data?.total || this.total
-      }).finally(() => {
-        this.listLoading = false
-      })
-    },
-    sortChange(data) {
-      const { prop, order } = data
-      if (prop === 'id') {
-        this.sortByID(order)
-      }
-    },
-    sortByID(order) {
-      if (order === 'ascending') {
-        this.listQuery.sort = '+id'
-      } else {
-        this.listQuery.sort = '-id'
-      }
-      this.handleFilter()
-    },
     resetTemp() {
       this.temp = {
         id: undefined,
@@ -544,14 +517,6 @@ export default {
         alarm_msg: false
       }
     },
-    handleCreate() {
-      this.resetTemp()
-      this.dialogStatus = 'create'
-      this.dialogFormVisible = true
-      this.$nextTick(() => {
-        this.$refs.dataForm.clearValidate()
-      })
-    },
     createData() {
       this.$refs.dataForm.validate(valid => {
         if (valid) {
@@ -565,16 +530,8 @@ export default {
             this.getList()
             this.dialogFormVisible = false
             ElMessage.success(message)
-          })
+          }).catch(() => {})
         }
-      })
-    },
-    handleUpdate(row) {
-      this.temp = Object.assign({}, row)
-      this.dialogStatus = 'update'
-      this.dialogFormVisible = true
-      this.$nextTick(() => {
-        this.$refs.dataForm.clearValidate()
       })
     },
     updateData() {
@@ -597,48 +554,9 @@ export default {
             }
             this.dialogFormVisible = false
             ElMessage.success(message)
-          })
+          }).catch(() => {})
         }
       })
-    },
-    handleDelete(row) {
-      ElMessageBox.confirm(`此操作将永久删除用户:${row.name}-${row.callsign}, 是否继续?`, '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      })
-        .then(() => {
-          deleteEmployee(row).then(response => {
-            const message = response?.data?.message || '操作完成'
-            ElMessage.success(message)
-            this.listLoading = false
-          })
-          const index = this.list.indexOf(row)
-          this.list.splice(index, 1)
-
-          ElMessage.success('删除成功!')
-        })
-        .catch(() => {
-          ElMessage.info('已取消删除')
-        })
-    },
-    async handleDownload() {
-      this.downloadLoading = true
-      const excel = await import('@/vendor/Export2Excel')
-      const tHeader = ['更新时间', '电话', '角色', '工号', '角色']
-      const filterVal = ['update_time', 'phone', 'zhiwu', 'employee_id', 'roles']
-      const data = this.formatJson(filterVal, this.list)
-      await excel.export_json_to_excel({
-        header: tHeader,
-        data,
-        filename: 'table-list'
-      })
-      this.downloadLoading = false
-    },
-    formatJson(filterVal, jsonData) {
-      return jsonData.map(v =>
-        filterVal.map(j => v[j])
-      )
     }
   }
 }
