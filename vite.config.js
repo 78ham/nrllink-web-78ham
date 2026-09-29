@@ -4,6 +4,7 @@ import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
+import viteCompression from 'vite-plugin-compression'
 import path from 'path'
 
 export default defineConfig(({ mode }) => {
@@ -27,7 +28,10 @@ export default defineConfig(({ mode }) => {
       createSvgIconsPlugin({
         iconDirs: [path.resolve(process.cwd(), 'src/icons/svg')],
         symbolId: 'icon-[name]'
-      })
+      }),
+      // 构建期预压缩产物，配合 nginx gzip_static/brotli 直接下发静态压缩文件
+      viteCompression({ verbose: false, threshold: 10240, algorithm: 'gzip', ext: '.gz' }),
+      viteCompression({ verbose: false, threshold: 10240, algorithm: 'brotliCompress', ext: '.br' })
     ],
     resolve: {
       alias: {
