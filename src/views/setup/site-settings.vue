@@ -5,9 +5,14 @@
         <h2>{{ $t('siteSettings.title') }}</h2>
         <p>{{ $t('siteSettings.description') }}</p>
       </div>
-      <el-button type="primary" :loading="saving" @click="saveSettings">
-        {{ $t('siteSettings.save') }}
-      </el-button>
+      <div style="display: flex; gap: 10px;">
+        <el-button type="warning" plain :loading="backingUp" @click="handleBackup">
+          下载数据库快照 (.sqlite3)
+        </el-button>
+        <el-button type="primary" :loading="saving" @click="saveSettings">
+          {{ $t('siteSettings.save') }}
+        </el-button>
+      </div>
     </div>
 
     <el-form
@@ -38,6 +43,7 @@
 
 <script>
 import { fetchSiteSettings, updateSiteSettings } from '@/api/platform'
+import { backupDatabase } from '@/api/auth-security'
 import { ElMessage } from 'element-plus'
 
 const emptyForm = {
@@ -51,6 +57,7 @@ export default {
     return {
       loading: false,
       saving: false,
+      backingUp: false,
       form: { ...emptyForm },
       fields: [
         { key: 'platform_name', label: 'siteSettings.platformName' },
@@ -91,6 +98,27 @@ export default {
         await this.loadSettings()
       } finally {
         this.saving = false
+      }
+    },
+    async handleBackup() {
+      this.backingUp = true
+      try {
+        const response = await backupDatabase()
+        const blob = new Blob([response], { type: 'application/octet-stream' })
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        const timestamp = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14)
+        a.download = `nrllink_backup_${timestamp}.sqlite3`
+        document.body.appendChild(a)
+        a.click()
+        a.remove()
+        window.URL.revokeObjectURL(url)
+        ElMessage.success('数据库快照已下载')
+      } catch (err) {
+        ElMessage.error(err.message || '备份下载失败')
+      } finally {
+        this.backingUp = false
       }
     }
   }

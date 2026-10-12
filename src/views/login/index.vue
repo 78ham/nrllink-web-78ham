@@ -252,13 +252,52 @@
             </el-form-item>
           </el-tooltip>
 
-          <div class="login-button-wrapper">
+          <div v-if="!totpRequired" class="login-button-wrapper">
             <el-button
               :loading="loading"
               type="primary"
               class="login-button"
               @click.prevent="handleLogin"
             >{{ $t("login.logIn") }}</el-button>
+
+            <el-button
+              :loading="passkeyLoading"
+              type="default"
+              class="login-button passkey-button"
+              style="margin-top: 12px; width: 100%;"
+              @click.prevent="handlePasskeyLogin"
+            >使用通行密钥 (Passkey) 登录</el-button>
+          </div>
+
+          <div v-else class="totp-step-wrapper" style="margin-top: 16px;">
+            <p style="font-size: 13px; color: #909399; margin-bottom: 12px; text-align: center;">
+              该账号已开启两步验证，请输入身份验证器上的 6 位动态验证码：
+            </p>
+            <el-form-item>
+              <span class="svg-container">
+                <svg-icon icon-class="lock" />
+              </span>
+              <el-input
+                ref="totpInput"
+                v-model="totpCode"
+                placeholder="6 位动态验证码"
+                maxlength="6"
+                tabindex="3"
+                style="letter-spacing: 4px; font-size: 16px;"
+                @keyup.enter="handleTOTPLogin"
+              />
+            </el-form-item>
+            <el-button
+              :loading="loading"
+              type="primary"
+              style="width: 100%; margin-top: 8px;"
+              @click.prevent="handleTOTPLogin"
+            >验证并登录</el-button>
+            <el-button
+              link
+              style="width: 100%; margin-top: 8px;"
+              @click="totpRequired = false; totpCode = '';"
+            >返回密码登录</el-button>
           </div>
         </el-form>
       </div>
@@ -312,6 +351,8 @@
 
 <script>
 import { getplatforminfo, fetchPlatformList } from '@/api/platform'
+import { loginTOTP, getPasskeyLoginBegin, postPasskeyLoginFinish } from '@/api/auth-security'
+import { transformAssertionOptions, serializeAssertionResponse } from '@/utils/webauthn'
 import { setI18nLanguage } from '@/lang'
 import { validUsername } from '@/utils/validate'
 import { mapState } from 'pinia'
@@ -377,6 +418,10 @@ export default {
       passwordType: 'password',
       capsTooltip: false,
       loading: false,
+      passkeyLoading: false,
+      totpRequired: false,
+      totpTicket: '',
+      totpCode: '',
       showDialog: false,
       loginDialogVisible: false,
       registerDialogVisible: false,
@@ -659,6 +704,9 @@ export default {
       })
     },
     openLoginDialog() {
+      this.totpRequired = false
+      this.totpCode = ''
+      this.totpTicket = ''
       this.loginDialogVisible = true
     },
     openRegisterDialog() {
@@ -690,7 +738,19 @@ export default {
           this.loading = true
           const userStore = useUserStore()
           userStore.login(this.loginForm)
-            .then(() => {
+            .then(res => {
+              if (res?.require_2fa) {
+                this.totpRequired = true
+                this.totpTicket = res.totp_ticket
+                this.totpCode = ''
+                this.loading = false
+                this.$nextTick(() => {
+                  if (this.$refs.totpInput) {
+                    this.$refs.totpInput.focus()
+                  }
+                })
+                return
+              }
               this.loginDialogVisible = false
               this.$router.push({ path: this.redirect || '/' })
               this.loading = false
@@ -703,6 +763,70 @@ export default {
           return false
         }
       })
+    },
+    async handleTOTPLogin() {
+      if (!this.totpCode || this.totpCode.length < 6) {
+        this.$message.error('请输入完整的 6 位动态验证码')
+        return
+      }
+      this.loading = true
+      try {
+        const res = await loginTOTP(this.totpTicket, this.totpCode)
+        if (res.code === 20000 && res.data?.token) {
+          const userStore = useUserStore()
+          userStore.setAuthToken(res.data.token)
+          this.loginDialogVisible = false
+          this.$router.push({ path: this.redirect || '/' })
+        } else {
+          this.$message.error(res.message || '两步验证失败')
+        }
+      } catch (err) {
+        this.$message.error(err.message || '两步验证失败')
+      } finally {
+        this.loading = false
+      }
+    },
+    async handlePasskeyLogin() {
+      if (!window.PublicKeyCredential) {
+        this.$message.error('当前浏览器不支持通行密钥 (WebAuthn)')
+        return
+      }
+      this.passkeyLoading = true
+      try {
+        const username = this.loginForm.username.trim()
+        const beginRes = await getPasskeyLoginBegin(username)
+        if (beginRes.code !== 20000) {
+          throw new Error(beginRes.message || '获取通行密钥挑战失败')
+        }
+
+        const { session_id, options } = beginRes.data
+        const credOptions = transformAssertionOptions(options)
+
+        const assertion = await navigator.credentials.get(credOptions)
+        if (!assertion) {
+          throw new Error('未获取到有效凭据')
+        }
+
+        const payload = serializeAssertionResponse(assertion)
+        const finishRes = await postPasskeyLoginFinish(session_id, payload)
+        if (finishRes.code !== 20000 || !finishRes.data?.token) {
+          throw new Error(finishRes.message || '通行密钥验证失败')
+        }
+
+        const userStore = useUserStore()
+        userStore.setAuthToken(finishRes.data.token)
+        this.loginDialogVisible = false
+        this.$router.push({ path: this.redirect || '/' })
+        this.$message.success('通行密钥免密登录成功')
+      } catch (err) {
+        if (err.name === 'NotAllowedError') {
+          this.$message.warning('已取消通行密钥登录')
+        } else {
+          this.$message.error(err.message || '通行密钥登录失败')
+        }
+      } finally {
+        this.passkeyLoading = false
+      }
     }
   }
 }

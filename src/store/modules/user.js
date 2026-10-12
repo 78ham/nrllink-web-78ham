@@ -18,6 +18,7 @@ export const useUserStore = defineStore('user', {
     billing_enabled: false,
     avatar: '',
     introduction: '',
+    totp_enabled: 0,
     roles: [],
     routes: []
   }),
@@ -26,8 +27,18 @@ export const useUserStore = defineStore('user', {
       const { username, password } = userInfo
       const response = await login({ username: username.trim(), password })
       const { data } = response
-      this.token = data.token
-      setToken(data.token)
+      if (data?.require_2fa) {
+        return data
+      }
+      if (data?.token) {
+        this.token = data.token
+        setToken(data.token)
+      }
+      return data
+    },
+    setAuthToken(token) {
+      this.token = token
+      setToken(token)
     },
     async getInfo() {
       const response = await getInfo(this.token)
@@ -35,7 +46,7 @@ export const useUserStore = defineStore('user', {
       if (!data) {
         throw new Error('Verification failed, please Login again.')
       }
-      const { routes, roles, id, name, phone, callsign, dmrid, mdcid, status, expire_time, package_type, billing_enabled, avatar, introduction } = data
+      const { routes, roles, id, name, phone, callsign, dmrid, mdcid, status, expire_time, package_type, billing_enabled, avatar, introduction, totp_enabled } = data
       if (!roles || roles.length <= 0) {
         throw new Error('getInfo: roles must be a non-null array!')
       }
@@ -53,6 +64,7 @@ export const useUserStore = defineStore('user', {
       this.billing_enabled = !!billing_enabled
       this.avatar = avatar
       this.introduction = introduction
+      this.totp_enabled = totp_enabled || 0
       return data
     },
     async logout() {
