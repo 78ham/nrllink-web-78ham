@@ -84,9 +84,10 @@ export default {
     width: 32px;
     height: 32px;
     border-radius: 9px;
-    background: var(--platform-surface-soft);
-    border: 1px solid var(--platform-border);
+    background: linear-gradient(135deg, var(--platform-accent-18) 0%, var(--platform-accent-06) 100%);
+    border: 1px solid var(--platform-border-accent);
     color: var(--platform-accent);
+    box-shadow: 0 2px 8px var(--platform-accent-14);
     display: flex;
     align-items: center;
     justify-content: center;

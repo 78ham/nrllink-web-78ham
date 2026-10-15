@@ -26,6 +26,7 @@ package-lock.json
 
 # Codex / Playwright artifacts
 .codex/
+.zcode/
 .playwright-cli/
 output/
 

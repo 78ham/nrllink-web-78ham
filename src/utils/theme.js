@@ -54,6 +54,7 @@ export function setPlatformTheme(themeKey) {
   if (!theme) return
 
   const root = document.documentElement
+  root.setAttribute('data-theme', themeKey)
   platformThemeVarKeys.forEach((key) => {
     root.style.removeProperty(key)
   })

@@ -188,17 +188,36 @@ export default {
   border-radius: 14px;
   background: var(--platform-surface);
   border: 1px solid var(--platform-border);
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   min-height: 116px;
-  transition: border-color 0.2s cubic-bezier(0.2, 0, 0, 1), transform 0.2s cubic-bezier(0.2, 0, 0, 1);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s cubic-bezier(0.2, 0, 0, 1);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--platform-accent) 0%, var(--platform-accent-2) 100%);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
 
   &:hover {
-    border-color: var(--platform-border-strong);
-    transform: translateY(-2px);
+    border-color: var(--platform-border-accent);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.14);
+
+    &::before {
+      opacity: 1;
+    }
   }
 
   strong {

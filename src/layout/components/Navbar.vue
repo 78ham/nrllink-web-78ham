@@ -263,7 +263,10 @@ export default {
   overflow: hidden;
   position: relative;
   background: var(--platform-surface) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--platform-border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   display: flex;
   align-items: center;
   padding: 0 16px;
