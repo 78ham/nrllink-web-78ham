@@ -11,7 +11,9 @@ export function fetchHomepageAnnouncements(params) {
   return request({
     url: '/api/homepage/announcements',
     method: 'get',
-    params
+    params,
+    // 公告接口是可选的。对端没有这个路由时不弹全局错误。
+    silent: true
   })
 }
 

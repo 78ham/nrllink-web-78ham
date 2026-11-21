@@ -1,68 +1,64 @@
 <template>
   <div class="dashboard-home">
     <div class="dashboard-shell">
-      <section class="dashboard-hero">
-        <div class="hero-copy hero-copy--compact" />
-
-        <div class="hero-side">
-          <div class="hero-metrics-row">
-            <div class="hero-unified-stats">
-              <article class="unified-stat-card">
-                <strong>{{ totalDeviceCount }}</strong>
-                <span>{{ $t('dashboardHome.totalDevices') }}</span>
-              </article>
-
-              <article class="unified-stat-card">
-                <strong>{{ liveStats.onlineDevices }}</strong>
-                <span>{{ $t('login.onlineDevices') }}</span>
-              </article>
-
-              <article class="unified-stat-card">
-                <strong>{{ liveStats.connectedClients }}</strong>
-                <span>{{ $t('login.onlineBrowsers') }}</span>
-              </article>
-
-              <article class="unified-stat-card">
-                <strong>{{ liveStats.totalSubs }}</strong>
-                <span>{{ $t('login.audioSubscriptions') }}</span>
-              </article>
-            </div>
-          </div>
+      <header class="ops-head">
+        <div class="ops-copy">
+          <p class="ops-kicker">
+            <span v-if="callsign" class="ops-callsign">{{ callsign }}</span>
+            <span>{{ $t('dashboardHome.heroBadge') }}</span>
+          </p>
+          <h1>{{ $t('dashboardHome.liveTitle') }}</h1>
+          <p class="ops-hint">{{ $t('dashboardHome.liveHint') }}</p>
         </div>
-      </section>
+        <span class="link-pill" :class="{ 'is-on': liveStats.connected }">
+          <i />
+          {{ liveStats.connected ? $t('login.connected') : $t('login.connecting') }}
+        </span>
+      </header>
 
-      <!-- Homepage announcements from CMS -->
-      <section v-if="announcements.length" class="dashboard-announcements">
-        <article
-          v-for="ann in announcements"
-          :key="ann.id"
-          class="announcement-card"
-        >
-          <div class="ann-header">
-            <span v-if="ann.is_pinned" class="ann-pin">置顶</span>
-            <span class="ann-type">{{ annTypeLabel(ann.type) }}</span>
-            <h3 class="ann-title">{{ ann.title }}</h3>
-          </div>
-          <p v-if="ann.summary" class="ann-summary">{{ ann.summary }}</p>
-          <footer class="ann-meta">
-            <time>{{ ann.publish_time }}</time>
-          </footer>
+      <section class="metric-strip" :aria-label="$t('dashboardHome.summaryTitle')">
+        <article v-for="item in metrics" :key="item.key" class="metric unified-stat-card">
+          <span class="metric-icon" :class="item.tone">
+            <el-icon><component :is="item.icon" /></el-icon>
+          </span>
+          <span class="metric-copy">
+            <span class="metric-label">{{ item.label }}</span>
+            <strong>{{ item.value }}</strong>
+          </span>
         </article>
       </section>
 
-      <section class="dashboard-grid">
-        <div class="monitor-panel-content">
+      <section class="ops-stage" :class="{ 'has-notes': announcements.length }">
+        <div class="ops-monitor">
           <realtime-monitor-panel @stats-change="handleMonitorStatsChange" />
         </div>
+
+        <aside v-if="announcements.length" class="ops-notes">
+          <h2>{{ $t('dashboardHome.notices') }}</h2>
+          <article v-for="ann in announcements" :key="ann.id" class="announcement-card">
+            <div class="ann-header">
+              <span v-if="ann.is_pinned" class="ann-pin">置顶</span>
+              <span class="ann-type">{{ annTypeLabel(ann.type) }}</span>
+            </div>
+            <h3 class="ann-title">{{ ann.title }}</h3>
+            <p v-if="ann.summary" class="ann-summary">{{ ann.summary }}</p>
+            <footer class="ann-meta">
+              <time>{{ ann.publish_time }}</time>
+            </footer>
+          </article>
+        </aside>
       </section>
     </div>
   </div>
 </template>
 
 <script>
+import { mapState } from 'pinia'
 import { fetchTotalStats } from '@/api/dataquery'
 import { fetchHomepageAnnouncements } from '@/api/homepage'
+import { useUserStore } from '@/store/modules/user'
 import RealtimeMonitorPanel from '@/components/platform/RealtimeMonitorPanel.vue'
+import { Cpu, Connection, Monitor, Headset } from '@element-plus/icons-vue'
 
 export default {
   name: 'DashboardAdmin',
@@ -76,14 +72,25 @@ export default {
       liveStats: {
         totalSubs: 0,
         connectedClients: 0,
-        onlineDevices: 0
+        onlineDevices: 0,
+        connected: false
       },
       announcements: []
     }
   },
   computed: {
+    ...mapState(useUserStore, ['callsign']),
     totalDeviceCount() {
       return Number(this.list.platform_dev_total || this.list.dev_number) || 0
+    },
+    // 四个数从左到右是：库存、在线、谁在看、谁在听。图标只帮眼睛分组，不抢数字。
+    metrics() {
+      return [
+        { key: 'total', label: this.$t('dashboardHome.totalDevices'), value: this.totalDeviceCount, icon: Cpu, tone: 'tone-ink' },
+        { key: 'online', label: this.$t('login.onlineDevices'), value: this.liveStats.onlineDevices, icon: Connection, tone: 'tone-ok' },
+        { key: 'browsers', label: this.$t('login.onlineBrowsers'), value: this.liveStats.connectedClients, icon: Monitor, tone: 'tone-info' },
+        { key: 'subs', label: this.$t('login.audioSubscriptions'), value: this.liveStats.totalSubs, icon: Headset, tone: 'tone-accent' }
+      ]
     }
   },
   created() {
@@ -118,7 +125,8 @@ export default {
       this.liveStats = {
         totalSubs: Number(stats && stats.totalSubs) || 0,
         connectedClients: Number(stats && stats.connectedClients) || 0,
-        onlineDevices: Number(stats && stats.onlineDevices) || 0
+        onlineDevices: Number(stats && stats.onlineDevices) || 0,
+        connected: Boolean(stats && stats.connected)
       }
     }
   }
@@ -129,133 +137,203 @@ export default {
 .dashboard-home {
   min-height: 100%;
   background: var(--platform-shell);
-  position: relative;
-  overflow: hidden;
   color: var(--platform-ink);
 }
 
 .dashboard-shell {
-  width: min(1520px, calc(100% - 48px));
+  width: min(1680px, calc(100% - 40px));
   margin: 0 auto;
-  padding: 24px 0 36px;
-  position: relative;
-  z-index: 1;
+  padding: 20px 0 28px;
 }
 
-.dashboard-hero {
-  display: block;
-  margin-bottom: 24px;
-}
-
-.hero-copy--compact {
+.ops-head {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  min-height: 1px;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
 }
 
-.hero-side {
+.ops-kicker {
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 14px;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--platform-ink-dim);
 }
 
-.hero-metrics-row {
-  display: grid;
-  width: 100%;
+.ops-callsign {
+  color: var(--platform-accent);
+  letter-spacing: 0.04em;
 }
 
-.hero-unified-stats {
+.ops-copy h1 {
+  margin: 0;
+  font-size: 26px;
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--platform-ink);
+}
+
+.ops-hint {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--platform-ink-dim);
+}
+
+.link-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--platform-border);
+  background: var(--platform-surface);
+  color: var(--platform-ink-dim);
+  font-size: 12px;
+  font-weight: 600;
+  flex: 0 0 auto;
+
+  i {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #f59e0b;
+  }
+
+  &.is-on {
+    color: #34d399;
+    border-color: rgba(16, 185, 129, 0.35);
+
+    i {
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+    }
+  }
+}
+
+.metric-strip {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
-  width: 100%;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
-.dashboard-grid {
+.ops-stage {
   display: block;
 }
 
-.monitor-panel-content {
-  min-height: 720px;
+.ops-stage.has-notes {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 16px;
+  align-items: stretch;
 }
 
-// Obsidian Arc Metric Stat Card
-.unified-stat-card {
+.ops-monitor {
+  min-height: 420px;
+  height: calc(100dvh - 300px);
+}
+
+.ops-monitor :deep(.realtime-monitor-panel),
+.ops-monitor :deep(.monitor-card) {
+  height: 100%;
+}
+
+.ops-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  max-height: calc(100dvh - 300px);
+  overflow: auto;
+  padding-right: 2px;
+
+  h2 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--platform-ink-dim);
+  }
+}
+
+.metric {
   min-width: 0;
-  padding: 16px 18px;
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  min-height: 76px;
+  padding: 14px 16px;
   border-radius: 14px;
   background: var(--platform-surface);
   border: 1px solid var(--platform-border);
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  min-height: 116px;
-  position: relative;
   overflow: hidden;
-  transition: all 0.25s cubic-bezier(0.2, 0, 0, 1);
+}
 
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--platform-accent) 0%, var(--platform-accent-2) 100%);
-    opacity: 0;
-    transition: opacity 0.25s ease;
+.metric-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  background: var(--platform-surface-soft);
+  color: var(--platform-ink-dim);
+  font-size: 18px;
+
+  &.tone-ok {
+    background: rgba(16, 185, 129, 0.12);
+    color: #34d399;
   }
 
-  &:hover {
-    border-color: var(--platform-border-accent);
-    transform: translateY(-3px);
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.14);
-
-    &::before {
-      opacity: 1;
-    }
+  &.tone-info {
+    background: rgba(56, 189, 248, 0.12);
+    color: #38bdf8;
   }
 
-  strong {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    line-height: 1.1;
-    color: var(--platform-ink);
-    text-align: center;
-  }
-
-  span {
-    display: block;
-    margin-top: 6px;
-    font-size: 11.5px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--platform-ink-dim);
-    line-height: 1.35;
+  &.tone-accent {
+    background: var(--platform-accent-12);
+    color: var(--platform-accent);
   }
 }
 
-// Announcements (Obsidian Arc reading card)
-.dashboard-announcements {
-  margin-bottom: 24px;
+.metric-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.metric-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--platform-ink-dim);
+  line-height: 1.3;
+}
+
+.metric strong {
+  margin-top: 2px;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  color: var(--platform-ink);
 }
 
 .announcement-card {
   border-radius: 14px;
   background: var(--platform-surface);
   border: 1px solid var(--platform-border);
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
-  padding: 16px 20px;
-  margin-bottom: 12px;
+  padding: 14px 14px 12px;
   transition: border-color 0.2s ease;
 
   &:hover {
@@ -267,7 +345,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .ann-pin {
@@ -292,8 +370,9 @@ export default {
 
 .ann-title {
   margin: 0;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
+  line-height: 1.4;
   color: var(--platform-ink);
 }
 
@@ -319,72 +398,59 @@ export default {
   }
 }
 
-@media (max-width: 1320px) {
-  .hero-side {
-    align-items: center;
+@media (max-width: 1180px) {
+  .ops-stage.has-notes {
+    grid-template-columns: 1fr;
   }
 
-  .hero-metrics-row {
-    width: 100%;
+  .ops-notes {
+    order: -1;
+    max-height: 220px;
   }
 
-  .hero-unified-stats {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    width: 100%;
-  }
-
-  .dashboard-grid {
-    display: block;
+  .ops-monitor {
+    height: auto;
+    min-height: 560px;
   }
 }
 
-@media (max-width: 1023px) {
- .monitor-panel-content {
-  min-height: 480px;
- }
+@media (max-width: 900px) {
+  .metric-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 767px) {
   .dashboard-shell {
     width: min(100%, calc(100% - 24px));
-    padding-top: 16px;
+    padding-top: 14px;
   }
 
-  .hero-copy--compact {
-    align-items: center;
-    text-align: center;
+  .ops-head {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
-  .hero-metrics-row {
-    width: 100%;
+  .ops-copy h1 {
+    font-size: 22px;
   }
 
-  .hero-unified-stats {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    width: 100%;
-    gap: 10px;
-  }
-
-  .monitor-panel-content {
+  .ops-monitor {
     min-height: 0;
+    height: auto;
   }
 
-  .unified-stat-card {
-    min-height: 98px;
+  .metric {
+    min-height: 68px;
     padding: 12px;
+  }
 
-    strong {
-      font-size: 22px;
-    }
+  .metric strong {
+    font-size: 20px;
   }
 
   .announcement-card {
     border-radius: 12px;
-    padding: 12px 14px;
-  }
-
-  .ann-title {
-    font-size: 14px;
   }
 }
 </style>

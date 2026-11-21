@@ -314,8 +314,8 @@ export default {
 
 .group-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
+  gap: 14px;
 }
 
 .box-card {
@@ -323,15 +323,14 @@ export default {
   float: none;
   margin-right: 0;
   margin-bottom: 0;
-  border-radius: 24px;
+  border-radius: 16px;
   border: 1px solid var(--platform-border);
-  background: var(--platform-shell);
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.22);
-  transition: transform 0.3s, box-shadow 0.3s;
+  background: var(--platform-surface);
+  box-shadow: none;
+  transition: border-color 0.2s ease;
 
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 22px 50px rgba(0, 0, 0, 0.28);
+    border-color: var(--platform-border-strong);
   }
 
   :deep(.el-card__body) {
@@ -347,18 +346,18 @@ export default {
     font-weight: 700;
     color: var(--platform-ink);
     border-bottom: 1px solid var(--platform-border);
+    box-shadow: inset 3px 0 0 transparent;
 
     &.type-hall {
-      background: linear-gradient(90deg, var(--platform-accent-12) 0%, var(--platform-accent-14) 100%);
+      box-shadow: inset 3px 0 0 var(--platform-accent);
     }
 
     &.type-room {
-      background: linear-gradient(90deg, var(--platform-accent-2) 0%, var(--platform-accent-14) 100%);
-      opacity: 0.8;
+      box-shadow: inset 3px 0 0 var(--platform-accent-2);
     }
 
     &.type-link {
-      background: linear-gradient(90deg, var(--platform-accent-14) 0%, var(--platform-accent-16) 100%);
+      box-shadow: inset 3px 0 0 var(--platform-ink-muted);
     }
   }
 

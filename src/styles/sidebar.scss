@@ -95,6 +95,7 @@
       background-color: var(--platform-accent-14) !important;
       color: var(--platform-accent) !important;
       font-weight: 600;
+      box-shadow: inset 3px 0 0 var(--platform-accent);
     }
 
     .is-active > .el-sub-menu__title {

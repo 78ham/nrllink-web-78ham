@@ -35,26 +35,26 @@ export default {
   overflow-y: auto;
   background: var(--platform-deep-98);
   scrollbar-width: thin;
-  scrollbar-color: var(--platform-accent-42) var(--platform-surface-soft);
+  scrollbar-color: var(--platform-border-strong) transparent;
 
   &::-webkit-scrollbar {
     width: 10px;
   }
 
   &::-webkit-scrollbar-track {
-    background: var(--platform-surface-soft);
-    border-left: 1px solid var(--platform-border-lighter);
+    background: transparent;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, var(--platform-accent-62) 0%, var(--platform-accent-72) 100%);
+    background: var(--platform-border-strong);
     border-radius: 999px;
-    border: 2px solid var(--platform-surface-0);
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    border: 2px solid transparent;
+    background-clip: padding-box;
   }
 
   &::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, var(--platform-accent-85) 0%, var(--platform-accent-88) 100%);
+    background: var(--platform-ink-muted);
+    background-clip: padding-box;
   }
 
   &::-webkit-scrollbar-corner {

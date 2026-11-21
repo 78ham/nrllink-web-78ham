@@ -49,6 +49,12 @@
           {{ $t('login.noCallRecord') }}
         </div>
         <div v-else class="recent-call-list">
+          <div class="recent-call-head">
+            <span>{{ $t('login.colRoom') }}</span>
+            <span>{{ $t('login.colCaller') }}</span>
+            <span>{{ $t('login.colDuration') }}</span>
+            <span>{{ $t('login.colTime') }}</span>
+          </div>
           <div
             v-for="item in recentCalls"
             :key="`${item.room_key}-${item.started_at}-${item.callsign}-${item.ssid}`"
@@ -140,7 +146,8 @@ export default {
       this.$emit('stats-change', {
         totalSubs: this.totalSubs,
         connectedClients: this.connectedClients,
-        onlineDevices: this.onlineDevices
+        onlineDevices: this.onlineDevices,
+        connected: this.wsConnected
       })
     },
     applyLiveStats(payload, fallbackZero = false) {
@@ -206,6 +213,7 @@ export default {
       ws.binaryType = 'arraybuffer'
       ws.onopen = () => {
         this.wsConnected = true
+        this.emitStatsChange()
         this.wsRetryDelay = 2000 // 连接成功后重置退避
         this.wsPingTimer = window.setInterval(() => {
           if (this.websock && this.websock.readyState === WebSocket.OPEN) {
@@ -216,9 +224,11 @@ export default {
       ws.onmessage = this.handleMonitorMessage
       ws.onerror = () => {
         this.wsConnected = false
+        this.emitStatsChange()
       }
       ws.onclose = () => {
         this.wsConnected = false
+        this.emitStatsChange()
         if (this.wsPingTimer) {
           clearInterval(this.wsPingTimer)
           this.wsPingTimer = null
@@ -457,8 +467,8 @@ export default {
 }
 
 .monitor-room-grid {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
   gap: 10px;
 }
 
@@ -468,10 +478,9 @@ export default {
   border-radius: 12px;
   background: var(--platform-surface-soft);
   color: var(--platform-ink);
-  min-height: 54px;
-  flex: 1 1 220px;
-  min-width: min(220px, 100%);
-  max-width: 100%;
+  min-height: 58px;
+  min-width: 0;
+  width: 100%;
   padding: 8px 12px;
   text-align: left;
   display: flex;
@@ -479,11 +488,10 @@ export default {
   justify-content: flex-start;
   gap: 3px;
   cursor: pointer;
-  transition: all 0.15s cubic-bezier(0.2, 0, 0, 1);
+  transition: border-color 0.15s ease, background 0.15s ease;
 }
 
 .monitor-room-button:hover {
-  transform: translateY(-1px);
   border-color: var(--platform-border-strong);
   background: var(--platform-surface-light);
 }
@@ -496,14 +504,8 @@ export default {
 
 .monitor-room-button.speaking {
   border-color: #10b981;
-  box-shadow: 0 0 10px rgba(16, 185, 129, 0.25);
-  will-change: transform;
-  animation: speakingPulse 0.8s ease-in-out infinite;
+  animation: speakingPulse 1.6s ease-in-out infinite;
   animation-delay: var(--speaking-pulse-delay);
-}
-
-.monitor-room-button.multi-speakers {
-  flex-basis: 360px;
 }
 
 .room-title {
@@ -544,10 +546,28 @@ export default {
 }
 
 .section-title {
-  font-size: 20px;
+  font-size: 13px;
   font-weight: 600;
-  color: var(--platform-ink);
-  margin-bottom: 10px;
+  color: var(--platform-ink-dim);
+  margin-bottom: 8px;
+}
+
+.recent-call-head,
+.recent-call-item {
+  grid-template-columns: minmax(0, 1fr) 132px 56px 148px;
+  column-gap: 12px;
+}
+
+.recent-call-head {
+  display: grid;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 0 13px 6px;
+  background: var(--platform-surface);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--platform-ink-muted, var(--platform-ink-dim));
 }
 
 .recent-call-list {
@@ -556,7 +576,7 @@ export default {
   gap: 8px;
   flex: 1;
   overflow: auto;
-  padding: 4px 4px 2px 0;
+  padding: 0 0 2px;
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;
 }
@@ -598,8 +618,6 @@ export default {
 
 .recent-call-item {
   display: grid;
-  grid-template-columns: 2fr 0.9fr auto auto;
-  gap: 8px;
   align-items: center;
   padding: 9px 12px;
   border-radius: 12px;
@@ -610,31 +628,40 @@ export default {
 }
 
 .recent-call-item.active {
-  border-color: var(--platform-accent-2);
-  box-shadow: 0 0 12px var(--platform-accent-18);
-  will-change: transform;
-  animation: speakingPulse 0.8s ease-in-out infinite;
+  border-color: #10b981;
+  animation: speakingPulse 1.6s ease-in-out infinite;
   animation-delay: var(--speaking-pulse-delay);
 }
 
 .recent-room {
   color: var(--platform-ink);
   font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .recent-caller {
   color: var(--platform-accent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .recent-duration {
   color: var(--platform-accent-2);
   font-variant-numeric: tabular-nums;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .recent-time,
 .empty-state {
   color: var(--platform-ink-dim);
+}
+
+.recent-time {
+  white-space: nowrap;
 }
 
 .empty-state {
@@ -645,11 +672,11 @@ export default {
 @keyframes speakingPulse {
   0%,
   100% {
-    transform: translateY(0);
+    box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.28);
   }
 
   50% {
-    transform: translateY(-1px);
+    box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.7), 0 0 14px rgba(16, 185, 129, 0.22);
   }
 }
 
@@ -659,8 +686,8 @@ export default {
     padding: 16px;
   }
 
-  .monitor-room-button.multi-speakers {
-    flex-basis: 100%;
+  .recent-call-head {
+    display: none;
   }
 
   .recent-call-item {
@@ -678,9 +705,8 @@ export default {
     align-items: flex-start;
   }
 
-  .monitor-header h4,
-  .section-title {
-    font-size: 17px;
+  .monitor-header h4 {
+    font-size: 16px;
   }
 
   .monitor-room-button {

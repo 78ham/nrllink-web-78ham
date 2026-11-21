@@ -255,6 +255,10 @@ export default {
     noCallRecord: 'No Call Record',
     subscribedRooms: 'Subscribed to {count} rooms, backend will mix and stream audio',
     loginDialogTip: 'Enter username and password to access the platform',
+    usernameInvalid: 'Enter a valid account',
+    passwordTooShort: 'Password must be at least 6 characters',
+    capsLock: 'Caps Lock is on',
+    passkeyLogin: 'Sign in with a passkey',
     noAccount: 'No account? Register',
     newUserRegister: 'New User Registration',
     registerDesc: 'Complete the form in the popup, submit and wait for admin approval.',
@@ -267,7 +271,11 @@ export default {
     serverListPanel: 'Servers',
     showAllPanels: 'Show All Panels',
     switchToChinese: 'Switch to Chinese',
-    switchToEnglish: 'Switch to English'
+    switchToEnglish: 'Switch to English',
+    colRoom: 'Room',
+    colCaller: 'Callsign',
+    colDuration: 'Duration',
+    colTime: 'Started'
   },
   dashboardHome: {
     heroBadge: 'Control Center',
@@ -285,7 +293,10 @@ export default {
     liveAccessDesc: '{subs} active audio subscriptions right now',
     platformName: 'Platform Name',
     platformIcp: 'ICP Filing',
-    platformLanguage: 'Current Language'
+    platformLanguage: 'Current Language',
+    liveTitle: 'Live Traffic',
+    liveHint: 'Online scale, room status and recent calls',
+    notices: 'Announcements'
   },
   permission: {
     addRole: 'Add Role',

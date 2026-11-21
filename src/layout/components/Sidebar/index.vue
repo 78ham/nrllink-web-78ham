@@ -16,15 +16,14 @@
       </el-menu>
     </el-scrollbar>
 
-    <!-- Obsidian Arc Rail Footer: User profile & direct Logout button -->
     <div class="sidebar-rail-footer" :class="{ 'is-collapsed': isCollapse }">
-      <div v-if="!isCollapse" class="rail-user-info">
-        <img :src="avatar + '?imageView2/1/w/80/h/80'" class="rail-avatar" alt="Avatar">
-        <div class="rail-user-meta">
-          <span class="rail-user-name" :title="name">{{ name || 'HAM User' }}</span>
-          <span class="rail-user-callsign" :title="callsign">{{ callsign || 'Online' }}</span>
+      <router-link to="/profile/index" class="rail-user-info" :title="name || callsign">
+        <img :src="avatar + '?imageView2/1/w/80/h/80'" class="rail-avatar" alt="">
+        <div v-if="!isCollapse" class="rail-user-meta">
+          <span class="rail-user-name">{{ name || 'HAM' }}</span>
+          <span class="rail-user-callsign">{{ callsign || $t('route.profile') }}</span>
         </div>
-      </div>
+      </router-link>
       <button
         type="button"
         class="rail-logout-action"
@@ -33,7 +32,6 @@
         @click="logout"
       >
         <el-icon class="rail-logout-icon"><SwitchButton /></el-icon>
-        <span v-if="!isCollapse" class="rail-logout-text">{{ $t('navbar.logOut') }}</span>
       </button>
     </div>
   </div>
@@ -114,23 +112,24 @@ export default {
   flex: 0 0 auto;
   border-top: 1px solid var(--platform-border);
   background: var(--sidebar-bg);
-  padding: 10px 10px 12px;
+  padding: 10px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
   gap: 8px;
   box-sizing: border-box;
-  transition: all 0.28s cubic-bezier(0.2, 0, 0, 1);
 
   &.is-collapsed {
+    flex-direction: column;
     padding: 8px 6px 12px;
-    align-items: center;
 
-    .rail-logout-action {
-      justify-content: center;
-      padding: 0;
+    .rail-user-info {
       width: 38px;
       height: 38px;
-      border-radius: 10px;
+      padding: 0;
+      justify-content: center;
+      background: transparent;
+      border-color: transparent;
     }
   }
 }
@@ -139,10 +138,18 @@ export default {
   display: flex;
   align-items: center;
   gap: 9px;
+  min-width: 0;
+  flex: 1;
   padding: 4px 6px;
   border-radius: 10px;
   background: var(--platform-surface-soft);
   border: 1px solid var(--platform-border-light);
+  text-decoration: none;
+  color: inherit;
+
+  &:hover {
+    border-color: var(--platform-border-strong);
+  }
 
   .rail-avatar {
     width: 32px;
@@ -184,38 +191,26 @@ export default {
   appearance: none;
   border: 1px solid var(--platform-border);
   border-radius: 10px;
-  background: var(--platform-surface-soft);
+  background: transparent;
   color: var(--platform-ink-dim);
+  width: 36px;
   height: 36px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 0 12px;
-  font-size: 12.5px;
-  font-weight: 600;
+  justify-content: center;
+  padding: 0;
+  flex: 0 0 auto;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
   outline: none;
 
   .rail-logout-icon {
-    font-size: 15px;
-    flex-shrink: 0;
-  }
-
-  .rail-logout-text {
-    white-space: nowrap;
+    font-size: 16px;
   }
 
   &:hover {
     border-color: rgba(239, 68, 68, 0.45);
     background: rgba(239, 68, 68, 0.12);
     color: #ef4444;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
-  }
-
-  &:active {
-    transform: translateY(0);
   }
 }
 </style>

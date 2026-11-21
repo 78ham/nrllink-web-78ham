@@ -223,7 +223,7 @@
 
           <el-tooltip
             v-model="capsTooltip"
-            content="Caps lock is On"
+            :content="$t('login.capsLock')"
             placement="right"
             manual
           >
@@ -264,9 +264,8 @@
               :loading="passkeyLoading"
               type="default"
               class="login-button passkey-button"
-              style="margin-top: 12px; width: 100%;"
               @click.prevent="handlePasskeyLogin"
-            >使用通行密钥 (Passkey) 登录</el-button>
+            >{{ $t('login.passkeyLogin') }}</el-button>
           </div>
 
           <div v-else class="totp-step-wrapper" style="margin-top: 16px;">
@@ -381,14 +380,14 @@ export default {
   data() {
     const validateUsername = (rule, value, callback) => {
       if (!validUsername(value)) {
-        callback(new Error('Please enter the correct user name'))
+        callback(new Error(this.$t('login.usernameInvalid')))
       } else {
         callback()
       }
     }
     const validatePassword = (rule, value, callback) => {
       if (value.length < 6) {
-        callback(new Error('The password can not be less than 6 digits'))
+        callback(new Error(this.$t('login.passwordTooShort')))
       } else {
         callback()
       }
@@ -606,8 +605,14 @@ export default {
       }
 
       const topbarWidth = topbar.clientWidth
-      const brandWidth = brandBlock.scrollWidth
-      const rightWidth = topbarRight.scrollWidth
+      const logoEl = brandBlock.querySelector('.topbar-logo')
+      const titleEl = brandBlock.querySelector('h1')
+      // 标题不换行。被挤窄之后，块自己的 scrollWidth 等于列宽，量不出真实内容，叠放会卡住。
+      const brandWidth = (logoEl ? logoEl.offsetWidth : 0) + (titleEl ? titleEl.scrollWidth : 0) + 24
+      const rightStyle = window.getComputedStyle(topbarRight)
+      const rightGap = Number.parseFloat(rightStyle.columnGap || rightStyle.gap || '0') || 0
+      const rightKids = Array.from(topbarRight.children)
+      const rightWidth = rightKids.reduce((sum, el) => sum + el.offsetWidth, 0) + Math.max(rightKids.length - 1, 0) * rightGap
       const computedStyle = window.getComputedStyle(topbar)
       const columnGap = Number.parseFloat(computedStyle.columnGap || computedStyle.gap || '0') || 0
       const reservedGap = columnGap || 20

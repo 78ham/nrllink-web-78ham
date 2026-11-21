@@ -11,11 +11,6 @@
 
     <div class="right-menu">
       <template v-if="device!=='mobile'">
-        <div class="nav-user-pill desktop-only">
-          <span class="user-pill-name">{{ name || 'HAM' }}</span>
-          <span v-if="callsign" class="user-pill-callsign">{{ callsign }}</span>
-        </div>
-
         <button
           v-if="billingEnabled"
           class="expire-toggle right-menu-item hover-effect desktop-only"
@@ -70,17 +65,6 @@
             </el-dropdown-menu>
           </template>
         </el-dropdown>
-
-        <!-- Direct Logout button for admin backend (Obsidian Arc Style) -->
-        <button
-          type="button"
-          class="nav-logout-btn desktop-only"
-          :title="$t('navbar.logOut')"
-          @click="logout"
-        >
-          <el-icon class="logout-icon"><SwitchButton /></el-icon>
-          <span class="logout-text">{{ $t('navbar.logOut') }}</span>
-        </button>
       </template>
 
       <template v-if="device==='mobile'">
@@ -126,8 +110,6 @@ export default {
     const sidebar = computed(() => appStore.sidebar)
     const device = computed(() => appStore.device)
     const language = computed(() => appStore.language)
-    const name = computed(() => userStore.name)
-    const callsign = computed(() => userStore.callsign)
     const avatar = computed(() => userStore.avatar)
     const billingEnabled = computed(() => userStore.billing_enabled)
     const expireText = computed(() => {
@@ -182,8 +164,6 @@ export default {
       sidebar,
       device,
       language,
-      name,
-      callsign,
       avatar,
       billingEnabled,
       expireText,
@@ -309,27 +289,6 @@ export default {
       outline: none;
     }
 
-    .nav-user-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 5px 12px;
-      border-radius: 9999px;
-      background: var(--platform-surface-soft);
-      border: 1px solid var(--platform-border);
-      font-size: 12.5px;
-
-      .user-pill-name {
-        font-weight: 600;
-        color: var(--platform-ink);
-      }
-
-      .user-pill-callsign {
-        color: var(--platform-accent);
-        font-weight: 700;
-      }
-    }
-
     .lang-toggle {
       appearance: none;
       border: 1px solid var(--platform-border);
@@ -449,46 +408,6 @@ export default {
       }
     }
 
-    // Direct Logout Button in Desktop Header
-    .nav-logout-btn {
-      appearance: none;
-      border: 1px solid rgba(239, 68, 68, 0.28);
-      border-radius: 9999px;
-      background: rgba(239, 68, 68, 0.08);
-      color: #f87171;
-      height: 32px;
-      padding: 0 12px;
-      font-size: 12.5px;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      outline: none;
-      transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
-
-      .logout-icon {
-        font-size: 14px;
-        flex-shrink: 0;
-      }
-
-      .logout-text {
-        white-space: nowrap;
-      }
-
-      &:hover {
-        border-color: #ef4444;
-        background: #ef4444;
-        color: #ffffff;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
-      }
-
-      &:active {
-        transform: translateY(0);
-      }
-    }
-
     .mobile-avatar {
       width: 30px;
       height: 30px;
@@ -510,12 +429,6 @@ export default {
       justify-content: center;
       cursor: pointer;
     }
-  }
-}
-
-@media (max-width: 900px) {
-  .navbar .right-menu .nav-user-pill {
-    display: none;
   }
 }
 

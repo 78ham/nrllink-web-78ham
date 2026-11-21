@@ -255,6 +255,10 @@ export default {
     noCallRecord: '暂无通话记录',
     subscribedRooms: '已订阅 {count} 个房间，后端会先混音再下发语音',
     loginDialogTip: '输入用户名和密码后进入平台',
+    usernameInvalid: '请输入正确的账号',
+    passwordTooShort: '密码至少 6 位',
+    capsLock: '大写锁定已打开',
+    passkeyLogin: '使用通行密钥登录',
     noAccount: '没有账号？去注册',
     newUserRegister: '新用户注册',
     registerDesc: '在弹窗中直接完成资料填写，提交后等待管理员审核。',
@@ -267,7 +271,11 @@ export default {
     serverListPanel: '服务器列表',
     showAllPanels: '全部显示',
     switchToChinese: '切换到中文',
-    switchToEnglish: '切换到英文'
+    switchToEnglish: '切换到英文',
+    colRoom: '房间',
+    colCaller: '呼号',
+    colDuration: '时长',
+    colTime: '开始'
   },
   dashboardHome: {
     heroBadge: '控制中心',
@@ -285,7 +293,10 @@ export default {
     liveAccessDesc: '当前音频订阅 {subs} 路',
     platformName: '平台名称',
     platformIcp: '备案信息',
-    platformLanguage: '当前语言'
+    platformLanguage: '当前语言',
+    liveTitle: '实时台情',
+    liveHint: '在线规模、房间状态和最近通话',
+    notices: '平台公告'
   },
   permission: {
     addRole: '新增职位',
