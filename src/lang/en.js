@@ -224,6 +224,7 @@ export default {
 
   },
   navbar: {
+    navigation: 'Navigation menu',
 
     dashboard: 'Dashboard',
     logOut: 'Log Out',
@@ -478,6 +479,7 @@ export default {
     serverAddr: 'Server Address',
     serverPort: 'Port',
     password: 'Password',
+    keepPassword: 'Leave blank to keep the current password',
     callsign: 'Callsign',
     dmrid: 'DMR-ID',
     defaultTG: 'Default Talkgroup (TG)',

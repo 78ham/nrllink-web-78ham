@@ -16,19 +16,16 @@ export const DEVICE = {
  * 规则：
  *  1. 宽度 < 768            -> mobile
  *  2. iPadOS（Macintosh UA + maxTouchPoints > 1）-> tablet
- *  3. 触屏且宽度 < 1024     -> tablet
+ *  3. 宽度 < 1024     -> tablet
  *  4. 其余                  -> desktop
  */
 export function detectDevice() {
   const width = document.documentElement.clientWidth
   const ua = navigator.userAgent || ''
-  const isTouch = typeof window.matchMedia === 'function' &&
-    window.matchMedia('(pointer: coarse)').matches
   const isIPadOS = /Macintosh/.test(ua) && navigator.maxTouchPoints > 1
 
   if (width < BREAKPOINT.mobile) return DEVICE.MOBILE
-  if (isIPadOS) return DEVICE.TABLET
-  if (isTouch && width < BREAKPOINT.tablet) return DEVICE.TABLET
+  if (isIPadOS || width < BREAKPOINT.tablet) return DEVICE.TABLET
   return DEVICE.DESKTOP
 }
 

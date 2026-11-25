@@ -141,6 +141,7 @@ export default {
 }
 
 .dashboard-shell {
+  container-type: inline-size;
   width: min(1680px, calc(100% - 40px));
   margin: 0 auto;
   padding: 20px 0 28px;
@@ -152,6 +153,11 @@ export default {
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 16px;
+}
+
+.ops-copy {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .ops-kicker {
@@ -229,12 +235,13 @@ export default {
 
 .ops-stage.has-notes {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
+  grid-template-columns: minmax(0, 1fr) minmax(250px, 22%);
   gap: 16px;
   align-items: stretch;
 }
 
 .ops-monitor {
+  min-width: 0;
   min-height: 420px;
   height: calc(100dvh - 300px);
 }
@@ -370,6 +377,7 @@ export default {
 
 .ann-title {
   margin: 0;
+  overflow-wrap: anywhere;
   font-size: 14px;
   font-weight: 600;
   line-height: 1.4;
@@ -398,23 +406,29 @@ export default {
   }
 }
 
-@media (max-width: 1180px) {
+@container (max-width: 960px) {
   .ops-stage.has-notes {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .ops-notes {
-    order: -1;
-    max-height: 220px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+    max-height: none;
+    overflow: visible;
+
+    h2 {
+      grid-column: 1 / -1;
+    }
   }
 
   .ops-monitor {
     height: auto;
-    min-height: 560px;
+    min-height: 0;
   }
 }
 
-@media (max-width: 900px) {
+@container (max-width: 700px) {
   .metric-strip {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -422,22 +436,22 @@ export default {
 
 @media (max-width: 767px) {
   .dashboard-shell {
-    width: min(100%, calc(100% - 24px));
+    width: calc(100% - 24px);
     padding-top: 14px;
   }
 
   .ops-head {
     align-items: flex-start;
-    flex-direction: column;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    .ops-copy {
+      flex: 1 1 12rem;
+    }
   }
 
   .ops-copy h1 {
     font-size: 22px;
-  }
-
-  .ops-monitor {
-    min-height: 0;
-    height: auto;
   }
 
   .metric {

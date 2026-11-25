@@ -72,30 +72,28 @@ export const useUserStore = defineStore('user', {
         await logout(this.token)
       } finally {
         // 无论后端是否成功，都清理本地会话，避免 token 残留
-        this.token = ''
-        this.roles = []
-        this.routes = []
-        this.id = ''
-        this.name = ''
-        this.phone = ''
-        this.callsign = ''
-        this.dmrid = ''
-        this.mdcid = ''
-        this.status = ''
-        this.expire_time = ''
-        this.package_type = ''
-        this.billing_enabled = false
-        this.avatar = ''
-        this.introduction = ''
-        removeToken()
-        resetRouter()
+        this.resetToken()
       }
     },
     resetToken() {
       this.token = ''
       this.roles = []
       this.routes = []
+      this.id = ''
+      this.name = ''
+      this.phone = ''
+      this.callsign = ''
+      this.dmrid = ''
+      this.mdcid = ''
+      this.status = ''
+      this.expire_time = ''
+      this.package_type = ''
+      this.billing_enabled = false
+      this.avatar = ''
+      this.introduction = ''
+      this.totp_enabled = 0
       removeToken()
+      resetRouter()
     },
     async changeRoles(role) {
       // DEV only: role switching for testing

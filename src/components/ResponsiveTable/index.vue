@@ -41,8 +41,10 @@
         <div v-if="useVirtual && topPadding > 0" :style="{ height: `${topPadding}px` }" class="rt-virtual-spacer" />
 
         <article
-          v-for="row in visibleData"
+          v-for="(row, index) in visibleData"
+          ref="cards"
           :key="getRowKey(row)"
+          :data-row-index="startIndex + index"
           class="rt-card"
         >
           <header class="rt-card__head">
@@ -106,6 +108,10 @@ import { useAppStore } from '@/store/modules/app'
 export default {
   name: 'ResponsiveTable',
   props: {
+    mobileCards: {
+      type: Boolean,
+      default: true
+    },
     data: {
       type: Array,
       default: () => []
@@ -151,6 +157,7 @@ export default {
   data() {
     return {
       scrollTop: 0,
+      measuredHeights: new WeakMap(),
       viewportHeight: 800,
       bufferCount: 5,
       touchStartY: 0,
@@ -162,28 +169,32 @@ export default {
   computed: {
     isMobile() {
       const appStore = useAppStore()
-      return appStore.device === 'mobile'
+      return this.mobileCards && appStore.device === 'mobile'
     },
     useVirtual() {
       return (this.data?.length || 0) > this.virtualThreshold
     },
+    offsets() {
+      const offsets = [0]
+      for (const row of this.data) {
+        const height = this.measuredHeights.get(row) || this.itemHeight
+        offsets.push(offsets[offsets.length - 1] + height)
+      }
+      return offsets
+    },
     startIndex() {
       if (!this.useVirtual) return 0
-      const index = Math.floor(this.scrollTop / this.itemHeight) - this.bufferCount
-      return Math.max(0, index)
+      return Math.max(0, this.indexAt(this.scrollTop) - this.bufferCount)
     },
     endIndex() {
       if (!this.useVirtual) return this.data.length
-      const count = Math.ceil(this.viewportHeight / this.itemHeight) + this.bufferCount * 2
-      return Math.min(this.data.length, this.startIndex + count)
+      return Math.min(this.data.length, this.indexAt(this.scrollTop + this.viewportHeight) + this.bufferCount + 1)
     },
     topPadding() {
-      if (!this.useVirtual) return 0
-      return this.startIndex * this.itemHeight
+      return this.useVirtual ? this.offsets[this.startIndex] : 0
     },
     bottomPadding() {
-      if (!this.useVirtual) return 0
-      return Math.max(0, (this.data.length - this.endIndex) * this.itemHeight)
+      return this.useVirtual ? this.offsets[this.data.length] - this.offsets[this.endIndex] : 0
     },
     visibleData() {
       if (!this.data || !this.data.length) return []
@@ -197,15 +208,40 @@ export default {
     }
   },
   mounted() {
+    this.scrollContainer = this.$el.closest('.app-main') || window
     this.updateViewport()
-    window.addEventListener('scroll', this.handleScroll, { passive: true })
+    this.scrollContainer.addEventListener('scroll', this.handleScroll, { passive: true })
     window.addEventListener('resize', this.updateViewport, { passive: true })
   },
+  updated() {
+    this.measureCards()
+  },
   beforeUnmount() {
-    window.removeEventListener('scroll', this.handleScroll)
+    this.scrollContainer.removeEventListener('scroll', this.handleScroll)
     window.removeEventListener('resize', this.updateViewport)
   },
   methods: {
+    // Find the card containing this pixel, allowing for wrapped fields and actions.
+    indexAt(offset) {
+      let low = 0
+      let high = this.data.length - 1
+      while (low < high) {
+        const mid = Math.floor((low + high) / 2)
+        if (this.offsets[mid + 1] <= offset) low = mid + 1
+        else high = mid
+      }
+      return low
+    },
+    measureCards() {
+      if (!this.useVirtual || !this.isMobile) return
+      for (const card of this.$refs.cards || []) {
+        const row = this.data[Number(card.dataset.rowIndex)]
+        const height = card.offsetHeight + parseFloat(getComputedStyle(card).marginBottom || 0)
+        if (row && card.offsetHeight > 0 && height !== this.measuredHeights.get(row)) {
+          this.measuredHeights.set(row, height)
+        }
+      }
+    },
     getRowKey(row) {
       if (!row) return Math.random().toString(36).slice(2)
       return row[this.rowKey] ?? row.id ?? row.name ?? JSON.stringify(row)
@@ -219,17 +255,18 @@ export default {
       return val !== undefined && val !== null && val !== '' ? val : '--'
     },
     updateViewport() {
-      if (typeof window !== 'undefined') {
-        this.viewportHeight = window.innerHeight || 800
-      }
+      this.viewportHeight = this.scrollContainer.clientHeight || window.innerHeight
+      this.handleScroll()
+      this.measureCards()
     },
     handleScroll() {
       if (!this.isMobile || !this.useVirtual) return
-      this.scrollTop = window.scrollY || document.documentElement.scrollTop || 0
+      const top = this.scrollContainer === window ? 0 : this.scrollContainer.getBoundingClientRect().top
+      this.scrollTop = Math.max(0, top - this.$el.getBoundingClientRect().top)
     },
     handleTouchStart(e) {
       if (!this.pullToRefresh || this.refreshing) return
-      const currentScroll = window.scrollY || document.documentElement.scrollTop || 0
+      const currentScroll = this.scrollContainer === window ? window.scrollY : this.scrollContainer.scrollTop
       if (currentScroll <= 5) {
         this.touchStartY = e.touches[0].clientY
       } else {
@@ -411,11 +448,10 @@ export default {
     justify-content: flex-end;
     align-items: center;
     gap: 8px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    flex-wrap: wrap;
 
-    &::-webkit-scrollbar {
-      display: none;
+    :deep(.el-button) {
+      margin-inline: 0;
     }
   }
 }

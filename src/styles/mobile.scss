@@ -53,30 +53,12 @@ $tablet-breakpoint: $bp-tablet;
 
 // === Mobile layout adjustments ===
 @media (max-width: #{$mobile-breakpoint - 1}) {
-  // Sidebar hidden on mobile (handled by ResizeMixin)
-  .sidebar-container {
-    position: fixed !important;
-    z-index: 1001;
-    height: 100vh;
-    height: 100dvh;
-  }
-
-  // Main container takes full width on mobile
-  .main-container {
-    margin-left: 0 !important;
-    width: 100% !important;
-    min-height: 100vh;
-    min-height: 100dvh;
-    // Bottom padding for tabbar
-    padding-bottom: calc(56px + var(--sab, 0px)) !important;
-  }
-
   .app-wrapper {
-    // Prevent horizontal overflow
-    overflow-x: hidden;
-    // 横屏刘海/挖孔安全区
-    padding-left: var(--sal, 0px);
-    padding-right: var(--sar, 0px);
+    padding-inline: var(--sal) var(--sar);
+  }
+
+  .main-container {
+    padding-bottom: calc(56px + var(--sab));
   }
 
   // 防 iOS 聚焦自动缩放：表单控件字号不得小于 16px
@@ -99,19 +81,6 @@ $tablet-breakpoint: $bp-tablet;
     padding: 12px !important;
   }
 
-  // Navbar mobile
-  .navbar {
-    .breadcrumb-container {
-      display: none;
-    }
-
-    .right-menu {
-      .right-menu-item:not(.avatar-container) {
-        display: none !important;
-      }
-    }
-  }
-
   // Tags view mobile - scroll horizontally
   .tags-view-container {
     .tags-view-wrapper {
@@ -122,38 +91,52 @@ $tablet-breakpoint: $bp-tablet;
     }
   }
 
-  // Dialogs full-width on mobile
-  .el-dialog {
-    width: 92vw !important;
-    max-width: 92vw !important;
-    margin: 8vh auto !important;
-    max-height: 80vh;
+  .el-dialog:not(.is-fullscreen) {
+    width: min(100% - 24px, 600px) !important;
+    max-width: calc(100% - 24px);
+    margin: max(12px, var(--sat)) auto max(12px, var(--sab)) !important;
+  }
+
+  .platform-theme-dialog:not(.is-fullscreen) {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 32px);
+    max-height: calc(100dvh - max(16px, var(--sat)) - max(16px, var(--sab)));
+  }
+
+  .platform-theme-dialog > .el-dialog__body {
+    min-height: 0;
     overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 16px !important;
   }
 
-  .el-dialog__body {
-    max-height: calc(80vh - 120px);
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+  .platform-theme-dialog > .el-dialog__header,
+  .platform-theme-dialog > .el-dialog__footer {
+    flex: none;
+    padding: 12px 16px !important;
   }
 
-  // Drawer full-width on mobile
-  .el-drawer {
-    width: 85vw !important;
-    max-width: 85vw !important;
+  .platform-theme-dialog .el-dialog__title {
+    display: block;
+    padding-right: 32px;
   }
 
-  // Filter container mobile
-  .filter-container {
-    .filter-item {
-      width: 100% !important;
-      margin-right: 0 !important;
-      margin-bottom: 8px;
+  .platform-theme-dialog .el-dialog__headerbtn {
+    top: 8px;
+    right: 8px;
+  }
 
-      .el-input,
-      .el-select {
-        width: 100% !important;
-      }
+  .platform-theme-dialog .el-form:not(.el-form--inline) .el-form-item:has(> .el-form-item__label) {
+    display: block;
+
+    > .el-form-item__label {
+      display: block;
+      width: auto !important;
+      height: auto;
+      line-height: 1.5;
+      text-align: start;
+      margin: 0 0 6px;
     }
   }
 
@@ -216,8 +199,7 @@ $tablet-breakpoint: $bp-tablet;
   }
 
   .el-dialog {
-    width: 70vw !important;
-    max-width: 70vw !important;
+    max-width: calc(100% - 40px);
   }
 }
 

@@ -18,7 +18,9 @@
 
     <div class="sidebar-rail-footer" :class="{ 'is-collapsed': isCollapse }">
       <router-link to="/profile/index" class="rail-user-info" :title="name || callsign">
-        <img :src="avatar + '?imageView2/1/w/80/h/80'" class="rail-avatar" alt="">
+        <el-avatar :size="32" :src="avatar || undefined" class="rail-avatar">
+          <svg-icon icon-class="user" />
+        </el-avatar>
         <div v-if="!isCollapse" class="rail-user-meta">
           <span class="rail-user-name">{{ name || 'HAM' }}</span>
           <span class="rail-user-callsign">{{ callsign || $t('route.profile') }}</span>

@@ -100,6 +100,45 @@ body, html {
   height: 36px;
 }
 
+.admin-list-filters,
+.admin-list-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.platform-theme-page .admin-list-toolbar .filter-item {
+  margin: 0;
+}
+
+.admin-list-filters .el-input.filter-item,
+.admin-list-filters .el-date-editor.filter-item,
+.admin-list-actions .el-button.filter-item {
+  display: inline-flex;
+}
+
+.admin-list-filters .search-input {
+  width: 220px;
+}
+
+.admin-list-filters .role-select,
+.admin-list-filters .operator-select {
+  width: 180px;
+}
+
+.admin-list-filters .daterange-input {
+  width: 280px;
+}
+
+.admin-list-actions > .el-button + .el-button {
+  margin-left: 0;
+}
+
+.admin-card-grid > .el-empty {
+  grid-column: 1 / -1;
+}
+
 // ---------------------------------------------------------------------------
 // Capsule Toolbar Switch / Toggle
 // ---------------------------------------------------------------------------
@@ -660,6 +699,54 @@ body, html {
   .platform-theme-page .pagination-container {
     padding: 12px;
     justify-content: center;
+  }
+}
+
+@media (max-width: 1023px) {
+  .platform-theme-page .filter-container.admin-list-toolbar {
+    display: grid;
+    gap: 10px;
+
+    .admin-list-filters,
+    .admin-list-actions {
+      display: grid;
+      gap: 8px;
+    }
+
+    .admin-list-filters {
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
+    }
+
+    .admin-list-actions {
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 128px), 1fr));
+    }
+
+    .filter-item,
+    .toolbar-capsule {
+      width: 100%;
+      min-width: 0;
+      max-width: none;
+      margin: 0;
+    }
+
+    .el-button,
+    .toolbar-capsule {
+      height: auto;
+      min-height: 44px;
+      padding: 8px 10px;
+      justify-content: center;
+      white-space: normal;
+      line-height: 1.35;
+    }
+  }
+}
+
+@media (max-width: 599px) {
+  .admin-list-filters > :last-child:nth-child(odd),
+  .admin-list-filters > .daterange-input,
+  .admin-list-actions .auto-approve-capsule,
+  .admin-list-actions .batch-action {
+    grid-column: 1 / -1;
   }
 }
 

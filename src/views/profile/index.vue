@@ -2,11 +2,11 @@
   <div class="app-container platform-theme-page profile-page">
     <div v-if="user">
       <el-row :gutter="20">
-        <el-col :xs="24" :sm="6">
+        <el-col :xs="24" :sm="8" :md="6">
           <user-card :user="user" />
         </el-col>
 
-        <el-col :xs="24" :sm="18">
+        <el-col :xs="24" :sm="16" :md="18">
           <el-card class="platform-theme-card profile-content-card">
             <el-tabs v-model="activeTab">
               <!-- <el-tab-pane label="活动" name="activity">
@@ -141,7 +141,7 @@ export default {
     }
 
     :deep(.el-card__body) {
-      padding: 24px;
+      padding: clamp(14px, 2vw, 24px);
     }
 
     :deep(.el-tabs__header) {

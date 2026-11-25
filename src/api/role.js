@@ -39,7 +39,7 @@ export function addRole(data) {
 
 export function updateRole(id, data) {
   return request({
-    url: `/roles/create?key=${id}`,
+    url: `/roles/create?key=${encodeURIComponent(id)}`,
     method: 'put',
     data
   })
@@ -47,7 +47,7 @@ export function updateRole(id, data) {
 
 export function deleteRole(id) {
   return request({
-    url: `/roles/create?key=${id}`,
+    url: `/roles/create?key=${encodeURIComponent(id)}`,
     method: 'delete'
   })
 }

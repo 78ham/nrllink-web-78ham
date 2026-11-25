@@ -1,7 +1,15 @@
 import request from '@/utils/request'
 
+async function requestBM(config) {
+  const result = await request(config)
+  if (result.code !== 20000) {
+    throw new Error(result.data?.message || result.message || 'BM API error')
+  }
+  return result
+}
+
 export function fetchBMNetworks(params, config = {}) {
-  return request({
+  return requestBM({
     url: '/bm/network/list',
     method: 'get',
     params,
@@ -11,7 +19,7 @@ export function fetchBMNetworks(params, config = {}) {
 }
 
 export function createBMNetwork(data, config = {}) {
-  return request({
+  return requestBM({
     url: '/bm/network/create',
     method: 'post',
     data,
@@ -21,7 +29,7 @@ export function createBMNetwork(data, config = {}) {
 }
 
 export function updateBMNetwork(data, config = {}) {
-  return request({
+  return requestBM({
     url: '/bm/network/update',
     method: 'post',
     data,
@@ -31,7 +39,7 @@ export function updateBMNetwork(data, config = {}) {
 }
 
 export function deleteBMNetwork(data, config = {}) {
-  return request({
+  return requestBM({
     url: '/bm/network/delete',
     method: 'post',
     data,
@@ -41,7 +49,7 @@ export function deleteBMNetwork(data, config = {}) {
 }
 
 export function startBMBridge(data, config = {}) {
-  return request({
+  return requestBM({
     url: '/bm/bridge/start',
     method: 'post',
     data,
@@ -51,7 +59,7 @@ export function startBMBridge(data, config = {}) {
 }
 
 export function stopBMBridge(data, config = {}) {
-  return request({
+  return requestBM({
     url: '/bm/bridge/stop',
     method: 'post',
     data,
@@ -61,7 +69,7 @@ export function stopBMBridge(data, config = {}) {
 }
 
 export function fetchBMBridgeStatus(params, config = {}) {
-  return request({
+  return requestBM({
     url: '/bm/bridge/status',
     method: 'get',
     params,

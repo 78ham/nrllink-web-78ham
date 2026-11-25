@@ -2,7 +2,7 @@
 
 #app {
   .main-container {
-    height: 100vh;
+    height: 100%;
     transition: margin-left .28s cubic-bezier(0.2, 0, 0, 1);
     margin-left: $sideBarWidth;
     position: relative;
@@ -25,6 +25,12 @@
     z-index: 1001;
     overflow: hidden;
     box-sizing: border-box;
+  }
+
+  .sidebar-wrapper-inner {
+    .rail-avatar .svg-icon {
+      margin: 0;
+    }
 
     .horizontal-collapse-transition {
       transition: 0s width ease-in-out, 0s padding-left ease-in-out, 0s padding-right ease-in-out;
@@ -53,7 +59,7 @@
       display: none;
     }
 
-    a {
+    .menu-wrapper a {
       display: inline-block;
       width: 100%;
       overflow: hidden;
@@ -119,7 +125,7 @@
     }
   }
 
-  .hideSidebar {
+  .hideSidebar:not(.mobile) {
     .sidebar-container {
       width: 58px !important;
 
@@ -201,21 +207,7 @@
 
   .mobile {
     .main-container {
-      margin-left: 0px;
-      height: 100vh;
-    }
-
-    .sidebar-container {
-      transition: transform .28s cubic-bezier(0.2, 0, 0, 1);
-      width: $sideBarWidth !important;
-    }
-
-    &.hideSidebar {
-      .sidebar-container {
-        pointer-events: none;
-        transition-duration: 0.3s;
-        transform: translate3d(-$sideBarWidth, 0, 0);
-      }
+      margin-left: 0;
     }
   }
 

@@ -1,79 +1,84 @@
 <template>
   <div class="app-container platform-theme-page setup-users-page">
-    <div class="filter-container platform-theme-toolbar">
-      <el-input
-        v-model="listQuery.callsign"
-        :placeholder="$t('device.callsign')"
-        class="filter-item search-input"
-        clearable
-        @keyup.enter="handleFilter"
-      />
+    <div class="filter-container platform-theme-toolbar admin-list-toolbar">
+      <div class="admin-list-filters">
+        <el-input
+          v-model="listQuery.callsign"
+          :placeholder="$t('device.callsign')"
+          class="filter-item search-input"
+          clearable
+          @keyup.enter="handleFilter"
+        />
 
-      <el-input
-        v-model="listQuery.namephone"
-        :placeholder="$t('Account.namephone')"
-        class="filter-item search-input"
-        clearable
-        @keyup.enter="handleFilter"
-      />
+        <el-input
+          v-model="listQuery.namephone"
+          :placeholder="$t('Account.namephone')"
+          class="filter-item search-input"
+          clearable
+          @keyup.enter="handleFilter"
+        />
 
-      <el-select
-        v-model="listQuery.role"
-        :placeholder="$t('employee.position')"
-        clearable
-        class="filter-item role-select"
-        popper-class="platform-theme-select-dropdown"
-      >
-        <el-option v-for="item in roles" :key="item.id" :label="item.name" :value="item.key" />
-      </el-select>
+        <el-select
+          v-model="listQuery.role"
+          :placeholder="$t('employee.position')"
+          clearable
+          class="filter-item role-select"
+          popper-class="platform-theme-select-dropdown"
+        >
+          <el-option v-for="item in roles" :key="item.id" :label="item.name" :value="item.key" />
+        </el-select>
+      </div>
+      <div class="admin-list-actions">
+        <el-button v-waves class="filter-item action-btn" type="primary" @click="handleFilter">
+          <el-icon>
+            <Search />
+          </el-icon>
+          {{ $t('employee.search') }}
+        </el-button>
 
-      <el-button v-waves class="filter-item action-btn" type="primary" @click="handleFilter">
-        <el-icon>
-          <Search />
-        </el-icon>
-        {{ $t('employee.search') }}
-      </el-button>
+        <el-button class="filter-item action-btn action-btn-secondary" type="primary" @click="handleCreate">
+          <el-icon>
+            <Edit />
+          </el-icon>
+          {{ $t('employee.add') }}
+        </el-button>
 
-      <el-button class="filter-item action-btn action-btn-secondary" type="primary" @click="handleCreate">
-        <el-icon>
-          <Edit />
-        </el-icon>
-        {{ $t('employee.add') }}
-      </el-button>
+        <el-button
+          v-waves
+          :loading="downloadLoading"
+          class="filter-item action-btn action-btn-secondary"
+          type="primary"
+          @click="handleDownload"
+        >
+          <el-icon>
+            <Download />
+          </el-icon>
+          {{ $t('employee.export') }}
+        </el-button>
 
-      <el-button
-        v-waves
-        :loading="downloadLoading"
-        class="filter-item action-btn action-btn-secondary"
-        type="primary"
-        @click="handleDownload"
-      >
-        <el-icon>
-          <Download />
-        </el-icon>
-        {{ $t('employee.export') }}
-      </el-button>
-
-      <button
-        type="button"
-        class="toolbar-capsule"
-        :class="{ 'is-active': showtable }"
-        @click="showtable = !showtable"
-      >
-        <span class="capsule-indicator" />
-        <span>{{ $t('device.showtable') }}</span>
-      </button>
+        <button
+          type="button"
+          class="toolbar-capsule"
+          :class="{ 'is-active': showtable }"
+          :aria-pressed="showtable"
+          @click="showtable = !showtable"
+        >
+          <span class="capsule-indicator" />
+          <span>{{ $t('device.showtable') }}</span>
+        </button>
+      </div>
     </div>
 
     <responsive-table
+      :mobile-cards="!showtable"
       :data="list"
       :columns="userColumns"
       :loading="listLoading"
       title-key="callsign"
       row-key="id"
-      :has-more="list.length < total"
+      :has-more="listQuery.page * listQuery.limit < total"
       @load-more="handleLoadMore"
-      @refresh="getList"
+      @refresh="handleFilter"
     >
       <template #table>
         <div v-if="showtable" class="table-shell table-responsive">
@@ -120,7 +125,9 @@
             <el-table-column :label="$t('Account.avatar')" min-width="90" align="center">
               <template #default="scope">
                 <div class="avatar-shell">
-                  <img class="user-avatar" :src="scope.row.avatar" alt="avatar">
+                  <el-avatar :size="38" :src="scope.row.avatar || undefined" class="user-avatar">
+                    {{ (scope.row.callsign || scope.row.name || '?').slice(0, 1) }}
+                  </el-avatar>
                 </div>
               </template>
             </el-table-column>
@@ -205,11 +212,16 @@
           </el-table>
         </div>
 
-        <div v-else class="users-card-grid">
+        <div v-else v-loading="listLoading" class="users-card-grid admin-card-grid">
+          <el-empty v-if="!listLoading && !list.length" />
           <article v-for="item in list" :key="item.id" class="users-card">
             <div class="users-card__header">
               <div class="users-card__headline">
-                <div class="avatar-shell"><img class="user-avatar" :src="item.avatar" alt="avatar"></div>
+                <div class="avatar-shell">
+                  <el-avatar :size="38" :src="item.avatar || undefined" class="user-avatar">
+                    {{ (item.callsign || item.name || '?').slice(0, 1) }}
+                  </el-avatar>
+                </div>
                 <div>
                   <h3>{{ item.name || '--' }}</h3>
                   <el-tag class="callsign-tag">{{ item.callsign || '--' }}</el-tag>
@@ -251,7 +263,7 @@
     </responsive-table>
 
     <pagination
-      v-show="total > 0"
+      v-show="total > 0 && !mobileCards"
       v-model:page="listQuery.page"
       v-model:limit="listQuery.limit"
       class="platform-theme-pagination"
@@ -377,15 +389,15 @@ import waves from '@/directive/waves'
 import Pagination from '@/components/Pagination/index.vue'
 import ResponsiveTable from '@/components/ResponsiveTable/index.vue'
 import { ElMessage } from 'element-plus'
-import { createCrudListMethods } from '@/composables/useCrudList'
-import { mapState } from 'pinia'
-import { useAppStore } from '@/store/modules/app'
+import { createCrudListMethods, reportMutationError } from '@/composables/useCrudList'
+import { useListView } from '@/composables/useListView'
 
 export default {
   name: 'SetupUsersPage',
   components: { Pagination, ResponsiveTable },
   directives: { waves },
 
+  setup: useListView,
   data() {
     return {
       tableKey: 0,
@@ -437,15 +449,15 @@ export default {
         roles: [{ required: true, message: '角色是必选项', trigger: 'change' }],
         phone: [{ required: true, message: '电话号码是必选项', trigger: 'blur' }]
       },
-      downloadLoading: false,
-      showtable: true
+      downloadLoading: false
     }
   },
-  computed: {
-    ...mapState(useAppStore, ['device'])
+  watch: {
+    mobileCards() {
+      if (this.listQuery.page !== 1) this.handleFilter()
+    }
   },
   created() {
-    this.showtable = this.device !== 'mobile'
     this.getList()
     getRoles({}).then(response => {
       this.roles = response.data
@@ -521,12 +533,8 @@ export default {
       this.$refs.dataForm.validate(valid => {
         if (valid) {
           createEmployee(this.temp).then(response => {
-            const data = response?.data || {}
-            const message = data.message || '创建成功'
-            if (data.isok === 1) {
-              ElMessage.error(message)
-              return
-            }
+            if (reportMutationError(response)) return
+            const message = response.data?.message || '创建成功'
             this.getList()
             this.dialogFormVisible = false
             ElMessage.success(message)
@@ -539,21 +547,10 @@ export default {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
           updateEmployee(tempData).then(response => {
-            for (const v of this.list) {
-              if (v.id === this.temp.id) {
-                const index = this.list.indexOf(v)
-                this.list.splice(index, 1, this.temp)
-                break
-              }
-            }
-            const data = response?.data || {}
-            const message = data.message || '更新成功'
-            if (data.isok === 1) {
-              ElMessage.error(message)
-              return
-            }
+            if (reportMutationError(response)) return
+            this.getList()
             this.dialogFormVisible = false
-            ElMessage.success(message)
+            ElMessage.success(response.data?.message || '更新成功')
           }).catch(() => {})
         }
       })
@@ -563,46 +560,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.filter-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  align-items: center;
-
-  .filter-item {
-    margin-bottom: 0;
-    margin-right: 0;
-
-    &.search-input {
-      width: 220px;
-    }
-
-    &.role-select {
-      width: 180px;
-    }
-
-    &.action-btn {
-      height: 42px;
-      padding: 0 22px;
-      border-radius: 14px;
-    }
-
-    &.action-btn-secondary {
-      min-width: 124px;
-    }
-  }
-
-  :deep(.view-switch) {
-    --el-switch-on-color: linear-gradient(90deg, #26efc7 0%, #3f8dff 100%);
-    --el-switch-off-color: rgba(104, 176, 255, 0.22);
-    .el-switch__core { border-color: rgba(104, 176, 255, 0.24); background: rgba(12, 31, 58, 0.72); min-width: 46px; height: 24px; }
-    &.is-checked .el-switch__core { border-color: rgba(54, 240, 203, 0.34); background: linear-gradient(90deg, rgba(38, 239, 199, 0.88) 0%, rgba(63, 141, 255, 0.82) 100%); }
-    .el-switch__action { width: 18px; height: 18px; top: 2px; }
-    .el-switch__label, .el-switch__label * { color: var(--platform-ink-dim) !important; }
-    .el-switch__label.is-active, .el-switch__label.is-active * { color: var(--platform-ink) !important; }
-  }
-}
-
 .table-shell {
   padding: 10px;
   max-width: 100%;
@@ -761,7 +718,7 @@ export default {
   margin: 0 auto;
 }
 
-.users-card-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:18px; padding:10px; }
+.users-card-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap:18px; padding:10px; }
 .users-card { border-radius:24px; border:1px solid var(--platform-border-light); background:var(--platform-shell); box-shadow:0 18px 44px rgba(15,23,42,.08); padding:18px; display:flex; flex-direction:column; gap:16px; }
 .users-card__header { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
 .users-card__headline { min-width:0; display:flex; align-items:center; gap:12px; }
@@ -777,17 +734,7 @@ export default {
 .users-card__note { width:100%; margin:0; text-align:left; color:var(--platform-note-text, rgba(228,239,255,.78)); }
 .users-card__actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:10px; }
 
-@media (max-width: 768px) {
-  .filter-container {
-    .filter-item {
-      &.search-input,
-      &.role-select,
-      &.action-btn,
-      &.action-btn-secondary {
-        width: 100%;
-      }
-    }
-  }
+@media (max-width: 767px) {
 
   .setup-users-page {
     .compact-btn {

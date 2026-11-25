@@ -1,32 +1,36 @@
 <template>
   <div class="app-container platform-theme-page setup-server-page">
-    <div class="filter-container platform-theme-toolbar">
-      <el-button v-waves class="filter-item action-btn" type="primary" @click="handleFilter">
-        <el-icon>
-          <Search />
-        </el-icon>
-        {{ $t('Account.search') }}
-      </el-button>
+    <div class="filter-container platform-theme-toolbar admin-list-toolbar">
+      <div class="admin-list-actions">
+        <el-button v-waves class="filter-item action-btn" type="primary" @click="handleFilter">
+          <el-icon>
+            <Search />
+          </el-icon>
+          {{ $t('Account.search') }}
+        </el-button>
 
-      <el-button class="filter-item action-btn action-btn-secondary" type="primary" @click="handleCreate">
-        <el-icon>
-          <Edit />
-        </el-icon>
-        {{ $t('employee.add') }}
-      </el-button>
+        <el-button class="filter-item action-btn action-btn-secondary" type="primary" @click="handleCreate">
+          <el-icon>
+            <Edit />
+          </el-icon>
+          {{ $t('employee.add') }}
+        </el-button>
 
-      <button
-        type="button"
-        class="toolbar-capsule"
-        :class="{ 'is-active': showtable }"
-        @click="showtable = !showtable"
-      >
-        <span class="capsule-indicator" />
-        <span>{{ $t('device.showtable') }}</span>
-      </button>
+        <button
+          type="button"
+          class="toolbar-capsule"
+          :class="{ 'is-active': showtable }"
+          :aria-pressed="showtable"
+          @click="showtable = !showtable"
+        >
+          <span class="capsule-indicator" />
+          <span>{{ $t('device.showtable') }}</span>
+        </button>
+      </div>
     </div>
 
     <responsive-table
+      :mobile-cards="!showtable"
       :data="list"
       :columns="serverColumns"
       :loading="listLoading"
@@ -173,7 +177,8 @@
           </el-table>
         </div>
 
-        <div v-else class="server-card-grid">
+        <div v-else v-loading="listLoading" class="server-card-grid admin-card-grid">
+          <el-empty v-if="!listLoading && !list.length" />
           <article v-for="item in list" :key="item.id" class="server-card">
             <div class="server-card__header">
               <div class="server-card__headline">
@@ -243,7 +248,7 @@
           <el-input v-model="temp.name" />
         </el-form-item>
 
-        <el-form-item prop="type">
+        <el-form-item prop="server_type">
           <template #label>
             <span id="server-type-label">{{ $t('server.server_type') }}</span>
           </template>
@@ -253,15 +258,15 @@
         </el-form-item>
 
         <el-form-item :label="$t('server.mem_size')" prop="mem_size">
-          <el-input v-model="temp.mem_size" />
+          <el-input-number v-model="temp.mem_size" :min="0" :precision="0" controls-position="right" />
         </el-form-item>
 
         <el-form-item :label="$t('server.input_rate')" prop="input_rate">
-          <el-input v-model="temp.input_rate" />
+          <el-input-number v-model="temp.input_rate" :min="0" :precision="0" controls-position="right" />
         </el-form-item>
 
         <el-form-item :label="$t('server.output_rate')" prop="output_rate">
-          <el-input v-model="temp.output_rate" />
+          <el-input-number v-model="temp.output_rate" :min="0" :precision="0" controls-position="right" />
         </el-form-item>
 
         <el-form-item :label="$t('server.ip_addr')" prop="ip_addr">
@@ -269,7 +274,7 @@
         </el-form-item>
 
         <el-form-item :label="$t('server.udp_port')" prop="udp_port">
-          <el-input v-model="temp.udp_port" />
+          <el-input v-model="temp.udp_port" inputmode="numeric" />
         </el-form-item>
 
         <el-form-item :label="$t('server.dns_name')" prop="dns_name">
@@ -298,6 +303,7 @@
 </template>
 
 <script>
+import { reportMutationError } from '@/composables/useCrudList'
 import {
   fetchServerList,
   createServer,
@@ -309,14 +315,14 @@ import waves from '@/directive/waves'
 import { parseTime, ValueFilter } from '@/utils'
 import { ServerTypeOptions } from '@/utils/system'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { mapState } from 'pinia'
-import { useAppStore } from '@/store/modules/app'
+import { useListView } from '@/composables/useListView'
 import ResponsiveTable from '@/components/ResponsiveTable/index.vue'
 
 export default {
   name: 'SetupServerPage',
   components: { ResponsiveTable },
   directives: { waves },
+  setup: useListView,
   data() {
     return {
       tableKey: 0,
@@ -340,9 +346,9 @@ export default {
         name: '',
         server_type: 0,
         status: 1,
-        mem_size: '',
-        input_rate: '',
-        output_rate: '',
+        mem_size: 0,
+        input_rate: 0,
+        output_rate: 0,
         ip_addr: '',
         udp_port: '',
         dns_name: ''
@@ -355,16 +361,11 @@ export default {
       },
       rules: {},
       downloadLoading: false,
-      uploadLoading: false,
-      showtable: true
+      uploadLoading: false
     }
-  },
-  computed: {
-    ...mapState(useAppStore, ['device'])
   },
 
   created() {
-    this.showtable = this.device !== 'mobile'
     this.getList()
   },
 
@@ -425,9 +426,9 @@ export default {
         name: '',
         server_type: 0,
         status: 1,
-        mem_size: '',
-        input_rate: '',
-        output_rate: '',
+        mem_size: 0,
+        input_rate: 0,
+        output_rate: 0,
         ip_addr: '',
         udp_port: '',
         dns_name: ''
@@ -445,6 +446,7 @@ export default {
       this.$refs.dataForm.validate(valid => {
         if (valid) {
           createServer(this.temp).then(response => {
+            if (reportMutationError(response)) return
             this.getList()
             this.dialogFormVisible = false
             ElMessage.success(response?.data?.message || '创建成功')
@@ -465,13 +467,8 @@ export default {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
           updateServer(tempData).then(response => {
-            for (const item of this.list) {
-              if (item.id === this.temp.id) {
-                const index = this.list.indexOf(item)
-                this.list.splice(index, 1, this.temp)
-                break
-              }
-            }
+            if (reportMutationError(response)) return
+            this.getList()
             this.dialogFormVisible = false
             ElMessage.success(response?.data?.message || '更新成功')
           })
@@ -479,27 +476,19 @@ export default {
       })
     },
     handleDelete(row) {
-      ElMessageBox.confirm('此操作将永久删除该群组, 是否继续?', '提示', {
+      ElMessageBox.confirm('此操作将永久删除该服务器, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       })
-        .then(() => {
-          deleteServer(row)
-            .then(response => {
-              const message = response?.data?.message || '删除成功'
-              ElMessage.success(message)
-              this.listLoading = false
-            })
-            .catch(() => {
-              ElMessage.warning('删除失败')
-            })
-
-          const index = this.list.indexOf(row)
-          this.list.splice(index, 1)
+        .then(() => deleteServer(row))
+        .then(response => {
+          if (reportMutationError(response)) return
+          this.getList()
+          ElMessage.success(response?.data?.message || '删除成功')
         })
-        .catch(() => {
-          ElMessage.info('已取消删除')
+        .catch(action => {
+          if (action === 'cancel') ElMessage.info('已取消删除')
         })
     }
   }
@@ -507,39 +496,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.filter-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  align-items: center;
-
-  .filter-item {
-    margin-bottom: 0;
-    margin-right: 0;
-
-    &.action-btn {
-      height: 42px;
-      padding: 0 22px;
-      border-radius: 14px;
-    }
-
-    &.action-btn-secondary {
-      min-width: 124px;
-    }
-  }
-
-  :deep(.view-switch) {
-    --el-switch-on-color: linear-gradient(90deg, #26efc7 0%, #3f8dff 100%);
-    --el-switch-off-color: rgba(104, 176, 255, 0.22);
-
-    .el-switch__core { border-color: rgba(104, 176, 255, 0.24); background: rgba(12, 31, 58, 0.72); min-width: 46px; height: 24px; }
-    &.is-checked .el-switch__core { border-color: rgba(54, 240, 203, 0.34); background: linear-gradient(90deg, rgba(38, 239, 199, 0.88) 0%, rgba(63, 141, 255, 0.82) 100%); }
-    .el-switch__action { width: 18px; height: 18px; top: 2px; }
-    .el-switch__label, .el-switch__label * { color: var(--platform-ink-dim) !important; }
-    .el-switch__label.is-active, .el-switch__label.is-active * { color: var(--platform-ink) !important; }
-  }
-}
-
 .table-shell {
   padding: 10px;
   max-width: 100%;
@@ -669,7 +625,7 @@ export default {
   margin: 0 auto;
 }
 
-.server-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px; padding: 10px; }
+.server-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 18px; padding: 10px; }
 .server-card { border-radius: 24px; border: 1px solid var(--platform-border-light); background: var(--platform-shell); box-shadow: 0 18px 44px rgba(15,23,42,.08); padding: 18px; display:flex; flex-direction:column; gap:16px; }
 .server-card__header { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
 .server-card__headline { min-width:0; display:flex; align-items:center; gap:10px; }
@@ -686,15 +642,7 @@ export default {
 .server-card__note { width:100%; margin:0; text-align:left; color:var(--platform-note-text, rgba(228,239,255,.78)); }
 .server-card__actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:10px; padding-top:4px; }
 
-@media (max-width: 768px) {
-  .filter-container {
-    .filter-item {
-      &.action-btn,
-      &.action-btn-secondary {
-        width: 100%;
-      }
-    }
-  }
+@media (max-width: 767px) {
 
   .setup-server-page {
     .compact-btn {

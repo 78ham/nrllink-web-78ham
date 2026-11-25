@@ -44,6 +44,7 @@
         type="button"
         class="toolbar-capsule"
         :class="{ 'is-active': showtable }"
+        :aria-pressed="showtable"
         @click="showtable = !showtable"
       >
         <span class="capsule-indicator" />
@@ -185,6 +186,7 @@
 
         <el-table-column
           :label="$t('device.active')"
+          min-width="200"
           align="center"
           class-name="small-padding fixed-width"
         >
@@ -199,7 +201,7 @@
             >{{ $t('device.edit') }}</el-button>
 
             <el-button
-              v-if="checkPermission(['admin']) || row.ower_callsign === callsign "
+              v-if="checkPermission(['admin'])"
               size="small"
               type="danger"
               plain
@@ -213,7 +215,8 @@
       </el-table>
     </div>
 
-    <div v-else class="relay-card-grid">
+    <div v-else v-loading="listLoading" class="relay-card-grid">
+      <el-empty v-if="!list.length && !listLoading" />
       <article
         v-for="item in list"
         :key="item.id"
@@ -277,6 +280,7 @@
           >{{ $t('device.edit') }}</el-button>
 
           <el-button
+            v-if="checkPermission(['admin'])"
             size="small"
             type="danger"
             plain
@@ -290,13 +294,14 @@
     <el-dialog
       v-model="dialogFormVisible"
       :title="textMap[dialogStatus]"
+      width="min(42rem, calc(100% - 2rem))"
       class="platform-theme-dialog relay-dialog"
     >
       <el-form
         ref="dataForm"
         :rules="rules"
         :model="temp"
-        label-position="right"
+        :label-position="device === 'mobile' ? 'top' : 'right'"
         label-width="140px"
         class="relay-form"
       >
@@ -325,7 +330,6 @@
         <el-form-item label="接收哑音:" prop="recive_cxcss">
           <el-select
             v-model="temp.recive_ctss"
-            style="width: 150px"
             popper-class="platform-theme-select-dropdown"
           >
             <el-option
@@ -340,7 +344,6 @@
         <el-form-item label="发射哑音:" prop="send_cxcss">
           <el-select
             v-model="temp.send_ctss"
-            style="width: 150px"
             popper-class="platform-theme-select-dropdown"
           >
             <el-option
@@ -388,6 +391,7 @@ import waves from '@/directive/waves' // waves directive
 import { parseTime, ValueFilter } from '@/utils'
 import { ServerTypeOptions } from '@/utils/system'
 import { ElMessage } from 'element-plus'
+import { useListView } from '@/composables/useListView'
 import { createCrudListMethods } from '@/composables/useCrudList'
 // import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 import { mapState } from 'pinia'
@@ -399,6 +403,7 @@ export default {
   // eslint-disable-next-line vue/component-definition-name-casing
   name: 'relay',
   directives: { waves },
+  setup: useListView,
   data() {
     return {
       tableKey: 0,
@@ -419,7 +424,6 @@ export default {
         id: undefined,
         name: ''
       },
-      showtable: true,
 
       dialogFormVisible: false,
 
@@ -442,7 +446,6 @@ export default {
   },
 
   created() {
-    this.showtable = this.device !== 'mobile'
     this.getList()
   },
 
@@ -705,10 +708,6 @@ export default {
     font-weight: 700;
   }
 
-  :deep(.el-dialog) {
-    width: min(680px, calc(100vw - 32px));
-  }
-
   :deep(.el-form-item__label) {
     font-weight: 600;
   }
@@ -721,9 +720,13 @@ export default {
 
 .relay-card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
   gap: 18px;
-  padding: 10px;
+  min-height: 96px;
+
+  .el-empty {
+    grid-column: 1 / -1;
+  }
 }
 
 .relay-card {
@@ -839,58 +842,45 @@ export default {
   padding-top: 4px;
 }
 
-@media (max-width: 768px) {
-.filter-container {
-    .filter-item {
-      &.search-input,
-      &.owner-input,
-      &.action-btn,
-      &.action-btn-secondary {
-        width: 100%;
-      }
-    }
-  }
+@media (max-width: 767px) {
+  .relay-page .filter-container {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
 
-  .relay-page {
-    :deep(.el-table) {
-      font-size: 13px;
+    .owner-input {
+      max-width: none;
     }
 
-    .compact-btn {
-      min-width: 72px;
-      margin: 4px !important;
+    .action-btn {
+      min-width: 0;
+      margin-left: 0;
     }
-  }
 
-  .relay-card-grid {
-    grid-template-columns: 1fr;
+    .toolbar-capsule {
+      grid-column: 1 / -1;
+      justify-content: center;
+    }
   }
 
   .relay-card {
-    padding: 16px;
-    border-radius: 20px;
+    gap: 10px;
+    padding: 14px;
+    border-radius: 16px;
   }
 
-  .relay-card__header,
-  .relay-card__row {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
+  .relay-card__body,
   .relay-card__meta {
-    grid-template-columns: 1fr;
+    gap: 6px;
   }
 
-  .relay-card__value {
-    text-align: left;
-  }
-
-  .relay-card__actions {
-    justify-content: stretch;
+  .relay-card__row,
+  .relay-meta-pill {
+    padding: 8px 10px;
   }
 
   .relay-card__actions .compact-btn {
-    flex: 1 1 calc(50% - 10px);
+    flex: 1;
     margin: 0 !important;
   }
 }

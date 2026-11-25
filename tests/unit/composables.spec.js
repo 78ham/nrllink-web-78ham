@@ -1,6 +1,7 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { defineComponent, ref, h } from 'vue'
 import { mount } from '@vue/test-utils'
+import { usePanelLayout } from '@/composables/usePanelLayout'
 
 // 锁定 setup() 与 Options API 混用语义（usePanelLayout 依赖此行为）：
 // setup 返回的 ref 在 data/computed/methods 中通过 this 读写均自动解包，
@@ -51,5 +52,28 @@ describe('setup 与 Options API 混用语义', () => {
     wrapper.vm.reset()
     expect(wrapper.vm.count).toBe(10)
     expect(wrapper.vm.doubled).toBe(20)
+  })
+})
+
+describe('login panel layout', () => {
+  it('uses the available container width and keeps the default three panels apart on resize', () => {
+    vi.stubGlobal('matchMedia', () => ({ matches: false }))
+    try {
+      const panels = usePanelLayout()
+      panels.contentWrapper.value = { clientWidth: 1000 }
+      panels.initializePanels()
+      expect(panels.isDesktopPanels.value).toBe(false)
+      for (const width of [1450, 1068]) {
+        panels.contentWrapper.value.clientWidth = width
+        panels.initializePanels()
+        const { left, middle, right } = panels.panelLayouts.value
+        expect(panels.isDesktopPanels.value).toBe(true)
+        expect(left.x + left.w).toBeLessThan(middle.x)
+        expect(middle.x + middle.w).toBeLessThan(right.x)
+        expect(right.x + right.w).toBe(width)
+      }
+    } finally {
+      vi.unstubAllGlobals()
+    }
   })
 })

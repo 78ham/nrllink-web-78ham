@@ -26,7 +26,7 @@ export function usePanelLayout() {
   })
   const nextPanelZIndex = ref(4)
   const panelInteraction = ref(null)
-  const panelDefaultsInitialized = ref(false)
+  let manuallyArranged = false
 
   function getPanelLimits(panelId) {
     const limits = {
@@ -60,33 +60,34 @@ export function usePanelLayout() {
       return
     }
 
-    const desktop = window.innerWidth >= 1024
-    isDesktopPanels.value = desktop
+    const wrapperWidth = contentWrapper.value.clientWidth
+    const gap = 24
+    const minWidth = ['left', 'middle', 'right'].reduce((width, id) => width + getPanelLimits(id).minW, 2 * gap)
+    isDesktopPanels.value = wrapperWidth >= minWidth && !window.matchMedia('(pointer: coarse)').matches
 
-    if (!desktop) {
+    if (!isDesktopPanels.value) {
       stopPanelInteraction()
       return
     }
 
-    const wrapperWidth = contentWrapper.value.clientWidth
-    const gap = 24
     const topOffset = 20
-    const leftWidth = Math.max(260, Math.min(320, Math.round(wrapperWidth * 0.22)))
-    const rightWidth = Math.max(280, Math.min(340, Math.round(wrapperWidth * 0.24)))
-    const middleWidth = Math.max(480, wrapperWidth - leftWidth - rightWidth - gap * 2)
+    const sideSpace = wrapperWidth - getPanelLimits('middle').minW - 2 * gap
+    const leftWidth = Math.max(260, Math.min(320, Math.round(wrapperWidth * 0.22), sideSpace - 280))
+    const rightWidth = Math.max(280, Math.min(340, Math.round(wrapperWidth * 0.24), sideSpace - leftWidth))
+    const middleWidth = wrapperWidth - leftWidth - rightWidth - 2 * gap
     const defaults = {
       left: { x: 0, y: topOffset, w: leftWidth, h: 640 },
       middle: { x: leftWidth + gap, y: topOffset, w: middleWidth, h: 760 },
       right: { x: leftWidth + gap + middleWidth + gap, y: topOffset, w: rightWidth, h: 760 }
     }
 
-    if (forceReset || !panelDefaultsInitialized.value) {
+    if (forceReset || !manuallyArranged) {
       panelLayouts.value = {
         left: { ...defaults.left, visible: panelLayouts.value.left.visible },
         middle: { ...defaults.middle, visible: panelLayouts.value.middle.visible },
         right: { ...defaults.right, visible: panelLayouts.value.right.visible }
       }
-      panelDefaultsInitialized.value = true
+      manuallyArranged = false
       return
     }
 
@@ -131,6 +132,7 @@ export function usePanelLayout() {
       return
     }
 
+    manuallyArranged = true
     const wrapperRect = contentWrapper.value.getBoundingClientRect()
     const interaction = panelInteraction.value
     const panel = panelLayouts.value[interaction.panelId]

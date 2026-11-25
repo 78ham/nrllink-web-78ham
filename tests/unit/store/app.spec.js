@@ -29,6 +29,20 @@ describe('store/app', () => {
     expect(Cookies.set).toHaveBeenCalled()
   })
 
+  it('keeps the tablet menu open on same-device resizes and preserves the desktop preference', () => {
+    const store = useAppStore()
+    store.toggleDevice('tablet')
+    expect(store.sidebar.opened).toBe(false)
+    store.toggleSideBar()
+    store.toggleDevice('tablet')
+    expect(store.sidebar.opened).toBe(true)
+    store.toggleDevice('mobile')
+    expect(store.sidebar.opened).toBe(false)
+    expect(Cookies.set).not.toHaveBeenCalled()
+    store.toggleDevice('desktop')
+    expect(store.sidebar.opened).toBe(true)
+  })
+
   it('sets language and size', () => {
     const store = useAppStore()
     store.setLanguage('en')

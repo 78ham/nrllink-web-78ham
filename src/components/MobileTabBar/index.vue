@@ -16,24 +16,25 @@
 
 <script>
 import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAppStore } from '@/store/modules/app'
 
 export default {
   name: 'MobileTabBar',
   setup() {
     const route = useRoute()
+    const router = useRouter()
     const appStore = useAppStore()
 
     const isMobile = computed(() => appStore.device === 'mobile')
 
-    const tabs = [
-      { path: '/dashboard', iconClass: 'dashboard', label: 'route.dashboard', fallback: '首页' },
-      { path: '/public/totaldevices', iconClass: 'table', label: 'route.totaldevices', fallback: '设备' },
-      { path: '/public/groups', iconClass: 'peoples', label: 'route.grouproom', fallback: '群组' },
-      { path: '/public/relay', iconClass: 'international', label: 'route.relay', fallback: '中继' },
-      { path: '/profile/index', iconClass: 'user', label: 'route.profile', fallback: '我的' }
-    ]
+    const tabs = computed(() => [
+      { name: 'Dashboard', path: '/dashboard', iconClass: 'dashboard', label: 'route.dashboard', fallback: '首页' },
+      { name: 'totaldevices', path: '/public/totaldevices', iconClass: 'table', label: 'route.totaldevices', fallback: '设备' },
+      { name: 'grouproom', path: '/public/groups', iconClass: 'peoples', label: 'route.grouproom', fallback: '群组' },
+      { name: 'relay', path: '/public/relay', iconClass: 'international', label: 'route.relay', fallback: '中继' },
+      { name: 'Profile', path: '/profile/index', iconClass: 'user', label: 'route.profile', fallback: '我的' }
+    ].filter(tab => router.hasRoute(tab.name)))
 
     const isActive = (path) => {
       return route.path === path || route.path.startsWith(path + '/')
@@ -50,13 +51,13 @@ export default {
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 9999;
+  z-index: 10;
   display: flex;
   align-items: stretch;
   justify-content: space-around;
   height: 56px;
   height: calc(56px + var(--sab, 0px));
-  padding-bottom: var(--sab, 0px);
+  padding: 0 var(--sar) var(--sab) var(--sal);
   background: var(--platform-deep-98, rgba(10, 23, 41, 0.98));
   border-top: 1px solid var(--platform-border, rgba(104, 176, 255, 0.14));
   backdrop-filter: blur(16px);
@@ -68,6 +69,7 @@ export default {
 
 .tabbar-item {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -113,7 +115,11 @@ export default {
 }
 
 .tabbar-label {
-  font-size: 10px;
+  max-width: 100%;
+  padding: 0 2px;
+  text-align: center;
+  overflow-wrap: anywhere;
+  font-size: 11px;
   font-weight: 600;
   line-height: 1;
   letter-spacing: 0.02em;

@@ -5,7 +5,7 @@
         <h2>{{ $t('siteSettings.title') }}</h2>
         <p>{{ $t('siteSettings.description') }}</p>
       </div>
-      <div style="display: flex; gap: 10px;">
+      <div class="heading-actions">
         <el-button type="warning" plain :loading="backingUp" @click="handleBackup">
           下载数据库快照 (.sqlite3)
         </el-button>
@@ -42,6 +42,7 @@
 </template>
 
 <script>
+import { reportMutationError } from '@/composables/useCrudList'
 import { fetchSiteSettings, updateSiteSettings } from '@/api/platform'
 import { backupDatabase } from '@/api/auth-security'
 import { ElMessage } from 'element-plus'
@@ -93,7 +94,8 @@ export default {
     async saveSettings() {
       this.saving = true
       try {
-        await updateSiteSettings({ settings: { ...this.form }})
+        const response = await updateSiteSettings({ settings: { ...this.form }})
+        if (reportMutationError(response)) return
         ElMessage.success(this.$t('siteSettings.saved'))
         await this.loadSettings()
       } finally {
@@ -103,8 +105,7 @@ export default {
     async handleBackup() {
       this.backingUp = true
       try {
-        const response = await backupDatabase()
-        const blob = new Blob([response], { type: 'application/octet-stream' })
+        const blob = await backupDatabase()
         const url = window.URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
@@ -128,6 +129,14 @@ export default {
 <style lang="scss" scoped>
 .site-settings-page { max-width: 1120px; margin: 0 auto; }
 .page-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:24px; margin-bottom:24px; }
+.heading-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.heading-actions .el-button {
+  margin: 0;
+}
 .page-heading h2 { margin:0 0 8px; color:var(--platform-ink); font-size:24px; }
 .page-heading p { margin:0; color:var(--platform-note-text); line-height:1.6; }
 .settings-form { padding:24px; border:1px solid var(--platform-border-light); border-radius:16px; background:var(--platform-surface-light); }
@@ -135,7 +144,8 @@ export default {
 @media (max-width: 768px) {
  .site-settings-page { padding:16px; }
  .page-heading { flex-direction:column; }
- .page-heading .el-button { width:100%; }
+ .heading-actions { width: 100%; }
+ .heading-actions .el-button { flex: 1 1 auto; }
  .settings-form { padding:16px; }
  .settings-grid { grid-template-columns:1fr; }
 }

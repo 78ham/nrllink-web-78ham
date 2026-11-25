@@ -4,7 +4,7 @@
       返回
     </el-button>
     <el-row>
-      <el-col :span="12">
+      <el-col :xs="24" :sm="12">
         <h1 class="text-jumbo text-ginormous">
           Oops!
         </h1>
@@ -24,8 +24,8 @@
           <li><a href="#" @click.prevent="dialogVisible=true">点我看图</a></li>
         </ul>
       </el-col>
-      <el-col :span="12">
-        <img :src="errGif" width="313" height="428" alt="Girl has dropped her ice cream.">
+      <el-col :xs="24" :sm="12">
+        <img class="pan-gif" :src="errGif" width="313" height="428" alt="Girl has dropped her ice cream.">
       </el-col>
     </el-row>
     <el-dialog v-model="dialogVisible" title="随便看">
@@ -62,13 +62,16 @@ export default {
   .errPage-container {
     width: 800px;
     max-width: 100%;
-    margin: 100px auto;
+    margin: 0 auto;
+    padding: clamp(24px, 8vh, 80px) 16px;
     .pan-back-btn {
       background: #008489;
       color: #fff;
       border: none!important;
     }
     .pan-gif {
+      max-width: 100%;
+      height: auto;
       margin: 0 auto;
       display: block;
     }

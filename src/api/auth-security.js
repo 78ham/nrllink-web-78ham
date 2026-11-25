@@ -89,6 +89,7 @@ export function backupDatabase() {
   return request({
     url: '/admin/backup/database',
     method: 'post',
-    responseType: 'blob'
+    responseType: 'blob',
+    silent: true
   })
 }

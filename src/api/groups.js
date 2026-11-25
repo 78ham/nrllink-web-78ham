@@ -21,6 +21,10 @@ export function fetchGroupListMini(data) {
     url: '/group/list/mini',
     method: 'post',
     data
+  }).then(response => {
+    // Older backends returned the group array directly.
+    const groups = Array.isArray(response.data) ? response.data : response.data?.items
+    return Array.isArray(groups) ? groups : []
   })
 }
 
