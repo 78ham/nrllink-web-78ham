@@ -86,7 +86,7 @@
       font-size: clamp(22px, 2vw, 28px);
       line-height: 1.25;
       font-weight: 700;
-      white-space: nowrap;
+      overflow-wrap: anywhere;
     }
 
     p {
@@ -321,11 +321,6 @@
     width: min(1600px, calc(100% - 48px));
     margin: 20px auto 0;
     padding: 32px 0 clamp(24px, 4vw, 52px);
-
-    @media (min-width: 1024px) {
-      grid-template-columns: minmax(260px, 0.8fr) minmax(520px, 1.35fr) minmax(260px, 0.9fr);
-      column-gap: 24px;
-    }
   }
 
   .content-wrapper.desktop-panels {
@@ -346,11 +341,6 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
-  }
-
-  .floating-panel.desktop-floating {
-    position: absolute;
-    z-index: 2;
     border-radius: 16px;
     background: var(--platform-surface);
     backdrop-filter: blur(16px);
@@ -364,6 +354,17 @@
       border-color: var(--platform-border-strong);
       box-shadow: 0 20px 48px rgba(0, 0, 0, 0.35), 0 0 0 1px var(--platform-border-accent) inset;
     }
+  }
+
+  .floating-panel.desktop-floating {
+    position: absolute;
+    z-index: 2;
+  }
+
+  .floating-panel:not(.desktop-floating) .panel-close {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(-50%);
   }
 
   .panel-toolbar {
@@ -1258,8 +1259,8 @@
     }
 
     .floating-panel {
-      background: linear-gradient(145deg, rgba(10, 23, 41, 0.82) 0%, rgba(12, 29, 50, 0.72) 100%);
-      border: 1px solid rgba(104, 176, 255, 0.12);
+      background: var(--platform-surface);
+      border: 1px solid var(--platform-border);
       box-shadow: 0 16px 34px rgba(0, 0, 0, 0.22);
       overflow: hidden;
       backdrop-filter: blur(10px);
@@ -1301,6 +1302,23 @@
       order: 3;
     }
 
+  }
+
+  // In split view and on touch screens the monitor stays above the two directory panels.
+  @media (min-width: 768px) {
+    .content-wrapper:not(.desktop-panels) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+
+      .middle-column {
+        grid-column: 1 / -1;
+        order: -1;
+      }
+
+      .panel-toolbar {
+        cursor: default;
+      }
+    }
   }
 
   @media (max-width: 900px) {

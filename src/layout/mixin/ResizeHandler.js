@@ -15,22 +15,14 @@ export default {
   },
   beforeMount() {
     window.addEventListener('resize', this.$_resizeHandler, { passive: true })
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', this.$_resizeHandler, { passive: true })
-    }
+    this.$_applyDevice()
   },
   beforeUnmount() {
     window.removeEventListener('resize', this.$_resizeHandler)
-    if (window.visualViewport) {
-      window.visualViewport.removeEventListener('resize', this.$_resizeHandler)
-    }
     if (rafId) {
       window.cancelAnimationFrame(rafId)
       rafId = null
     }
-  },
-  mounted() {
-    this.$_applyDevice()
   },
   methods: {
     $_currentDevice() {
@@ -38,13 +30,7 @@ export default {
     },
     $_applyDevice() {
       const appStore = useAppStore(pinia)
-      const device = this.$_currentDevice()
-      appStore.toggleDevice(device)
-      if (device === DEVICE.MOBILE) {
-        appStore.closeSideBar({ withoutAnimation: true })
-      } else if (device === DEVICE.TABLET) {
-        appStore.closeSideBar({ withoutAnimation: true })
-      }
+      appStore.toggleDevice(this.$_currentDevice())
     },
     $_resizeHandler() {
       if (document.hidden) return

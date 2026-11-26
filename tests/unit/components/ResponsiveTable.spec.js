@@ -68,6 +68,21 @@ describe('components/ResponsiveTable', () => {
     expect(cards[0].text()).toContain('在线')
   })
 
+  it('lets the user switch between the table and cards on a phone', async() => {
+    useAppStore().toggleDevice('mobile')
+    const wrapper = mount(ResponsiveTable, {
+      props: { data: mockData, columns: mockColumns },
+      slots: { table: '<table />' }
+    })
+
+    await wrapper.setProps({ mobileCards: false })
+    expect(wrapper.find('table').exists()).toBe(true)
+    expect(wrapper.find('.rt-card').exists()).toBe(false)
+
+    await wrapper.setProps({ mobileCards: true })
+    expect(wrapper.findAll('.rt-card')).toHaveLength(mockData.length)
+  })
+
   it('handles virtual scrolling when data exceeds virtualThreshold', () => {
     const appStore = useAppStore()
     appStore.toggleDevice('mobile')
@@ -92,6 +107,27 @@ describe('components/ResponsiveTable', () => {
     expect(wrapper.vm.useVirtual).toBe(true)
     // 初始渲染窗口应该小于 200
     expect(wrapper.findAll('.rt-card').length).toBeLessThan(200)
+  })
+
+  it('scrolls mixed-height cards with the main panel instead of the document', async () => {
+    useAppStore().toggleDevice('mobile')
+    const main = document.createElement('section')
+    main.className = 'app-main'
+    document.body.append(main)
+    const rows = Array.from({ length: 120 }, (_, id) => ({ id, name: String(id) }))
+    const wrapper = mount(ResponsiveTable, { attachTo: main, props: { data: rows, itemHeight: 100 } })
+    try {
+      wrapper.vm.measuredHeights.set(wrapper.vm.data[0], 300)
+      wrapper.element.getBoundingClientRect = () => ({ top: -2200 })
+      main.dispatchEvent(new Event('scroll'))
+      await wrapper.vm.$nextTick()
+      expect(wrapper.vm.startIndex).toBe(15)
+      expect(wrapper.vm.topPadding).toBe(1700)
+      expect(wrapper.find('.rt-card__title').text()).toBe('15')
+    } finally {
+      wrapper.unmount()
+      main.remove()
+    }
   })
 
   it('emits load-more when button is clicked', async () => {

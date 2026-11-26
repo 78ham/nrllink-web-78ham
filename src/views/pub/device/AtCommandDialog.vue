@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     v-model="visible"
-    width="70%"
+    width="min(52rem, calc(100% - 2rem))"
     class="platform-theme-dialog device-at-dialog"
     :title="title"
     :center="device === 'mobile'"
@@ -12,7 +12,6 @@
       :model="tempat"
       :label-position="device === 'mobile' ? 'top' : 'right'"
       :label-width="device === 'mobile' ? 'auto' : '120px'"
-      :style="device === 'mobile' ? 'width: 100%' : 'width: 85%; margin-left: 5px'"
       class="device-at-form"
     >
       <el-form-item :label="$t('device.deviceInfoLabel')" prop="version">
@@ -211,21 +210,17 @@ export default {
   }
 
   .at-control-row {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
+    gap: 6px 10px;
     width: 100%;
-
-    .at-val-input {
-      width: 215px;
-      max-width: 100%;
-    }
 
     .at-readme-hint {
       font-size: 12px;
       color: var(--color-text-secondary, #909399);
-      margin-left: 4px;
+      grid-column: 1 / -1;
+      overflow-wrap: anywhere;
     }
   }
 
@@ -249,13 +244,4 @@ export default {
   }
 }
 
-@media screen and (max-width: 768px) {
-  .device-at-dialog {
-    .at-control-row {
-      .at-val-input {
-        width: 100%;
-      }
-    }
-  }
-}
 </style>

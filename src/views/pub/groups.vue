@@ -6,12 +6,11 @@
         :placeholder="$t('group.name')"
         class="filter-item search-input"
         clearable
-        @keyup.enter="handleFilter"
       />
     </div>
 
-    <div class="group-grid">
-      <el-card v-for="g,idx in list.filter(item => item.name.includes(name))" :key="g.id" class="box-card platform-theme-card" :body-style="{ padding: '0px' }">
+    <div v-loading="listLoading" class="group-grid">
+      <el-card v-for="g in filteredGroups" :key="g.id" class="box-card platform-theme-card" :body-style="{ padding: '0px' }">
         <div
           class="card-header"
           :class="{
@@ -38,7 +37,7 @@
             <button
               type="button"
               class="panel-tab"
-              @click="openJoinedDevicesDialog(g, idx)"
+              @click="openJoinedDevicesDialog(g)"
             >
               <span>已加入设备</span>
               <strong>{{ g.online_dev_number }}/{{ g.total_dev_number }}</strong>
@@ -47,13 +46,14 @@
         </div>
       </el-card>
     </div>
+    <el-empty v-if="!listLoading && !filteredGroups.length" />
 
     <el-dialog
       v-model="joinDevicesDialogVisible"
-      :width="isNarrowDialogScreen ? '100%' : '860px'"
+      width="min(54rem, calc(100% - 2rem))"
       :title="joinDevicesDialogTitle"
-      :center="isNarrowDialogScreen"
-      :fullscreen="isNarrowDialogScreen"
+      :center="device === 'mobile'"
+      :fullscreen="device === 'mobile'"
       class="platform-theme-dialog"
     >
       <div class="joined-devices-dialog">
@@ -86,10 +86,10 @@
 
     <el-dialog
       v-model="joinedDevicesDialogVisible"
-      :width="isNarrowDialogScreen ? '100%' : '860px'"
+      width="min(54rem, calc(100% - 2rem))"
       :title="joinedDevicesDialogTitle"
-      :center="isNarrowDialogScreen"
-      :fullscreen="isNarrowDialogScreen"
+      :center="device === 'mobile'"
+      :fullscreen="device === 'mobile'"
       class="platform-theme-dialog"
     >
       <div v-loading="joinedDevicesLoading" class="joined-devices-dialog">
@@ -170,7 +170,6 @@ export default {
       joinedDevicesList: [],
       joinedDevicesDialogTitle: '已加入设备',
       currentJoinedGroupId: null,
-      isNarrowDialogScreen: false,
 
       dialogTimeLineVisible: false,
       dialogTimeLineChartVisible: false,
@@ -179,24 +178,19 @@ export default {
     }
   },
   computed: {
-    ...mapState(useAppStore, ['device'])
+    ...mapState(useAppStore, ['device']),
+    filteredGroups() {
+      return this.list.filter(group => group.name.includes(this.name))
+    }
   },
 
   created() {
-    this.syncDialogScreenMode()
     this.getList()
 
     this.fetchMyDeviceList({}).then(response => {
-      this.mydevicesOptions = Object.values(response.data.items)
+      this.mydevicesOptions = Object.values(response.data.items || {})
     }).catch(() => {})
   },
-  mounted() {
-    window.addEventListener('resize', this.syncDialogScreenMode, { passive: true })
-  },
-  beforeUnmount() {
-    window.removeEventListener('resize', this.syncDialogScreenMode)
-  },
-
   methods: {
     fetchMyDeviceList,
     updateDevice,
@@ -211,22 +205,16 @@ export default {
         filename: 'group-list'
       }
     }),
-    syncDialogScreenMode() {
-      if (typeof window === 'undefined') {
-        return
-      }
-      this.isNarrowDialogScreen = window.innerWidth <= 768
-    },
     getList() {
-      this.fetchGroupListMini({}).then(response => {
-        this.list = response.data.map(group => ({
-          ...group,
-          devlist: Array.isArray(group.devlist) ? group.devlist : []
-        }))
-      }).catch(() => {})
+      this.listLoading = true
+      this.fetchGroupListMini({}).then(groups => {
+        this.list = groups
+      }).catch(() => {}).finally(() => {
+        this.listLoading = false
+      })
     },
     getJoinableDevices(group) {
-      return this.mydevicesOptions.filter(device => !this.hasindevlist(device.id, group.devmap))
+      return this.mydevicesOptions.filter(device => device.group_id !== group.id)
     },
     openJoinDevicesDialog(group) {
       this.currentJoinGroupId = group.id
@@ -234,23 +222,24 @@ export default {
       this.joinDevicesList = this.getJoinableDevices(group)
       this.joinDevicesDialogVisible = true
     },
-    openJoinedDevicesDialog(group, idx) {
+    openJoinedDevicesDialog(group) {
       this.joinedDevicesDialogVisible = true
       this.joinedDevicesDialogTitle = `${group.name} - 已加入设备 ${group.online_dev_number}/${group.total_dev_number}`
       this.currentJoinedGroupId = group.id
 
-      if (Array.isArray(group.devlist) && group.devlist.length) {
+      this.joinedDevicesLoading = false
+      if (Array.isArray(group.devlist)) {
         this.joinedDevicesList = group.devlist
         return
       }
 
+      this.joinedDevicesList = []
       this.joinedDevicesLoading = true
-      fetchGroupDevicesList({ group_id: group.id }).then(response => {
-        const devices = response.data.items || []
-        this.list[idx].devlist = devices
-        this.joinedDevicesList = devices
-      }).finally(() => {
-        this.joinedDevicesLoading = false
+      fetchGroupDevicesList({ group_id: String(group.id) }).then(response => {
+        group.devlist = response.data.items || []
+        if (this.currentJoinedGroupId === group.id) this.joinedDevicesList = group.devlist
+      }).catch(() => {}).finally(() => {
+        if (this.currentJoinedGroupId === group.id) this.joinedDevicesLoading = false
       })
     },
     handleModifiStatus(row, status) {
@@ -258,15 +247,16 @@ export default {
       row.status = status
     },
     changeGroup(tempData, groupid) {
-      tempData.group_id = groupid
-      updateDevice(tempData).then(response => {
+      updateDevice({ ...tempData, group_id: groupid }).then(response => {
+        if (response.code !== 20000) {
+          ElMessage.error(response.data?.message || this.$t('device.requestFailed'))
+          return
+        }
+        tempData.group_id = groupid
         this.getList()
         this.joinDevicesDialogVisible = false
         ElMessage.success(response?.data?.message || '操作成功')
       }).catch(() => {})
-    },
-    hasindevlist(id, devlist) {
-      return Object.values(devlist || {}).some(item => item.id === id)
     }
   }
 }
@@ -363,6 +353,7 @@ export default {
 
   .group-title {
     min-width: 0;
+    overflow-wrap: anywhere;
     color: var(--platform-ink);
     font-size: 15px;
     line-height: 1.4;
@@ -536,43 +527,35 @@ export default {
   background: var(--platform-surface-80) !important;
 }
 
-@media (max-width: 768px) {
-  .group-grid {
-    grid-template-columns: 1fr;
+@media (max-width: 479px) {
+  .box-card .card-content,
+  .box-card .card-header {
+    padding: 14px;
   }
 
   .group-action-grid {
-    grid-template-columns: 1fr;
+    gap: 8px;
   }
 
   .panel-tab {
-    width: 100%;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    padding: 9px 10px;
   }
+}
 
-  .joined-devices-dialog {
-    min-height: calc(100vh - 180px);
-  }
+.device-pill-list .item,
+.device-pill-list :deep(.el-tag),
+.join-device-btn {
+  max-width: 100%;
+}
 
-  .joined-device-list {
-    max-height: calc(100vh - 260px);
-    padding-right: 2px;
-  }
-
-  :deep(.platform-theme-dialog .el-dialog__body) {
-    padding-left: 16px;
-    padding-right: 16px;
-    padding-bottom: 16px;
-  }
-
-  :deep(.platform-theme-dialog .el-dialog__header) {
-    padding-left: 16px;
-    padding-right: 16px;
-  }
-
-  :deep(.platform-theme-dialog .el-dialog__footer) {
-    padding-left: 16px;
-    padding-right: 16px;
-    padding-bottom: 16px;
-  }
+.device-pill-list :deep(.el-tag),
+.join-device-btn {
+  height: auto;
+  min-height: 30px;
+  padding-block: 5px;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 </style>

@@ -1,6 +1,16 @@
 <template>
   <div :class="classObj" class="app-wrapper">
-    <div v-if="device==='mobile'&&sidebar.opened" class="drawer-bg" @click="handleClickOutside" />
+    <el-drawer
+      v-if="device === 'mobile'"
+      :model-value="sidebar.opened"
+      :title="$t('navbar.navigation')"
+      direction="ltr"
+      size="min(84vw, 320px)"
+      class="mobile-navigation"
+      @update:model-value="closeMobileMenu"
+    >
+      <sidebar @click="onMenuClick" />
+    </el-drawer>
     <sidebar v-if="device!=='mobile'" class="sidebar-container" />
     <div :class="{'hasTagsView':needTagsView,'is-mobile':device==='mobile'}" class="main-container">
       <div :class="{'fixed-header':fixedHeader}">
@@ -51,7 +61,10 @@ export default {
     }
   },
   methods: {
-    handleClickOutside() {
+    onMenuClick(event) {
+      if (event.target.closest('a[href]')) this.closeMobileMenu()
+    },
+    closeMobileMenu() {
       const appStore = useAppStore()
       appStore.closeSideBar({ withoutAnimation: false })
     }
@@ -70,31 +83,6 @@ export default {
   height: 100dvh;
   width: 100%;
   overflow: hidden;
-
-  &.mobile.openSidebar {
-    position: fixed;
-    top: 0;
-  }
-}
-
-.drawer-bg {
-  background: #000;
-  opacity: 0.3;
-  width: 100%;
-  top: 0;
-  height: 100%;
-  position: absolute;
-  z-index: 999;
-}
-
-.main-container {
-  &.is-mobile {
-    margin-left: 0 !important;
-    width: 100% !important;
-    padding-bottom: calc(56px + var(--sab, 0px));
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-  }
 }
 
 .fixed-header {
@@ -103,5 +91,24 @@ export default {
   top: 0;
   z-index: 9;
   width: 100%;
+}
+</style>
+
+<style lang="scss">
+.el-drawer.mobile-navigation {
+  --el-drawer-bg-color: var(--sidebar-bg);
+  --el-drawer-padding-primary: 0;
+
+  .el-drawer__header {
+    margin: 0;
+    padding: max(12px, var(--sat)) 16px 12px;
+    color: var(--platform-ink);
+    border-bottom: 1px solid var(--platform-border);
+  }
+
+  .el-drawer__body {
+    min-height: 0;
+    padding: 0 0 var(--sab);
+  }
 }
 </style>

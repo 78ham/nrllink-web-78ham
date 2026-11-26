@@ -2,7 +2,7 @@
   <el-dialog
     v-model="visible"
     :title="$t('device.parameterEdit')"
-    width="70%"
+    width="min(52rem, calc(100% - 2rem))"
     class="platform-theme-dialog"
     :center="device === 'mobile'"
     :fullscreen="device === 'mobile'"
@@ -11,9 +11,8 @@
       ref="devicedataForm"
       :rules="parmrules"
       :model="temp.device_parm"
-      label-position="right"
+      :label-position="device === 'mobile' ? 'top' : 'right'"
       label-width="100px"
-      style="width: 90%; margin-left: 5px"
     >
       <el-form-item :label="$t('device.deviceInfo') + ':'" prop="dev">
         {{ temp.callsign }}-{{ temp.ssid }} {{ temp.name }}

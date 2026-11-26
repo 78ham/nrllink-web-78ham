@@ -224,6 +224,7 @@ export default {
 
   },
   navbar: {
+    navigation: '导航菜单',
 
     dashboard: '首页',
     logOut: '退出登录',
@@ -478,6 +479,7 @@ export default {
     serverAddr: '服务器地址',
     serverPort: '端口',
     password: '连接密码',
+    keepPassword: '留空以保留现有密码',
     callsign: '呼号',
     dmrid: 'DMR-ID',
     defaultTG: '默认通话组 (TG)',

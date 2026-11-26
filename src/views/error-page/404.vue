@@ -14,7 +14,7 @@
         </div>
         <div class="bullshit__headline">{{ message }}</div>
         <div class="bullshit__info">Please check that the URL you entered is correct, or click the button below to return to the homepage.</div>
-        <a href="" class="bullshit__return-home">Back to home</a>
+        <router-link to="/dashboard" class="bullshit__return-home">Back to home</router-link>
       </div>
     </div>
   </div>
@@ -33,23 +33,25 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.wscn-http404-container{
-  transform: translate(-50%,-50%);
-  position: absolute;
-  top: 40%;
-  left: 50%;
+.wscn-http404-container {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
 }
 .wscn-http404 {
-  position: relative;
-  width: 1200px;
-  max-width: 100%;
-  padding: 0 50px;
-  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  width: min(100%, 1000px);
+  gap: clamp(16px, 3vw, 40px);
+
   .pic-404 {
     position: relative;
-    float: left;
-    width: 600px;
-    max-width: 100%;
+    flex: 1 1 340px;
+    max-width: min(100%, 600px);
     overflow: hidden;
     &__parent {
       width: 100%;
@@ -159,8 +161,8 @@ export default {
   }
   .bullshit {
     position: relative;
-    float: left;
-    width: 300px;
+    flex: 1 1 240px;
+    max-width: 340px;
     padding: 30px 0;
     overflow: hidden;
     &__oops {
@@ -177,7 +179,7 @@ export default {
     &__headline {
       font-size: 20px;
       line-height: 24px;
-      color: #222;
+      color: var(--platform-ink);
       font-weight: bold;
       opacity: 0;
       margin-bottom: 10px;

@@ -5,6 +5,7 @@
       v-model:page-size="pageSize"
       :background="background"
       :layout="resolvedLayout"
+      :pager-count="compact ? 5 : 7"
       :page-sizes="pageSizes"
       popper-class="platform-theme-select-dropdown"
       :total="total"
@@ -16,8 +17,6 @@
 </template>
 
 <script>
-import { scrollTo } from '@/utils/scroll-to'
-
 export default {
   name: 'Pagination',
   props: {
@@ -58,12 +57,12 @@ export default {
   },
   data() {
     return {
-      isMobile: false
+      compact: false
     }
   },
   computed: {
     resolvedLayout() {
-      return this.isMobile ? 'total, sizes, prev, pager, next' : this.layout
+      return this.compact ? this.layout.split(',').map(part => part.trim()).filter(part => part !== 'jumper').join(', ') : this.layout
     },
     currentPage: {
       get() {
@@ -83,28 +82,28 @@ export default {
     }
   },
   mounted() {
-    this.syncMobileState()
-    window.addEventListener('resize', this.syncMobileState, { passive: true })
+    this.observer = new ResizeObserver(([entry]) => {
+      this.compact = entry.contentRect.width < 680
+    })
+    this.observer.observe(this.$el)
   },
   beforeUnmount() {
-    window.removeEventListener('resize', this.syncMobileState)
+    this.observer.disconnect()
   },
   methods: {
-    syncMobileState() {
-      if (typeof window === 'undefined') return
-      this.isMobile = window.innerWidth <= 768
+    scrollToTop() {
+      if (this.autoScroll) {
+        const container = this.$el.closest('.app-main') || window
+        container.scrollTo({ top: 0, behavior: 'smooth' })
+      }
     },
     handleSizeChange(val) {
       this.$emit('pagination', { page: this.currentPage, limit: val })
-      if (this.autoScroll) {
-        scrollTo(0, 800)
-      }
+      this.scrollToTop()
     },
     handleCurrentChange(val) {
       this.$emit('pagination', { page: val, limit: this.pageSize })
-      if (this.autoScroll) {
-        scrollTo(0, 800)
-      }
+      this.scrollToTop()
     }
   }
 }
@@ -112,10 +111,27 @@ export default {
 
 <style scoped>
 .pagination-container {
+  container-type: inline-size;
   background: transparent;
   padding: 32px 16px;
 }
 .pagination-container.hidden {
   display: none;
+}
+.pagination-container :deep(.el-pagination) {
+  max-width: 100%;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  row-gap: 8px;
+}
+
+@container (max-width: 679px) {
+  .pagination-container :deep(.el-pagination) {
+    justify-content: center;
+  }
+
+  .pagination-container :deep(.el-pagination__sizes) {
+    margin-inline: 4px;
+  }
 }
 </style>

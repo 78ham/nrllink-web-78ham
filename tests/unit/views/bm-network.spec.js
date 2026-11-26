@@ -1,5 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 
+vi.mock('@/utils/request', () => ({ default: vi.fn() }))
+
 vi.mock('element-plus', () => ({
   ElMessage: {
     success: vi.fn(),
@@ -11,6 +13,8 @@ vi.mock('element-plus', () => ({
   }
 }))
 
+import { flushPromises } from '@vue/test-utils'
+import request from '@/utils/request'
 import * as bmApi from '@/api/bm'
 import BMNetworkPage from '@/views/pub/bm-network.vue'
 import zh from '@/lang/zh'
@@ -35,6 +39,21 @@ describe('BM Network Management', () => {
     expect(data.bridgeStatus.status).toBe(0)
     expect(Array.isArray(data.networkList)).toBe(true)
     expect(Array.isArray(data.networkColumns)).toBe(true)
+  })
+
+  it('keeps an empty live network list distinct from demo configurations', async() => {
+    const page = BMNetworkPage.data()
+    request.mockResolvedValueOnce({ code: 20000, data: { items: [] }})
+    BMNetworkPage.methods.loadNetworks.call(page)
+    await flushPromises()
+    expect(page.networkList).toEqual([])
+    expect(page.isDemoMode).toBe(false)
+    expect(page.selectedNetworkId).toBeUndefined()
+  })
+
+  it('rejects a failed BM operation even when HTTP succeeds', async() => {
+    request.mockResolvedValueOnce({ code: 20001, data: { message: '保存失败' }})
+    await expect(bmApi.updateBMNetwork({ id: 1 })).rejects.toThrow('保存失败')
   })
 
   it('should contain complete i18n keys for BM network', () => {

@@ -2,10 +2,14 @@ import { defineStore } from 'pinia'
 import Cookies from 'js-cookie'
 import { getLanguage } from '@/lang/index'
 
+function desktopSidebarOpen() {
+  return Cookies.get('sidebarStatus') !== '0'
+}
+
 export const useAppStore = defineStore('app', {
   state: () => ({
     sidebar: {
-      opened: Cookies.get('sidebarStatus') ? !!+Cookies.get('sidebarStatus') : true,
+      opened: desktopSidebarOpen(),
       withoutAnimation: false
     },
     device: 'desktop',
@@ -21,19 +25,19 @@ export const useAppStore = defineStore('app', {
     toggleSideBar() {
       this.sidebar.opened = !this.sidebar.opened
       this.sidebar.withoutAnimation = false
-      if (this.sidebar.opened) {
-        Cookies.set('sidebarStatus', 1)
-      } else {
-        Cookies.set('sidebarStatus', 0)
+      if (this.device === 'desktop') {
+        Cookies.set('sidebarStatus', this.sidebar.opened ? 1 : 0)
       }
     },
     closeSideBar({ withoutAnimation }) {
-      Cookies.set('sidebarStatus', 0)
       this.sidebar.opened = false
       this.sidebar.withoutAnimation = withoutAnimation
     },
     toggleDevice(device) {
+      if (this.device === device) return
       this.device = device
+      this.sidebar.opened = device === 'desktop' && desktopSidebarOpen()
+      this.sidebar.withoutAnimation = true
     },
     setLanguage(language) {
       this.language = language

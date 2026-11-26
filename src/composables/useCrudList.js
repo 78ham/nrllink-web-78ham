@@ -30,6 +30,12 @@ function resolveText(option, vm, row, fallback) {
   return fallback
 }
 
+export function reportMutationError(response) {
+  if (response?.code === 20000 && response.data?.isok !== 1) return false
+  ElMessage.error(response?.data?.message || response?.message || '操作失败')
+  return true
+}
+
 export function createCrudListMethods(config = {}) {
   const methods = {
     getList() {
@@ -145,6 +151,7 @@ export function createCrudListMethods(config = {}) {
       })
         .then(() => config.remove(row))
         .then(response => {
+          if (reportMutationError(response)) return
           ElMessage.success(response?.data?.message || resolveText(config.removedText, this, row, '操作完成'))
           if (config.afterRemove === 'reload') {
             this.getList()

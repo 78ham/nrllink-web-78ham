@@ -32,6 +32,7 @@ import AppLink from './Link.vue'
 import FixiOSBug from './FixiOSBug.js'
 
 const resolveRoutePath = (basePath, routePath) => {
+  if (!routePath) return basePath || '/'
   if (routePath.startsWith('/')) {
     return routePath
   }

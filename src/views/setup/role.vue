@@ -1,23 +1,26 @@
 <template>
   <div class="app-container platform-theme-page setup-role-page">
-    <div class="filter-container platform-theme-toolbar">
-      <el-button type="primary" class="filter-item action-btn" @click="handleAddRole">
-        {{ $t('permission.addRole') }}
-      </el-button>
+    <div class="filter-container platform-theme-toolbar admin-list-toolbar">
+      <div class="admin-list-actions">
+        <el-button type="primary" class="filter-item action-btn" @click="handleAddRole">
+          {{ $t('permission.addRole') }}
+        </el-button>
 
-      <button
-        type="button"
-        class="toolbar-capsule"
-        :class="{ 'is-active': showtable }"
-        @click="showtable = !showtable"
-      >
-        <span class="capsule-indicator" />
-        <span>{{ $t('device.showtable') }}</span>
-      </button>
+        <button
+          type="button"
+          class="toolbar-capsule"
+          :class="{ 'is-active': showtable }"
+          :aria-pressed="showtable"
+          @click="showtable = !showtable"
+        >
+          <span class="capsule-indicator" />
+          <span>{{ $t('device.showtable') }}</span>
+        </button>
+      </div>
     </div>
 
     <div v-if="showtable" class="table-shell roles-table-shell table-responsive">
-      <el-table :data="rolesList" border style="width: 100%">
+      <el-table v-loading="rolesLoading" :data="rolesList" border style="width: 100%">
         <el-table-column align="center" label="序号" min-width="100">
           <template #default="scope">{{ scope.row.id }}</template>
         </el-table-column>
@@ -50,14 +53,16 @@
               plain
               size="small"
               class="compact-btn role-delete-btn"
-              @click="handleDelete(scope)"
+              :disabled="scope.row.key === 'admin'"
+              @click="handleDelete(scope.row)"
             >{{ $t('permission.delete') }}</el-button>
           </template>
         </el-table-column>
       </el-table>
     </div>
 
-    <div v-else class="role-card-grid">
+    <div v-else v-loading="rolesLoading" class="role-card-grid admin-card-grid">
+      <el-empty v-if="!rolesLoading && !rolesList.length" />
       <article v-for="item in rolesList" :key="item.key" class="role-card">
         <div class="role-card__header">
           <el-tag size="small" effect="dark" class="role-key-tag">{{ item.key }}</el-tag>
@@ -71,7 +76,7 @@
         </div>
         <div class="role-card__actions">
           <el-button type="primary" plain size="small" class="compact-btn role-edit-btn" @click="handleEdit({ row: item })">{{ $t('permission.editPermission') }}</el-button>
-          <el-button type="danger" plain size="small" class="compact-btn role-delete-btn" @click="handleDelete({ $index: rolesList.findIndex(v => v.key === item.key), row: item })">{{ $t('permission.delete') }}</el-button>
+          <el-button type="danger" plain size="small" class="compact-btn role-delete-btn" :disabled="item.key === 'admin'" @click="handleDelete(item)">{{ $t('permission.delete') }}</el-button>
         </div>
       </article>
     </div>
@@ -93,15 +98,18 @@
           />
         </el-form-item>
       </el-form>
-      <div class="dialog-footer role-dialog-footer">
-        <el-button type="default" @click="dialogVisible = false">{{ $t('permission.cancel') }}</el-button>
-        <el-button type="primary" @click="confirmRole">{{ $t('permission.confirm') }}</el-button>
-      </div>
+      <template #footer>
+        <div class="dialog-footer role-dialog-footer">
+          <el-button @click="dialogVisible = false">{{ $t('permission.cancel') }}</el-button>
+          <el-button type="primary" :loading="savingRole" @click="confirmRole">{{ $t('permission.confirm') }}</el-button>
+        </div>
+      </template>
     </el-dialog>
   </div>
 </template>
 
 <script>
+import { reportMutationError } from '@/composables/useCrudList'
 import { deepClone } from '@/utils'
 import {
   getRoutes,
@@ -112,8 +120,7 @@ import {
 } from '@/api/role'
 import i18n from '@/lang'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { mapState } from 'pinia'
-import { useAppStore } from '@/store/modules/app'
+import { useListView } from '@/composables/useListView'
 
 const resolveRoutePath = (basePath, routePath) => {
   if (routePath.startsWith('/')) {
@@ -129,34 +136,34 @@ const defaultRole = {
   key: '',
   name: '',
   description: '',
-  routes: []
+  routes: ''
 }
 
 export default {
   name: 'SetupRolePage',
+  setup: useListView,
   data() {
     return {
       role: Object.assign({}, defaultRole),
       routes: [],
       rolesList: [],
+      rolesLoading: true,
+      savingRole: false,
       dialogVisible: false,
       dialogType: 'new',
       checkStrictly: false,
       defaultProps: {
         children: 'children',
         label: 'title'
-      },
-      showtable: true
+      }
     }
   },
   computed: {
-    ...mapState(useAppStore, ['device']),
     routesData() {
       return this.routes
     }
   },
   created() {
-    this.showtable = this.device !== 'mobile'
     this.getRoles()
   },
   methods: {
@@ -167,8 +174,13 @@ export default {
       this.routes = this.i18n(routes)
     },
     async getRoles() {
-      const res = await getRoles()
-      this.rolesList = res.data
+      this.rolesLoading = true
+      try {
+        const res = await getRoles()
+        this.rolesList = res.data
+      } finally {
+        this.rolesLoading = false
+      }
     },
     i18n(routes) {
       const app = routes.map(route => {
@@ -230,16 +242,17 @@ export default {
       this.checkStrictly = true
       this.role = deepClone(scope.row)
     },
-    handleDelete({ $index, row }) {
+    handleDelete(row) {
       ElMessageBox.confirm('确认要删除职位角色?', 'Warning', {
         confirmButtonText: '确认',
         cancelButtonText: '取消',
         type: 'warning'
       })
         .then(async() => {
-          await deleteRole(row.key)
-          this.rolesList.splice($index, 1)
-          ElMessage.success('角色角色删除成功!')
+          const response = await deleteRole(row.key)
+          if (reportMutationError(response)) return
+          await this.getRoles()
+          ElMessage.success('角色删除成功')
         })
         .catch(err => {
           console.error(err)
@@ -262,25 +275,18 @@ export default {
       return res
     },
     async confirmRole() {
-      const isEdit = this.dialogType === 'edit'
-
-      if (isEdit) {
-        await updateRole(this.role.key, this.role)
-        for (let index = 0; index < this.rolesList.length; index++) {
-          if (this.rolesList[index].key === this.role.key) {
-            this.rolesList.splice(index, 1, Object.assign({}, this.role))
-            break
-          }
-        }
-      } else {
-        const { data } = await addRole(this.role)
-        this.role.key = data.key
-        this.rolesList.push(this.role)
+      this.savingRole = true
+      try {
+        const response = this.dialogType === 'edit'
+          ? await updateRole(this.role.key, this.role)
+          : await addRole(this.role)
+        if (reportMutationError(response)) return
+        this.dialogVisible = false
+        ElMessage.success(`角色 ${this.role.name} 保存成功`)
+        await this.getRoles()
+      } finally {
+        this.savingRole = false
       }
-
-      const { name } = this.role
-      this.dialogVisible = false
-      ElMessage.success(`角色 ${name} 保存成功`)
     },
     onlyOneShowingChild(children = [], parent) {
       let onlyOneChild = null
@@ -304,34 +310,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.filter-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  align-items: center;
-
-  .filter-item {
-    margin-bottom: 0;
-    margin-right: 0;
-
-    &.action-btn {
-      height: 42px;
-      padding: 0 22px;
-      border-radius: 14px;
-    }
-  }
-
-  :deep(.view-switch) {
-    --el-switch-on-color: linear-gradient(90deg, #26efc7 0%, #3f8dff 100%);
-    --el-switch-off-color: rgba(104, 176, 255, 0.22);
-    .el-switch__core { border-color: rgba(104, 176, 255, 0.24); background: rgba(12, 31, 58, 0.72); min-width: 46px; height: 24px; }
-    &.is-checked .el-switch__core { border-color: rgba(54, 240, 203, 0.34); background: linear-gradient(90deg, rgba(38, 239, 199, 0.88) 0%, rgba(63, 141, 255, 0.82) 100%); }
-    .el-switch__action { width: 18px; height: 18px; top: 2px; }
-    .el-switch__label, .el-switch__label * { color: var(--platform-ink-dim) !important; }
-    .el-switch__label.is-active, .el-switch__label.is-active * { color: var(--platform-ink) !important; }
-  }
-}
-
 .table-shell {
   padding: 10px;
 }
@@ -402,7 +380,7 @@ export default {
   margin: 0 auto;
 }
 
-.role-card-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:18px; padding:10px; }
+.role-card-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap:18px; padding:10px; }
 .role-card { border-radius:24px; border:1px solid var(--platform-border-light); background:var(--platform-shell); box-shadow:0 18px 44px rgba(15,23,42,.08); padding:18px; display:flex; flex-direction:column; gap:16px; }
 .role-card__header { display:flex; align-items:center; justify-content:space-between; gap:12px; }
 .role-card__header h3 { margin:0; color:var(--platform-ink); font-size:18px; line-height:1.35; word-break:break-word; }
@@ -422,14 +400,7 @@ export default {
   margin-bottom: 30px;
 }
 
-@media (max-width: 768px) {
-  .filter-container {
-    .filter-item {
-      &.action-btn {
-        width: 100%;
-      }
-    }
-  }
+@media (max-width: 767px) {
 
   .setup-role-page {
     .compact-btn {

@@ -5,6 +5,7 @@
       :model="form"
       :rules="rules"
       label-width="88px"
+      :label-position="device === 'mobile' ? 'top' : 'right'"
       class="profile-account-form"
     >
       <el-form-item label="姓名">
@@ -316,7 +317,7 @@ export default {
     this.fetchPasskeys()
   },
   methods: {
-    ...mapActions(useUserStore, ['getInfo']),
+    ...mapActions(useUserStore, ['getInfo', 'resetToken']),
     updateProfile,
     syncForm() {
       this.form = {
@@ -348,15 +349,21 @@ export default {
           }
 
           const profileResponse = await this.updateProfile(profilePayload)
-          if (profileResponse.code !== 20000) {
+          if (profileResponse.code !== 20000 || profileResponse.data?.isok === 1) {
             ElMessage.warning(profileResponse?.data?.message || '资料修改失败')
             return
           }
 
+          if (profilePayload.password) {
+            this.resetToken()
+            ElMessage.success('密码已更新，请重新登录')
+            await this.$router.replace({ path: '/login', query: { redirect: this.$route.fullPath }})
+            return
+          }
           await this.getInfo()
           this.$emit('updated')
           this.syncForm()
-          ElMessage.success(this.form.password ? '资料和密码已更新' : (profileResponse?.data?.message || '修改成功'))
+          ElMessage.success(profileResponse?.data?.message || '修改成功')
         } finally {
           this.submitting = false
         }
@@ -536,6 +543,11 @@ export default {
     justify-content: space-between;
     align-items: flex-start;
     gap: 16px;
+
+    @media (max-width: 767px) {
+      flex-direction: column;
+      gap: 8px;
+    }
 
     .security-item-info {
       h4 {

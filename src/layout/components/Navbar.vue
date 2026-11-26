@@ -3,79 +3,71 @@
     <hamburger
       id="hamburger-container"
       :is-active="sidebar.opened"
+      :aria-label="$t('navbar.navigation')"
+      :aria-expanded="sidebar.opened"
       class="hamburger-container"
       @toggle-click="toggleSideBar"
     />
 
-    <breadcrumb id="breadcrumb-container" class="breadcrumb-container" />
+    <span v-if="device === 'mobile'" class="mobile-page-title">{{ $t('route.' + $route.meta.title) }}</span>
+    <breadcrumb v-else id="breadcrumb-container" class="breadcrumb-container" />
 
     <div class="right-menu">
-      <template v-if="device!=='mobile'">
-        <button
-          v-if="billingEnabled"
-          class="expire-toggle right-menu-item hover-effect desktop-only"
-          :class="`expire-toggle--${expireLevel}`"
-          :title="$t('navbar.renew')"
-          @click="goRenew"
-        >
-          {{ expireText }}
-        </button>
+      <button
+        v-if="billingEnabled && device !== 'mobile'"
+        class="expire-toggle right-menu-item hover-effect"
+        :class="`expire-toggle--${expireLevel}`"
+        :title="$t('navbar.renew')"
+        @click="goRenew"
+      >
+        {{ expireText }}
+      </button>
 
-        <button class="lang-toggle right-menu-item hover-effect desktop-only" @click="toggleLanguage">
-          {{ language === 'zh' ? 'EN' : '中' }}
-        </button>
+      <button class="lang-toggle right-menu-item hover-effect" @click="toggleLanguage">
+        {{ language === 'zh' ? 'EN' : '中' }}
+      </button>
 
-        <el-dropdown class="theme-picker-container right-menu-item hover-effect desktop-only" trigger="click" popper-class="platform-theme-user-dropdown">
-          <div class="theme-trigger">
-            <span class="theme-icon">{{ currentTheme.icon }}</span>
-            <span class="theme-name">{{ currentTheme.name }}</span>
-          </div>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item v-for="(theme, key) in themes" :key="key" @click="switchTheme(key)">
-                <span class="theme-option">
-                  <span class="theme-option-icon">{{ theme.icon }}</span>
-                  <span class="theme-option-name">{{ theme.name }}</span>
-                  <el-icon v-if="platformThemeKey === key" class="theme-check"><Check /></el-icon>
-                </span>
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
+      <el-dropdown class="theme-picker-container right-menu-item hover-effect" trigger="click" popper-class="platform-theme-user-dropdown">
+        <div class="theme-trigger" :aria-label="$t('navbar.theme')">
+          <span class="theme-icon">{{ currentTheme.icon }}</span>
+          <span class="theme-name">{{ currentTheme.name }}</span>
+        </div>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item v-for="(theme, key) in themes" :key="key" @click="switchTheme(key)">
+              <span class="theme-option">
+                <span class="theme-option-icon">{{ theme.icon }}</span>
+                <span class="theme-option-name">{{ theme.name }}</span>
+                <el-icon v-if="platformThemeKey === key" class="theme-check"><Check /></el-icon>
+              </span>
+            </el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
 
-        <el-dropdown class="avatar-container right-menu-item hover-effect" trigger="click" popper-class="platform-theme-user-dropdown">
-          <div class="avatar-wrapper">
-            <img :src="avatar+'?imageView2/1/w/80/h/80'" class="user-avatar" alt="Avatar">
-            <el-icon class="el-icon-caret-bottom">
-              <CaretBottom />
-            </el-icon>
-          </div>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <router-link to="/profile/index">
-                <el-dropdown-item>{{ $t('navbar.profile') }}</el-dropdown-item>
-              </router-link>
-              <router-link to="/dashboard">
-                <el-dropdown-item>{{ $t('navbar.dashboard') }}</el-dropdown-item>
-              </router-link>
+      <el-dropdown class="avatar-container right-menu-item hover-effect" trigger="click" popper-class="platform-theme-user-dropdown">
+        <div class="avatar-wrapper" :aria-label="$t('navbar.profile')">
+          <el-avatar :size="32" :src="avatar || undefined" class="user-avatar">
+            <svg-icon icon-class="user" />
+          </el-avatar>
+          <el-icon class="el-icon-caret-bottom">
+            <CaretBottom />
+          </el-icon>
+        </div>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <router-link to="/profile/index">
+              <el-dropdown-item>{{ $t('navbar.profile') }}</el-dropdown-item>
+            </router-link>
+            <router-link to="/dashboard">
+              <el-dropdown-item>{{ $t('navbar.dashboard') }}</el-dropdown-item>
+            </router-link>
 
-              <el-dropdown-item divided>
-                <span style="display:block;" @click="logout">{{ $t('navbar.logOut') }}</span>
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-      </template>
-
-      <template v-if="device==='mobile'">
-        <img :src="avatar+'?imageView2/1/w/80/h/80'" class="mobile-avatar" alt="Avatar">
-        <button class="lang-toggle right-menu-item hover-effect" @click="toggleLanguage">
-          {{ language === 'zh' ? 'EN' : '中' }}
-        </button>
-        <button class="mobile-logout right-menu-item hover-effect" :title="$t('navbar.logOut')" @click="logout">
-          <el-icon><SwitchButton /></el-icon>
-        </button>
-      </template>
+            <el-dropdown-item v-if="billingEnabled && device === 'mobile'" @click="goRenew">{{ $t('navbar.renew') }}</el-dropdown-item>
+            <el-dropdown-item divided @click="logout">{{ $t('navbar.logOut') }}</el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
     </div>
   </div>
 </template>
@@ -92,14 +84,13 @@ import Hamburger from '@/components/Hamburger/index.vue'
 import { computed } from 'vue'
 import { setI18nLanguage } from '@/lang'
 import router from '@/router'
-import { Check, SwitchButton, CaretBottom } from '@element-plus/icons-vue'
+import { Check, CaretBottom } from '@element-plus/icons-vue'
 
 export default {
   components: {
     Breadcrumb,
     Hamburger,
     Check,
-    SwitchButton,
     CaretBottom
   },
   setup() {
@@ -153,7 +144,7 @@ export default {
       } catch (e) {
         console.warn('logout api error, clearing local session anyway:', e)
       }
-      router.push(`/login?redirect=${window.location.pathname}`)
+      router.push({ path: '/login', query: { redirect: router.currentRoute.value.fullPath }})
     }
 
     const goRenew = () => {
@@ -408,44 +399,46 @@ export default {
       }
     }
 
-    .mobile-avatar {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      border: 1px solid var(--platform-border);
-      object-fit: cover;
-    }
-
-    .mobile-logout {
-      appearance: none;
-      border: 1px solid rgba(239, 68, 68, 0.28);
-      border-radius: 8px;
-      background: rgba(239, 68, 68, 0.08);
-      color: #f87171;
-      width: 32px;
-      height: 32px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
   }
 }
 
 @media (max-width: 767px) {
   .navbar {
-    padding: 0 10px;
-    height: 48px;
+    padding: var(--sat) 8px 0;
+    height: calc(48px + var(--sat));
+    gap: 6px;
 
-    .hamburger-container,
-    .breadcrumb-container {
-      display: none;
+    .hamburger-container {
+      min-width: 44px;
+      justify-content: center;
+    }
+
+    .mobile-page-title {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      color: var(--platform-ink);
+      font-size: 15px;
+      font-weight: 600;
     }
 
     .right-menu {
-      width: 100%;
-      justify-content: flex-end;
-      gap: 6px;
+      gap: 2px;
+
+      .lang-toggle,
+      .theme-trigger,
+      .avatar-wrapper {
+        min-width: 40px;
+        min-height: 40px;
+        justify-content: center;
+      }
+
+      .theme-name,
+      .el-icon-caret-bottom {
+        display: none;
+      }
     }
   }
 }

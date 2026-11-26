@@ -42,18 +42,24 @@ service.interceptors.response.use(
      * Here is just an example
      * You can also judge the status by HTTP Status Code
      */
-  response => {
-    const res = response.data
-    // console.log(response.headers)
-    // if (response.headers.content - type === 'image/jpeg' || response.headers.content - type === "audio/amr") {
+  async response => {
+    let res = response.data
+    const isDownload = response.config.responseType === 'blob'
+    if (isDownload) {
+      if (res.type === 'application/octet-stream') return res
+      // The backup endpoint returns the usual JSON envelope on failure.
+      try {
+        res = JSON.parse(await res.text())
+      } catch {
+        throw new Error('无法读取下载响应')
+      }
+    }
 
-    // }
-
-    // if the custom code is not 20000, it is judged as an error.
-    if (res.code !== 20000 && res.code !== 20001) {
+    if (isDownload || (res.code !== 20000 && res.code !== 20001)) {
+      const message = res.message || res.data?.message || '请求失败'
       if (!response?.config?.silent) {
         ElMessage({
-          message: res.message || 'error',
+          message,
           type: 'error',
           duration: 5 * 1000
         })
@@ -73,7 +79,7 @@ service.interceptors.response.use(
         })
       }
       // return Promise.reject(res.message || 'error')
-      return Promise.reject(new Error(res.message || '无数据'))
+      return Promise.reject(new Error(message))
     } else {
       return res
     }

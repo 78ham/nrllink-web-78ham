@@ -1,90 +1,95 @@
 <template>
   <div class="app-container platform-theme-page setup-register-page">
-    <div class="filter-container platform-theme-toolbar">
-      <el-input
-        v-model="listQuery.callsign"
-        :placeholder="$t('device.callsign')"
-        class="filter-item search-input"
-        clearable
-        @keyup.enter="handleFilter"
-      />
+    <div class="filter-container platform-theme-toolbar admin-list-toolbar">
+      <div class="admin-list-filters">
+        <el-input
+          v-model="listQuery.callsign"
+          :placeholder="$t('device.callsign')"
+          class="filter-item search-input"
+          clearable
+          @keyup.enter="handleFilter"
+        />
 
-      <el-input
-        v-model="listQuery.namephone"
-        :placeholder="$t('Account.namephone')"
-        class="filter-item search-input"
-        clearable
-        @keyup.enter="handleFilter"
-      />
+        <el-input
+          v-model="listQuery.namephone"
+          :placeholder="$t('Account.namephone')"
+          class="filter-item search-input"
+          clearable
+          @keyup.enter="handleFilter"
+        />
+      </div>
+      <div class="admin-list-actions">
+        <el-button v-waves class="filter-item action-btn" type="primary" @click="handleFilter">
+          <el-icon>
+            <Search />
+          </el-icon>
+          {{ $t('employee.search') }}
+        </el-button>
 
-      <el-button v-waves class="filter-item action-btn" type="primary" @click="handleFilter">
-        <el-icon>
-          <Search />
-        </el-icon>
-        {{ $t('employee.search') }}
-      </el-button>
+        <el-button
+          v-waves
+          :loading="downloadLoading"
+          class="filter-item action-btn action-btn-secondary"
+          type="primary"
+          @click="handleDownload"
+        >
+          <el-icon>
+            <Download />
+          </el-icon>
+          {{ $t('employee.export') }}
+        </el-button>
 
-      <el-button
-        v-waves
-        :loading="downloadLoading"
-        class="filter-item action-btn action-btn-secondary"
-        type="primary"
-        @click="handleDownload"
-      >
-        <el-icon>
-          <Download />
-        </el-icon>
-        {{ $t('employee.export') }}
-      </el-button>
+        <!-- Auto-Approve Daemon Switch Capsule -->
+        <button
+          type="button"
+          class="toolbar-capsule auto-approve-capsule"
+          :class="{ 'is-active': autoApproveEnabled }"
+          :aria-pressed="autoApproveEnabled"
+          :title="autoApproveEnabled ? '自动审批模式运行中，新注册用户将自动审批' : '点击开启无人值守自动审批模式'"
+          @click="toggleAutoApprove"
+        >
+          <span class="capsule-indicator" :class="{ 'is-pulsing': autoApproveEnabled }" />
+          <span>自动审批: {{ autoApproveEnabled ? '运行中' : '未开启' }}</span>
+          <span v-if="autoApprovedCount > 0" class="auto-count-tag">已审 {{ autoApprovedCount }}</span>
+        </button>
 
-      <!-- Auto-Approve Daemon Switch Capsule -->
-      <button
-        type="button"
-        class="toolbar-capsule auto-approve-capsule"
-        :class="{ 'is-active': autoApproveEnabled }"
-        :title="autoApproveEnabled ? '自动审批模式运行中，新注册用户将自动审批' : '点击开启无人值守自动审批模式'"
-        @click="toggleAutoApprove"
-      >
-        <span class="capsule-indicator" :class="{ 'is-pulsing': autoApproveEnabled }" />
-        <span>自动审批: {{ autoApproveEnabled ? '运行中' : '未开启' }}</span>
-        <span v-if="autoApprovedCount > 0" class="auto-count-tag">已审 {{ autoApprovedCount }}</span>
-      </button>
+        <!-- Batch Approve All Pending Button -->
+        <el-button
+          v-if="pendingCount > 0"
+          v-waves
+          :loading="batchApproving"
+          class="filter-item action-btn action-btn-success batch-action"
+          type="success"
+          @click="handleBatchApproveAll"
+        >
+          <el-icon><Check /></el-icon>
+          一键全审 ({{ pendingCount }}人待审)
+        </el-button>
 
-      <!-- Batch Approve All Pending Button -->
-      <el-button
-        v-if="pendingCount > 0"
-        v-waves
-        :loading="batchApproving"
-        class="filter-item action-btn action-btn-success"
-        type="success"
-        @click="handleBatchApproveAll"
-      >
-        <el-icon><Check /></el-icon>
-        一键全审 ({{ pendingCount }}人待审)
-      </el-button>
+        <!-- Batch Approve Selected Button -->
+        <el-button
+          v-if="selectedPending.length > 0"
+          v-waves
+          :loading="batchApproving"
+          class="filter-item action-btn action-btn-success batch-action"
+          type="success"
+          @click="handleBatchApproveSelected"
+        >
+          <el-icon><Check /></el-icon>
+          批量审批 ({{ selectedPending.length }})
+        </el-button>
 
-      <!-- Batch Approve Selected Button -->
-      <el-button
-        v-if="multipleSelection.length > 0"
-        v-waves
-        :loading="batchApproving"
-        class="filter-item action-btn action-btn-success"
-        type="success"
-        @click="handleBatchApproveSelected"
-      >
-        <el-icon><Check /></el-icon>
-        批量审批 ({{ multipleSelection.length }})
-      </el-button>
-
-      <button
-        type="button"
-        class="toolbar-capsule"
-        :class="{ 'is-active': showtable }"
-        @click="showtable = !showtable"
-      >
-        <span class="capsule-indicator" />
-        <span>{{ $t('device.showtable') }}</span>
-      </button>
+        <button
+          type="button"
+          class="toolbar-capsule"
+          :class="{ 'is-active': showtable }"
+          :aria-pressed="showtable"
+          @click="showtable = !showtable"
+        >
+          <span class="capsule-indicator" />
+          <span>{{ $t('device.showtable') }}</span>
+        </button>
+      </div>
     </div>
 
     <div v-if="showtable" class="table-shell table-responsive">
@@ -97,9 +102,26 @@
         highlight-current-row
         style="width: 100%"
         @sort-change="sortChange"
-        @selection-change="handleSelectionChange"
       >
-        <el-table-column type="selection" width="45" align="center" />
+        <el-table-column label="" width="45" align="center">
+          <template #header>
+            <el-checkbox
+              :model-value="pendingCount > 0 && selectedPending.length === pendingCount"
+              :indeterminate="selectedPending.length > 0 && selectedPending.length < pendingCount"
+              :disabled="pendingCount === 0"
+              aria-label="选择本页全部待审申请"
+              @change="checked => selectedIds = checked ? pendingList.map(item => item.id) : []"
+            />
+          </template>
+          <template #default="{ row }">
+            <el-checkbox
+              v-if="row.status === 1"
+              :model-value="selectedIds.includes(row.id)"
+              :aria-label="`选择申请 ${row.callsign}`"
+              @change="checked => selectRow(row, checked)"
+            />
+          </template>
+        </el-table-column>
         <el-table-column :label="$t('employee.id')" prop="id" sortable="custom" align="center" min-width="80">
           <template #default="scope">
             <span>{{ scope.row.id }}</span>
@@ -198,10 +220,17 @@
       </el-table>
     </div>
 
-    <div v-else class="register-card-grid">
+    <div v-else v-loading="listLoading" class="register-card-grid admin-card-grid">
+      <el-empty v-if="!listLoading && !list.length" />
       <article v-for="item in list" :key="item.id" class="register-card">
         <div class="register-card__header">
           <div class="register-card__headline">
+            <el-checkbox
+              v-if="item.status === 1"
+              :model-value="selectedIds.includes(item.id)"
+              :aria-label="`选择申请 ${item.callsign}`"
+              @change="checked => selectRow(item, checked)"
+            />
             <el-tag size="small" effect="dark" class="register-id-tag">#{{ item.id }}</el-tag>
             <div>
               <h3>{{ item.name || '--' }}</h3>
@@ -305,15 +334,15 @@ import {
 import waves from '@/directive/waves'
 import Pagination from '@/components/Pagination/index.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { createCrudListMethods } from '@/composables/useCrudList'
-import { mapState } from 'pinia'
-import { useAppStore } from '@/store/modules/app'
+import { createCrudListMethods, reportMutationError } from '@/composables/useCrudList'
+import { useListView } from '@/composables/useListView'
 
 export default {
   name: 'SetupRegisterPage',
   components: { Pagination },
   directives: { waves },
 
+  setup: useListView,
   data() {
     return {
       tableKey: 0,
@@ -368,26 +397,31 @@ export default {
         phone: [{ required: true, message: '电话号码是必选项', trigger: 'blur' }]
       },
       downloadLoading: false,
-      showtable: true,
       autoApproveEnabled: localStorage.getItem('reg_auto_approve_enabled') === '1',
       autoApproveTimer: null,
       autoApprovedCount: 0,
       batchApproving: false,
-      multipleSelection: []
+      selectedIds: []
     }
   },
   computed: {
-    ...mapState(useAppStore, ['device']),
     pendingList() {
       return (this.list || []).filter(item => item.status === 1)
+    },
+    selectedPending() {
+      return this.pendingList.filter(item => this.selectedIds.includes(item.id))
     },
     pendingCount() {
       return this.pendingList.length
     }
   },
 
+  watch: {
+    list() {
+      this.selectedIds = []
+    }
+  },
   created() {
-    this.showtable = this.device !== 'mobile'
     this.getList()
     if (this.autoApproveEnabled) {
       this.startAutoApproveDaemon()
@@ -474,13 +508,8 @@ export default {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
           updateReg(tempData).then(response => {
-            for (const v of this.list) {
-              if (v.id === this.temp.id) {
-                const index = this.list.indexOf(v)
-                this.list.splice(index, 1, this.temp)
-                break
-              }
-            }
+            if (reportMutationError(response)) return
+            this.getList()
             this.dialogFormVisible = false
             ElMessage.success(response?.data?.message || '更新成功')
           }).catch(() => {})
@@ -492,16 +521,10 @@ export default {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
           addReg(tempData).then(response => {
-            if (response && response.code === 20000) {
-              this.getList()
-            }
-
+            if (reportMutationError(response)) return
+            this.getList()
             this.dialogFormVisible = false
-            ElMessage({
-              message: response?.data?.message || '操作完成',
-              type: response?.code === 20000 ? 'success' : 'warning',
-              duration: 2000
-            })
+            ElMessage.success(response?.data?.message || '操作完成')
           }).catch(() => {})
         }
       })
@@ -512,21 +535,20 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       })
-        .then(() => {
-          deleteReg(row).then(response => {
-            const message = response?.data?.message || '操作完成'
-            ElMessage.success(message)
-            this.listLoading = false
-          })
-
+        .then(() => deleteReg(row))
+        .then(response => {
+          if (reportMutationError(response)) return
+          ElMessage.success(response?.data?.message || '操作完成')
           this.getList()
         })
-        .catch(() => {
-          ElMessage.info('已取消删除')
+        .catch(action => {
+          if (action === 'cancel') ElMessage.info('已取消删除')
         })
     },
-    handleSelectionChange(val) {
-      this.multipleSelection = val || []
+    selectRow(row, checked) {
+      this.selectedIds = checked
+        ? [...this.selectedIds, row.id]
+        : this.selectedIds.filter(id => id !== row.id)
     },
     // 并发提交一批审批请求，返回成功数（取代逐条串行 await，避免 N+1 慢请求）
     async approveBatch(targets) {
@@ -549,7 +571,7 @@ export default {
       }
     },
     async handleBatchApproveSelected() {
-      const targets = (this.multipleSelection || []).filter(item => item.status === 1)
+      const targets = this.selectedPending
       if (targets.length === 0) {
         ElMessage.warning('请勾选需要审核的待审用户')
         return
@@ -645,42 +667,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.filter-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  align-items: center;
-
-  .filter-item {
-    margin-bottom: 0;
-    margin-right: 0;
-
-    &.search-input {
-      width: 220px;
-    }
-
-    &.action-btn {
-      height: 42px;
-      padding: 0 22px;
-      border-radius: 14px;
-    }
-
-    &.action-btn-secondary {
-      min-width: 124px;
-    }
-  }
-
-  :deep(.view-switch) {
-    --el-switch-on-color: linear-gradient(90deg, #26efc7 0%, #3f8dff 100%);
-    --el-switch-off-color: rgba(104, 176, 255, 0.22);
-    .el-switch__core { border-color: rgba(104, 176, 255, 0.24); background: rgba(12, 31, 58, 0.72); min-width: 46px; height: 24px; }
-    &.is-checked .el-switch__core { border-color: rgba(54, 240, 203, 0.34); background: linear-gradient(90deg, rgba(38, 239, 199, 0.88) 0%, rgba(63, 141, 255, 0.82) 100%); }
-    .el-switch__action { width: 18px; height: 18px; top: 2px; }
-    .el-switch__label, .el-switch__label * { color: var(--platform-ink-dim) !important; }
-    .el-switch__label.is-active, .el-switch__label.is-active * { color: var(--platform-ink) !important; }
-  }
-}
-
 .table-shell {
   padding: 10px;
   max-width: 100%;
@@ -817,7 +803,7 @@ export default {
   margin: 0 auto;
 }
 
-.register-card-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:18px; padding:10px; }
+.register-card-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap:18px; padding:10px; }
 .register-card { border-radius:24px; border:1px solid var(--platform-border-light); background:var(--platform-shell); box-shadow:0 18px 44px rgba(15,23,42,.08); padding:18px; display:flex; flex-direction:column; gap:16px; }
 .register-card__header { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
 .register-card__headline { min-width:0; display:flex; align-items:center; gap:10px; }
@@ -901,16 +887,7 @@ export default {
   filter: brightness(1.08);
 }
 
-@media (max-width: 768px) {
-.filter-container {
-    .filter-item {
-      &.search-input,
-      &.action-btn,
-      &.action-btn-secondary {
-        width: 100%;
-      }
-    }
-  }
+@media (max-width: 767px) {
 
   .setup-register-page {
     .compact-btn {

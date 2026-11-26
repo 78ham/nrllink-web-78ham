@@ -22,7 +22,7 @@
       </el-select>
 
       <div class="filter-item action-row">
-        <el-button v-waves class="action-btn" type="primary" @click="getList">
+        <el-button v-waves class="action-btn" type="primary" @click="handleFilter">
           <el-icon>
             <Search />
           </el-icon>
@@ -35,6 +35,7 @@
           type="button"
           class="toolbar-capsule"
           :class="{ 'is-active': listQuery.isonline }"
+          :aria-pressed="!!listQuery.isonline"
           @click="toggleOnline"
         >
           <span class="capsule-indicator" />
@@ -45,6 +46,7 @@
           type="button"
           class="toolbar-capsule"
           :class="{ 'is-active': showtable }"
+          :aria-pressed="showtable"
           @click="showtable = !showtable"
         >
           <span class="capsule-indicator" />
@@ -57,12 +59,13 @@
     <responsive-table
       :data="list"
       :columns="deviceColumns"
+      :mobile-cards="!showtable"
       :loading="listLoading"
       title-key="callsign"
       row-key="id"
-      :has-more="list.length < total"
+      :has-more="listQuery.page * listQuery.limit < total"
       @load-more="handleLoadMore"
-      @refresh="getList"
+      @refresh="handleFilter"
     >
       <template #table>
         <div v-if="showtable" class="table-shell table-responsive">
@@ -76,14 +79,14 @@
             style="width: 100%"
             @sort-change="sortChange"
           >
-            <el-table-column fixed :label="$t('Account.id')" prop="id" sortable="custom" align="center" min-width="110">
+            <el-table-column :fixed="device === 'desktop'" :label="$t('Account.id')" prop="id" sortable="custom" align="center" min-width="110">
               <template #default="scope">
                 <span>{{ scope.row.id }}</span>
               </template>
             </el-table-column>
 
             <el-table-column
-              fixed
+              :fixed="device === 'desktop'"
               prop="callsign"
               :label="$t('device.callsign')"
               min-width="150"
@@ -117,6 +120,7 @@
                     size="small"
                     plain
                     class="compact-btn status-receive-btn"
+                    :disabled="!canManageDevice(scope.row) || pendingStatus.has(scope.row.id)"
                     @click="updateStatus(scope.row, 1)"
                   >{{ (scope.row.status & 1) === 1 ? $t('device.disableReceive') :
                     $t('device.receive')
@@ -127,6 +131,7 @@
                     size="small"
                     plain
                     class="compact-btn status-transmit-btn"
+                    :disabled="!canManageDevice(scope.row) || pendingStatus.has(scope.row.id)"
                     @click="updateStatus(scope.row, 2)"
                   >{{ (scope.row.status & 2) === 2 ? $t('device.disableTransmit') :
                     $t('device.transmit')
@@ -172,7 +177,7 @@
               <template #default="{ row }">
                 <div class="operation-actions">
                   <el-button
-                    v-if="checkPermission(['admin']) || row.callsign === callsign"
+                    v-if="canManageDevice(row)"
                     size="small"
                     type="primary"
                     plain
@@ -181,7 +186,7 @@
                   >{{ $t("device.edit") }}</el-button>
 
                   <el-button
-                    v-if="checkPermission(['admin']) || row.callsign === callsign"
+                    v-if="canManageDevice(row)"
                     :disabled="row.is_online === false"
                     size="small"
                     type="warning"
@@ -191,7 +196,7 @@
                   >{{ $t("device.change") }}</el-button>
 
                   <el-button
-                    v-if="checkPermission(['admin']) || row.callsign === callsign"
+                    v-if="canManageDevice(row)"
                     :disabled="row.is_online === false"
                     size="small"
                     type="success"
@@ -209,7 +214,7 @@
                     @click="$router.push('/public/bm-network')"
                   >BM网络</el-button>
                   <el-button
-                    v-if="checkPermission(['admin']) || row.callsign === callsign"
+                    v-if="canManageDevice(row)"
                     size="small"
                     type="danger"
                     plain
@@ -289,7 +294,8 @@
           </el-table>
         </div>
 
-        <div v-if="showtable == false" class="box-grid">
+        <div v-else v-loading="listLoading" class="box-grid">
+          <el-empty v-if="!listLoading && !list.length" />
           <div
             v-for="item in list"
             :key="item.id"
@@ -373,7 +379,7 @@
                   size="small"
                   plain
                   class="compact-btn status-receive-btn"
-                  :disabled="item.is_online === false"
+                  :disabled="!canManageDevice(item) || pendingStatus.has(item.id)"
                   @click="updateStatus(item, 1)"
                 >{{ ((item.status ?? 0) & 1) === 1 ? $t('device.disableReceive') : $t('device.receive') }}</el-button>
                 <el-button
@@ -381,13 +387,13 @@
                   size="small"
                   plain
                   class="compact-btn status-transmit-btn"
-                  :disabled="item.is_online === false"
+                  :disabled="!canManageDevice(item) || pendingStatus.has(item.id)"
                   @click="updateStatus(item, 2)"
                 >{{ ((item.status ?? 0) & 2) === 2 ? $t('device.disableTransmit') : $t('device.transmit') }}</el-button>
               </div>
               <div class="action-btns">
                 <el-button
-                  v-if="checkPermission(['admin']) || item.callsign === callsign"
+                  v-if="canManageDevice(item)"
                   type="warning"
                   plain
                   size="small"
@@ -396,7 +402,7 @@
                   @click="handleChange(item)"
                 >{{ $t("device.change") }}</el-button>
                 <el-button
-                  v-if="checkPermission(['admin']) || item.callsign === callsign"
+                  v-if="canManageDevice(item)"
                   type="success"
                   plain
                   size="small"
@@ -405,7 +411,7 @@
                   @click="handleOpenAT(item)"
                 >{{ $t("device.at") }}</el-button>
                 <el-button
-                  v-if="checkPermission(['admin']) || item.callsign === callsign"
+                  v-if="canManageDevice(item)"
                   type="primary"
                   plain
                   size="small"
@@ -421,7 +427,7 @@
                   @click="$router.push('/public/bm-network')"
                 >BM网络</el-button>
                 <el-button
-                  v-if="checkPermission(['admin']) || item.callsign === callsign"
+                  v-if="canManageDevice(item)"
                   type="danger"
                   plain
                   size="small"
@@ -446,6 +452,7 @@
           size="small"
           plain
           class="compact-btn status-receive-btn"
+          :disabled="!canManageDevice(row) || pendingStatus.has(row.id)"
           @click="updateStatus(row, 1)"
         >{{ (row.status & 1) === 1 ? $t('device.disableReceive') : $t('device.receive') }}</el-button>
         <el-button
@@ -453,10 +460,20 @@
           size="small"
           plain
           class="compact-btn status-transmit-btn"
+          :disabled="!canManageDevice(row) || pendingStatus.has(row.id)"
           @click="updateStatus(row, 2)"
         >{{ (row.status & 2) === 2 ? $t('device.disableTransmit') : $t('device.transmit') }}</el-button>
         <el-button
-          v-if="checkPermission(['admin']) || row.callsign === callsign"
+          v-if="canManageDevice(row)"
+          type="warning"
+          plain
+          size="small"
+          class="compact-btn action-change-btn"
+          :disabled="row.is_online === false"
+          @click="handleChange(row)"
+        >{{ $t('device.change') }}</el-button>
+        <el-button
+          v-if="canManageDevice(row)"
           type="success"
           plain
           size="small"
@@ -465,7 +482,7 @@
           @click="handleOpenAT(row)"
         >{{ $t("device.at") }}</el-button>
         <el-button
-          v-if="checkPermission(['admin']) || row.callsign === callsign"
+          v-if="canManageDevice(row)"
           type="primary"
           plain
           size="small"
@@ -480,11 +497,19 @@
           class="compact-btn action-bm-btn"
           @click="$router.push('/public/bm-network')"
         >BM网络</el-button>
+        <el-button
+          v-if="canManageDevice(row)"
+          type="danger"
+          plain
+          size="small"
+          class="compact-btn action-delete-btn"
+          @click="handleDelete(row)"
+        >{{ $t('employee.delete') }}</el-button>
       </template>
     </responsive-table>
 
     <pagination
-      v-show="total > 0 && device !== 'mobile'"
+      v-show="total > 0 && !mobileCards"
       v-model:page="listQuery.page"
       v-model:limit="listQuery.limit"
       class="platform-theme-pagination"
@@ -497,23 +522,22 @@
       :title="textMap[dialogStatus]"
       :center="device === 'mobile'"
       :fullscreen="device === 'mobile'"
-      width="70%"
+      width="min(52rem, calc(100% - 2rem))"
       class="platform-theme-dialog"
     >
       <el-form
         ref="dataForm"
         :rules="rules"
         :model="temp"
-        label-position="right"
+        :label-position="device === 'mobile' ? 'top' : 'right'"
         label-width="120px"
-        style="width: 95%; margin-left: 5px"
       >
         <el-form-item :label="$t('device.name')" prop="name">
-          <el-input v-model="temp.name" style="width: 90%" />
+          <el-input v-model="temp.name" />
         </el-form-item>
 
         <el-form-item :label="$t('device.dmrid')" prop="dmrid">
-          <el-input v-model="temp.dmrid" style="width: 90%" />
+          <el-input v-model="temp.dmrid" />
         </el-form-item>
 
         <el-form-item :label="$t('device.grouproom')" prop="group_id">
@@ -522,9 +546,6 @@
             popper-class="platform-theme-select-dropdown"
             filterable
             clearable
-            style="width: 90%"
-            class="filter-item"
-            @change="handleFilter"
           >
 
             <el-option
@@ -676,6 +697,7 @@ import Pagination from '@/components/Pagination/index.vue' // secondary package 
 import ResponsiveTable from '@/components/ResponsiveTable/index.vue'
 import AtCommandDialog from './device/AtCommandDialog.vue'
 import ParamDialog from './device/ParamDialog.vue'
+import { useListView } from '@/composables/useListView'
 import { createCrudListMethods } from '@/composables/useCrudList'
 import { mapState } from 'pinia'
 import { useAppStore } from '@/store/modules/app'
@@ -688,6 +710,7 @@ export default {
   name: 'totaldevices',
   components: { Pagination, ResponsiveTable, AtCommandDialog, ParamDialog },
   directives: { waves },
+  setup: useListView,
   data() {
     const validateFreq = (rule, value, callback) => {
       if (!value) {
@@ -703,6 +726,7 @@ export default {
     return {
       tableKey: 0,
       list: [],
+      pendingStatus: new Set(),
       deviceColumns: [
         { prop: 'callsign', label: '呼号/SSID', formatter: (row) => `${row.callsign || '--'}-${row.ssid ?? ''}` },
         { prop: 'name', label: '名称' },
@@ -734,7 +758,6 @@ export default {
       activeName: '',
       total: 0,
       listLoading: false,
-      showtable: true,
       listQuery: {
         callsign: undefined,
         // displayOnline: true,
@@ -800,14 +823,14 @@ export default {
     ...mapState(useAppStore, ['device']),
     ...mapState(useUserStore, ['callsign'])
   },
+  watch: {
+    mobileCards() {
+      // Card pages append results; a paginated table shows one page at a time.
+      if (this.listQuery.page > 1) this.handleFilter()
+    }
+  },
 
   created() {
-    if (this.device === 'mobile') {
-      this.showtable = false
-    } else {
-      this.showtable = true
-    }
-
     this.fetchPlatformList({}).then((response) => {
       this.platformOptions = response.data.items
     }).catch(() => {})
@@ -816,8 +839,8 @@ export default {
       this.relayOptions = response.data.items
     }).catch(() => {})
 
-    this.fetchGroupListMini({}).then((response) => {
-      this.groupsOptions = response.data
+    this.fetchGroupListMini({}).then(groups => {
+      this.groupsOptions = groups
     }).catch(() => {})
     this.getList()
   },
@@ -922,39 +945,26 @@ export default {
       })
     },
 
-    updateStatus(tempData, key) {
-      let lastvalue1 = tempData.status & 1
-      let lastvalue2 = (tempData.status & 2) >> 1
-
-      if (key === 1) {
-        lastvalue1 = lastvalue1 ^ 1
-        // lastvalue1 = 1 - lastvalue1
-      } else if (key === 2) {
-        lastvalue2 = lastvalue2 ^ 1
-      }
-
-      tempData.status = lastvalue1 | (lastvalue2 << 1)
-
-      // tempData.status = tempData.statusArray.reduce((acc, num) => acc | num, 0)
-
-      // let status = 0;
-
-      // tempData.statusArray.forEach((num) => {
-      //   status |= num; // 按位或运算
-      //   });
-
-      //   tempData.status = status;
-
-      //    tempData.timestamp = +new Date(tempData.timestamp); // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
-      updateDevice(tempData).then((response) => {
+    canManageDevice(row) {
+      return checkPermission(['admin']) || row.callsign === this.callsign
+    },
+    async updateStatus(row, flag) {
+      if (this.pendingStatus.has(row.id)) return
+      this.pendingStatus.add(row.id)
+      try {
+        const status = (row.status ?? 0) ^ flag
+        const response = await updateDevice({ ...row, status })
         if (response.code === 20000) {
-          ElMessage.success(response?.data?.message || this.$t('device.updateSuccess'))
-
-          this.getList()
+          row.status = status
+          ElMessage.success(response.data?.message || this.$t('device.updateSuccess'))
         } else {
-          ElMessage.warning(response?.data?.message || this.$t('device.requestFailed'))
+          ElMessage.warning(response.data?.message || this.$t('device.requestFailed'))
         }
-      }).catch(() => {})
+      } catch {
+        // The request interceptor displays network errors.
+      } finally {
+        this.pendingStatus.delete(row.id)
+      }
     },
 
     handleChange(row) {
@@ -1062,5 +1072,4 @@ export default {
 }
 </script>
 
-<style src="./device/legacy.css"></style>
 <style lang="scss" scoped src="./device/device.scss"></style>

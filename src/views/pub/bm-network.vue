@@ -16,7 +16,9 @@
       show-icon
       :closable="false"
       class="bm-demo-banner"
-    />
+    >
+      <el-button size="small" :loading="loading" @click="loadNetworks">{{ $t('tagsView.refresh') }}</el-button>
+    </el-alert>
 
     <!-- Active Bridge Control Panel -->
     <div class="bm-bridge-panel">
@@ -29,8 +31,9 @@
 
       <div class="bridge-selectors">
         <div class="selector-item">
-          <label>{{ $t('bm.selectDevice') }}</label>
+          <label for="bm-device">{{ $t('bm.selectDevice') }}</label>
           <el-select
+            id="bm-device"
             v-model="selectedDeviceId"
             :placeholder="$t('bm.selectDevicePlaceholder')"
             class="bm-select"
@@ -46,8 +49,9 @@
         </div>
 
         <div class="selector-item">
-          <label>{{ $t('bm.selectNetwork') }}</label>
+          <label for="bm-network">{{ $t('bm.selectNetwork') }}</label>
           <el-select
+            id="bm-network"
             v-model="selectedNetworkId"
             :placeholder="$t('bm.selectNetworkPlaceholder')"
             class="bm-select"
@@ -66,6 +70,7 @@
             v-if="bridgeStatus.status !== 1"
             type="success"
             :loading="bridgeLoading"
+            :disabled="loading || isDemoMode || !selectedDeviceId || !selectedNetworkId"
             class="action-btn"
             @click="handleStartBridge"
           >
@@ -75,6 +80,7 @@
             v-else
             type="danger"
             :loading="bridgeLoading"
+            :disabled="loading || isDemoMode || !selectedDeviceId"
             class="action-btn"
             @click="handleStopBridge"
           >
@@ -108,7 +114,7 @@
     <div class="bm-network-list-section">
       <div class="section-toolbar">
         <h3>{{ $t('bm.configListTitle') }}</h3>
-        <el-button type="primary" class="add-network-btn" @click="handleCreateNetwork">
+        <el-button v-if="canManageNetworks" :disabled="loading || isDemoMode" type="primary" class="add-network-btn" @click="handleCreateNetwork">
           {{ $t('bm.addConfig') }}
         </el-button>
       </div>
@@ -149,7 +155,7 @@
                 <span>{{ row.heartbeat_interval }}s</span>
               </template>
             </el-table-column>
-            <el-table-column :label="$t('bm.actions')" width="160" align="center">
+            <el-table-column v-if="canManageNetworks && !isDemoMode" :label="$t('bm.actions')" width="160" align="center">
               <template #default="{ row }">
                 <el-button type="primary" plain size="small" @click="handleEditNetwork(row)">
                   {{ $t('bm.edit') }}
@@ -168,7 +174,7 @@
           </el-tag>
         </template>
 
-        <template #actions="{ row }">
+        <template v-if="canManageNetworks && !isDemoMode" #actions="{ row }">
           <el-button type="primary" plain size="small" @click="handleEditNetwork(row)">
             {{ $t('bm.edit') }}
           </el-button>
@@ -183,10 +189,10 @@
     <el-dialog
       v-model="dialogVisible"
       :title="isEdit ? $t('bm.editConfig') : $t('bm.addConfig')"
-      width="540px"
+      width="min(36rem, calc(100% - 2rem))"
       class="platform-theme-dialog"
     >
-      <el-form ref="networkForm" :model="form" label-width="140px">
+      <el-form ref="networkForm" :model="form" :label-position="device === 'mobile' ? 'top' : 'right'" label-width="140px">
         <el-form-item :label="$t('bm.configName')" prop="name" required>
           <el-input v-model="form.name" placeholder="例如：BrandMeister 4601" />
         </el-form-item>
@@ -197,7 +203,7 @@
           <el-input-number v-model="form.server_port" :min="1" :max="65535" />
         </el-form-item>
         <el-form-item :label="$t('bm.password')" prop="password">
-          <el-input v-model="form.password" type="password" show-password placeholder="BM 连接密码" />
+          <el-input v-model="form.password" type="password" show-password :placeholder="isEdit ? $t('bm.keepPassword') : $t('bm.password')" />
         </el-form-item>
         <el-form-item :label="$t('bm.callsign')" prop="callsign">
           <el-input v-model="form.callsign" placeholder="连接呼号" />
@@ -240,6 +246,9 @@ import {
   stopBMBridge,
   fetchBMBridgeStatus
 } from '@/api/bm'
+import { mapState } from 'pinia'
+import { useAppStore } from '@/store/modules/app'
+import checkPermission from '@/utils/permission'
 import { fetchDeviceList } from '@/api/device'
 import ResponsiveTable from '@/components/ResponsiveTable/index.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -282,10 +291,10 @@ export default {
       bridgeLoading: false,
       pollFailCount: 0,
       isDemoMode: false,
-      networkList: [...DEFAULT_NETWORKS],
+      networkList: [],
       bmDeviceList: [],
       selectedDeviceId: undefined,
-      selectedNetworkId: 1,
+      selectedNetworkId: undefined,
       bridgeStatus: {
         status: 0,
         rx_packets: 0,
@@ -319,6 +328,10 @@ export default {
     }
   },
   computed: {
+    ...mapState(useAppStore, ['device']),
+    canManageNetworks() {
+      return checkPermission(['admin'])
+    },
     bridgeStatusText() {
       if (this.bridgeStatus.status === 1) return this.$t('bm.running')
       if (this.bridgeStatus.status === 2) return this.$t('bm.error')
@@ -346,60 +359,45 @@ export default {
       this.loading = true
       fetchBMNetworks().then(res => {
         this.isDemoMode = false
-        const items = res?.data?.items || []
-        this.networkList = items.length ? items : [...DEFAULT_NETWORKS]
-        if (this.networkList.length && !this.selectedNetworkId) {
-          this.selectedNetworkId = this.networkList[0].id
+        this.networkList = res.data.items || []
+        if (!this.networkList.some(network => network.id === this.selectedNetworkId)) {
+          this.selectedNetworkId = this.networkList[0]?.id
         }
       }).catch(() => {
         this.isDemoMode = true
-        ElMessage.warning(this.$t('bm.demoFallback'))
-        if (!this.networkList.length) {
-          this.networkList = [...DEFAULT_NETWORKS]
-        }
-        if (this.networkList.length && !this.selectedNetworkId) {
-          this.selectedNetworkId = this.networkList[0].id
-        }
+        this.networkList = [...DEFAULT_NETWORKS]
+        this.selectedNetworkId = undefined
       }).finally(() => {
         this.loading = false
       })
     },
     loadBMDevices() {
-      fetchDeviceList({ page: 1, limit: 100 }).then(res => {
-        this.isDemoMode = false
-        const allItems = res?.data?.items || []
-        // Filter NRL-BM devices (model 202)
-        const bmDevices = allItems.filter(item => item.dev_model === 202)
-        this.bmDeviceList = bmDevices.length ? bmDevices : allItems
-        if (this.bmDeviceList.length && !this.selectedDeviceId) {
-          this.selectedDeviceId = this.bmDeviceList[0].id
-          this.checkBridgeStatus()
+      fetchDeviceList({}).then(res => {
+        this.bmDeviceList = (res.data.items || []).filter(item => item.dev_model === 202)
+        if (!this.bmDeviceList.some(device => device.id === this.selectedDeviceId)) {
+          this.selectedDeviceId = this.bmDeviceList[0]?.id
+          this.onDeviceChange()
         }
-      }).catch(() => {
-        this.isDemoMode = true
-        ElMessage.warning(this.$t('bm.demoFallback'))
-        if (!this.bmDeviceList.length) {
-          this.bmDeviceList = [
-            { id: 1, callsign: 'BG5ABC', ssid: 1, name: 'NRL-BM 演示节点', dev_model: 202 }
-          ]
-          this.selectedDeviceId = 1
-        }
-      })
+      }).catch(() => {})
     },
     onDeviceChange() {
       this.pollFailCount = 0
+      this.bridgeStatus = { status: 0, rx_packets: 0, tx_packets: 0, loss_rate: 0, last_heartbeat: '' }
       this.checkBridgeStatus()
       this.startStatusPolling()
     },
     checkBridgeStatus() {
       if (!this.selectedDeviceId) return
       if (document.hidden) return // 页面不可见时暂停，恢复可见后由下一个轮询周期接续
-      fetchBMBridgeStatus({ device_id: this.selectedDeviceId }).then(res => {
+      const deviceId = this.selectedDeviceId
+      fetchBMBridgeStatus({ device_id: deviceId }).then(res => {
+        if (deviceId !== this.selectedDeviceId) return
         this.pollFailCount = 0
         if (res?.data) {
           this.bridgeStatus = res.data
         }
       }).catch(() => {
+        if (deviceId !== this.selectedDeviceId) return
         this.pollFailCount = (this.pollFailCount || 0) + 1
         // 如果连续失败2次以上（说明后端接口未部署），自动暂停轮询，防止无休止报错
         if (this.pollFailCount >= 2 && this.statusPollTimer) {
@@ -410,7 +408,7 @@ export default {
       })
     },
     startStatusPolling() {
-      if (this.statusPollTimer) return
+      if (!this.selectedDeviceId || this.statusPollTimer) return
       this.statusPollTimer = setInterval(() => {
         this.checkBridgeStatus()
       }, 5000)
@@ -429,19 +427,10 @@ export default {
         device_id: this.selectedDeviceId,
         network_id: this.selectedNetworkId
       }).then(() => {
-        this.isDemoMode = false
         ElMessage.success(this.$t('bm.startSuccess'))
         this.checkBridgeStatus()
-      }).catch(() => {
-        this.isDemoMode = true
-        this.bridgeStatus = {
-          status: 1,
-          rx_packets: 16,
-          tx_packets: 20,
-          loss_rate: 0,
-          last_heartbeat: new Date().toLocaleTimeString()
-        }
-        ElMessage.warning(this.$t('bm.demoFallback'))
+      }).catch(error => {
+        ElMessage.error(error.message)
       }).finally(() => {
         this.bridgeLoading = false
       })
@@ -452,16 +441,10 @@ export default {
       stopBMBridge({
         device_id: this.selectedDeviceId
       }).then(() => {
-        this.isDemoMode = false
         ElMessage.success(this.$t('bm.stopSuccess'))
         this.checkBridgeStatus()
-      }).catch(() => {
-        this.isDemoMode = true
-        this.bridgeStatus = {
-          ...this.bridgeStatus,
-          status: 0
-        }
-        ElMessage.warning(this.$t('bm.demoFallback'))
+      }).catch(error => {
+        ElMessage.error(error.message)
       }).finally(() => {
         this.bridgeLoading = false
       })
@@ -494,13 +477,10 @@ export default {
         type: 'warning'
       }).then(() => {
         deleteBMNetwork({ id: row.id }).then(() => {
-          this.isDemoMode = false
           ElMessage.success(this.$t('bm.deleteSuccess'))
           this.loadNetworks()
-        }).catch(() => {
-          this.isDemoMode = true
-          this.networkList = this.networkList.filter(item => item.id !== row.id)
-          ElMessage.warning(this.$t('bm.demoFallback'))
+        }).catch(error => {
+          ElMessage.error(error.message)
         })
       }).catch(() => {})
     },
@@ -510,24 +490,14 @@ export default {
         return
       }
       const api = this.isEdit ? updateBMNetwork : createBMNetwork
-      api(this.form).then(() => {
-        this.isDemoMode = false
+      const data = { ...this.form }
+      if (this.isEdit && !data.password) delete data.password
+      api(data).then(() => {
         ElMessage.success(this.isEdit ? this.$t('bm.updateSuccess') : this.$t('bm.createSuccess'))
         this.dialogVisible = false
         this.loadNetworks()
-      }).catch(() => {
-        this.isDemoMode = true
-        if (this.isEdit) {
-          const idx = this.networkList.findIndex(n => n.id === this.form.id)
-          if (idx !== -1) {
-            this.networkList.splice(idx, 1, { ...this.form })
-          }
-        } else {
-          const newId = (this.networkList.length ? Math.max(...this.networkList.map(n => n.id)) : 0) + 1
-          this.networkList.unshift({ ...this.form, id: newId })
-        }
-        ElMessage.warning(this.$t('bm.demoFallback'))
-        this.dialogVisible = false
+      }).catch(error => {
+        ElMessage.error(error.message)
       })
     }
   }
@@ -590,6 +560,7 @@ export default {
       margin-bottom: 20px;
 
       .selector-item {
+        min-width: 0;
         display: flex;
         flex-direction: column;
         gap: 6px;
@@ -633,6 +604,7 @@ export default {
         }
 
         .metric-val {
+          overflow-wrap: anywhere;
           font-size: 18px;
           font-weight: 600;
           color: var(--platform-ink, #ffffff);
@@ -654,6 +626,8 @@ export default {
 
     .section-toolbar {
       display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 16px;
@@ -667,20 +641,32 @@ export default {
   }
 }
 
-@media screen and (max-width: 768px) {
+@media (max-width: 767px) {
   .bm-network-page {
-    padding: 12px;
+    .bm-header-card,
+    .bm-bridge-panel,
+    .bm-network-list-section {
+      padding: 14px;
+      margin-bottom: 12px;
+    }
 
-    .bridge-selectors {
-      flex-direction: column;
-      align-items: stretch;
-
-      .bridge-action-btns {
-        width: 100%;
+    .bm-bridge-panel {
+      .bridge-selectors {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 10px;
 
         .action-btn {
           width: 100%;
-          min-height: 44px;
+        }
+      }
+
+      .bridge-metrics-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+
+        .metric-card {
+          padding: 10px;
         }
       }
     }

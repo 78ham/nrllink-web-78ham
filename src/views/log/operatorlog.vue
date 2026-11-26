@@ -1,54 +1,60 @@
 <template>
   <div class="app-container platform-theme-page operatorlog-page">
-    <div class="filter-container platform-theme-toolbar">
-      <el-select
-        v-model="listQuery.operator_id"
-        :placeholder="$t('Account.name')"
-        clearable
-        filterable
-        class="filter-item operator-select"
-        popper-class="platform-theme-select-dropdown"
-      >
-        <el-option
-          v-for="item in employeesOptions"
-          :key="item.id"
-          :label="item.name"
-          :value="item.id"
+    <div class="filter-container platform-theme-toolbar admin-list-toolbar">
+      <div class="admin-list-filters">
+        <el-select
+          v-model="listQuery.operator_id"
+          :placeholder="$t('Account.name')"
+          clearable
+          filterable
+          class="filter-item operator-select"
+          popper-class="platform-theme-select-dropdown"
+        >
+          <el-option
+            v-for="item in employeesOptions"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          />
+        </el-select>
+
+        <el-input
+          v-model="listQuery.event_type"
+          :placeholder="$t('operator_log.event_type')"
+          class="filter-item search-input"
+          clearable
+          @keyup.enter="handleFilter"
         />
-      </el-select>
 
-      <el-input
-        v-model="listQuery.event_type"
-        :placeholder="$t('operator_log.event_type')"
-        class="filter-item search-input"
-        clearable
-        @keyup.enter="handleFilter"
-      />
+        <el-date-picker
+          v-model="listQuery.daterange"
+          value-format="YYYY-MM-DD"
+          :single-panel="isMobile"
+          popper-class="log-range-calendar"
+          type="daterange"
+          placeholder="日期范围"
+          class="filter-item daterange-input"
+        />
+      </div>
+      <div class="admin-list-actions">
+        <el-button v-waves class="filter-item action-btn" type="primary" @click="handleFilter">
+          <el-icon>
+            <Search />
+          </el-icon>
+          {{ $t('operator_log.search') }}
+        </el-button>
 
-      <el-date-picker
-        v-model="listQuery.daterange"
-        value-format="yyyy-MM-dd"
-        type="daterange"
-        placeholder="日期范围"
-        class="filter-item daterange-input"
-      />
-
-      <el-button v-waves class="filter-item action-btn" type="primary" @click="handleFilter">
-        <el-icon>
-          <Search />
-        </el-icon>
-        {{ $t('operator_log.search') }}
-      </el-button>
-
-      <button
-        type="button"
-        class="toolbar-capsule"
-        :class="{ 'is-active': showtable }"
-        @click="showtable = !showtable"
-      >
-        <span class="capsule-indicator" />
-        <span>{{ $t('device.showtable') }}</span>
-      </button>
+        <button
+          type="button"
+          class="toolbar-capsule"
+          :class="{ 'is-active': showtable }"
+          :aria-pressed="showtable"
+          @click="showtable = !showtable"
+        >
+          <span class="capsule-indicator" />
+          <span>{{ $t('device.showtable') }}</span>
+        </button>
+      </div>
     </div>
 
     <div v-if="showtable" class="table-shell table-responsive">
@@ -97,7 +103,8 @@
       </el-table>
     </div>
 
-    <div v-else class="log-card-grid">
+    <div v-else v-loading="listLoading" class="log-card-grid admin-card-grid">
+      <el-empty v-if="!listLoading && !list.length" />
       <article v-for="item in list" :key="item.id" class="log-card">
         <div class="log-card__header">
           <el-tag size="small" effect="dark" class="log-id-tag">#{{ item.id }}</el-tag>
@@ -131,18 +138,19 @@ import Pagination from '@/components/Pagination/index.vue'
 import { ElMessage } from 'element-plus'
 import { mapState } from 'pinia'
 import { useAppStore } from '@/store/modules/app'
+import { useListView } from '@/composables/useListView'
 
 export default {
   name: 'OperatorLogPage',
   components: { Pagination },
   directives: { waves },
+  setup: useListView,
   data() {
     return {
       tableKey: 0,
       list: [],
       total: 0,
       listLoading: true,
-      showtable: true,
       employeesOptions: [],
       listQuery: {
         page: 1,
@@ -158,13 +166,11 @@ export default {
     }
   },
   computed: {
-    ...mapState(useAppStore, ['device'])
+    ...mapState(useAppStore, ['isMobile'])
   },
   created() {
-    this.showtable = this.device !== 'mobile'
     fetchEmployeeList({}).then(response => {
-      this.employeesOptions = response.data.items
-      this.employeesOptions.unshift({ id: 0, name: '未知' })
+      this.employeesOptions = [{ id: 0, name: '未知' }, ...Object.values(response?.data?.items || {})]
     })
     this.getList()
   },
@@ -205,36 +211,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.filter-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  align-items: center;
-
-  .filter-item {
-    margin-bottom: 0;
-    margin-right: 0;
-
-    &.operator-select {
-      width: 150px;
-    }
-
-    &.search-input {
-      width: 220px;
-    }
-
-    &.daterange-input {
-      width: 280px;
-    }
-
-    &.action-btn {
-      height: 42px;
-      padding: 0 22px;
-      border-radius: 14px;
-    }
-  }
-}
-
 .table-shell {
   padding: 10px;
 }
@@ -277,7 +253,7 @@ export default {
 
 .log-card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
   gap: 18px;
   padding: 10px;
 }
@@ -332,17 +308,21 @@ export default {
   background: linear-gradient(135deg, rgba(19, 49, 84, 0.72) 0%, rgba(13, 34, 60, 0.88) 100%) !important;
 }
 
-@media (max-width: 768px) {
-  .filter-container {
-    .filter-item {
-      &.operator-select,
-      &.search-input,
-      &.daterange-input,
-      &.action-btn {
-        width: 100%;
-      }
-    }
+@media (max-width: 767px) {
+  :global(.log-range-calendar .el-date-range-picker.single-panel) {
+    width: min(322px, calc(100vw - 16px));
   }
+
+  :global(.log-range-calendar .single-panel .el-picker-panel__body) {
+    min-width: 0;
+  }
+
+  :global(.log-range-calendar .single-panel .el-picker-panel__content) {
+    width: auto;
+  }
+}
+
+@media (max-width: 768px) {
 
   .log-card-grid {
     grid-template-columns: 1fr;

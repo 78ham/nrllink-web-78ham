@@ -265,7 +265,9 @@ export default {
 
   img {
     width: 260px;
-    height: 260px;
+    max-width: 100%;
+    height: auto;
+    aspect-ratio: 1;
   }
 }
 
@@ -289,6 +291,9 @@ export default {
   .qr-box {
     width: 100%;
     max-width: 280px;
+    height: auto;
+    padding: 10px;
+    aspect-ratio: 1;
   }
 }
 </style>

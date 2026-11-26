@@ -1,37 +1,41 @@
 <template>
   <div class="app-container platform-theme-page setup-groups-page">
-    <div class="filter-container platform-theme-toolbar">
-      <el-input
-        v-model="listQuery.name"
-        :placeholder="$t('device.name')"
-        class="filter-item search-input"
-        clearable
-        @keyup.enter="handleFilter"
-      />
+    <div class="filter-container platform-theme-toolbar admin-list-toolbar">
+      <div class="admin-list-filters">
+        <el-input
+          v-model="listQuery.name"
+          :placeholder="$t('device.name')"
+          class="filter-item search-input"
+          clearable
+          @keyup.enter="handleFilter"
+        />
+      </div>
+      <div class="admin-list-actions">
+        <el-button v-waves class="filter-item action-btn" type="primary" @click="handleFilter">
+          <el-icon>
+            <Search />
+          </el-icon>
+          {{ $t('Account.search') }}
+        </el-button>
 
-      <el-button v-waves class="filter-item action-btn" type="primary" @click="handleFilter">
-        <el-icon>
-          <Search />
-        </el-icon>
-        {{ $t('Account.search') }}
-      </el-button>
+        <el-button class="filter-item action-btn action-btn-secondary" type="primary" @click="handleCreate">
+          <el-icon>
+            <Edit />
+          </el-icon>
+          {{ $t('employee.add') }}
+        </el-button>
 
-      <el-button class="filter-item action-btn action-btn-secondary" type="primary" @click="handleCreate">
-        <el-icon>
-          <Edit />
-        </el-icon>
-        {{ $t('employee.add') }}
-      </el-button>
-
-      <button
-        type="button"
-        class="toolbar-capsule"
-        :class="{ 'is-active': showtable }"
-        @click="showtable = !showtable"
-      >
-        <span class="capsule-indicator" />
-        <span>{{ $t('device.showtable') }}</span>
-      </button>
+        <button
+          type="button"
+          class="toolbar-capsule"
+          :class="{ 'is-active': showtable }"
+          :aria-pressed="showtable"
+          @click="showtable = !showtable"
+        >
+          <span class="capsule-indicator" />
+          <span>{{ $t('device.showtable') }}</span>
+        </button>
+      </div>
     </div>
 
     <div v-if="showtable" class="table-shell table-responsive">
@@ -115,7 +119,8 @@
       </el-table>
     </div>
 
-    <div v-else class="groups-card-grid">
+    <div v-else v-loading="listLoading" class="groups-card-grid admin-card-grid">
+      <el-empty v-if="!listLoading && !list.length" />
       <article
         v-for="item in list"
         :key="item.id"
@@ -246,6 +251,7 @@
 </template>
 
 <script>
+import { reportMutationError } from '@/composables/useCrudList'
 import {
   fetchGroupList,
   createGroup,
@@ -257,12 +263,12 @@ import waves from '@/directive/waves'
 import { parseTime, ValueFilter } from '@/utils'
 import { groupTypeOptions } from '@/utils/system'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { mapState } from 'pinia'
-import { useAppStore } from '@/store/modules/app'
+import { useListView } from '@/composables/useListView'
 
 export default {
   name: 'SetupGroupsPage',
   directives: { waves },
+  setup: useListView,
   data() {
     return {
       tableKey: 0,
@@ -284,7 +290,6 @@ export default {
         master_server: '',
         slave_server: ''
       },
-      showtable: true,
       dialogFormVisible: false,
       dialogStatus: '',
       textMap: {
@@ -296,12 +301,8 @@ export default {
       uploadLoading: false
     }
   },
-  computed: {
-    ...mapState(useAppStore, ['device'])
-  },
 
   created() {
-    this.showtable = this.device !== 'mobile'
     // this.fetchDeviceList({}).then(response => {
     //   this.devicesOptions = Object.values(response?.data?.items || {})
     // })
@@ -416,6 +417,7 @@ export default {
       this.$refs.dataForm.validate(valid => {
         if (valid) {
           createGroup(this.temp).then(response => {
+            if (reportMutationError(response)) return
             this.getList()
             this.dialogFormVisible = false
             ElMessage.success(response?.data?.message || '创建成功')
@@ -443,21 +445,10 @@ export default {
             ...this.temp
           }
           updateGroup(tempData).then(response => {
-            for (const item of this.list) {
-              if (item.id === this.temp.id) {
-                const index = this.list.indexOf(item)
-                this.list.splice(index, 1, tempData)
-                break
-              }
-            }
-
-            if (response && response.code === 20000) {
-              ElMessage.success('修改成功')
-            } else {
-              ElMessage.warning(response?.message || response?.data?.message || '请求失败')
-            }
-
+            if (reportMutationError(response)) return
+            this.getList()
             this.dialogFormVisible = false
+            ElMessage.success(response?.data?.message || '更新成功')
           })
         }
       })
@@ -468,19 +459,14 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       })
-        .then(() => {
-          deleteGroup(row).then(response => {
-            const message = response?.data?.message || '操作完成'
-            ElMessage.success(message)
-            this.listLoading = false
-          })
-          const index = this.list.indexOf(row)
-          this.list.splice(index, 1)
-
-          ElMessage.success('删除成功!')
+        .then(() => deleteGroup(row))
+        .then(response => {
+          if (reportMutationError(response)) return
+          this.getList()
+          ElMessage.success(response?.data?.message || '删除成功')
         })
-        .catch(() => {
-          ElMessage.info('已取消删除')
+        .catch(action => {
+          if (action === 'cancel') ElMessage.info('已取消删除')
         })
     }
   }
@@ -488,66 +474,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.filter-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  align-items: center;
-
-  .filter-item {
-    margin-bottom: 0;
-    margin-right: 0;
-
-    &.search-input {
-      width: 100%;
-      max-width: 320px;
-    }
-
-    &.action-btn {
-      height: 42px;
-      padding: 0 22px;
-      border-radius: 14px;
-    }
-
-    &.action-btn-secondary {
-      min-width: 124px;
-    }
-  }
-
-  :deep(.view-switch) {
-    --el-switch-on-color: linear-gradient(90deg, #26efc7 0%, #3f8dff 100%);
-    --el-switch-off-color: rgba(104, 176, 255, 0.22);
-
-    .el-switch__core {
-      border-color: rgba(104, 176, 255, 0.24);
-      background: rgba(12, 31, 58, 0.72);
-      min-width: 46px;
-      height: 24px;
-    }
-
-    &.is-checked .el-switch__core {
-      border-color: rgba(54, 240, 203, 0.34);
-      background: linear-gradient(90deg, rgba(38, 239, 199, 0.88) 0%, rgba(63, 141, 255, 0.82) 100%);
-    }
-
-    .el-switch__action {
-      width: 18px;
-      height: 18px;
-      top: 2px;
-    }
-
-    .el-switch__label,
-    .el-switch__label * {
-      color: var(--platform-ink-dim) !important;
-    }
-
-    .el-switch__label.is-active,
-    .el-switch__label.is-active * {
-      color: var(--platform-ink) !important;
-    }
-  }
-}
-
 .table-shell {
   padding: 10px;
   max-width: 100%;
@@ -690,7 +616,7 @@ export default {
 
 .groups-card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
   gap: 18px;
   padding: 10px;
 }
@@ -789,16 +715,7 @@ export default {
   padding-top: 4px;
 }
 
-@media (max-width: 768px) {
-  .filter-container {
-    .filter-item {
-      &.search-input,
-      &.action-btn,
-      &.action-btn-secondary {
-        width: 100%;
-      }
-    }
-  }
+@media (max-width: 767px) {
 
   .setup-groups-page {
     .compact-btn {
