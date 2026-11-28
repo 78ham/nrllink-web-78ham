@@ -16,17 +16,9 @@ export function fetchEmployeeAllList(data) {
   })
 }
 
-export function fetchEmployee(id) {
-  return request({
-    url: '/user/detail',
-    method: 'get',
-    params: { id }
-  })
-}
-
 export function fetchEmployeeListsByRole(role) {
   return request({
-    url: '/user/emplistbyrole',
+    url: '/user/userlistbyrole',
     method: 'get',
     params: { role }
   })
@@ -55,12 +47,3 @@ export function deleteEmployee(data) {
     data
   })
 }
-
-export function changearea(data) {
-  return request({
-    url: '/user/changearea',
-    method: 'post',
-    data
-  })
-}
-

@@ -74,6 +74,7 @@
 
 <script>
 import { getToken } from '@/utils/auth'
+import request from '@/utils/request'
 import { Grid, Microphone, Bell, Connection } from '@element-plus/icons-vue'
 
 export default {
@@ -98,6 +99,7 @@ export default {
       wsRetryTimer: null,
       wsRetryDelay: 2000,
       wsPingTimer: null,
+      lastWsTicket: null,
       monitorDestroyed: false,
       rooms: [],
       recentCalls: [],
@@ -187,9 +189,8 @@ export default {
         this.audioWorker = null
       }
     },
-    buildMonitorWsUrl() {
+    buildMonitorWsUrl(ticket) {
       const baseApi = import.meta.env.VITE_BASE_API || ''
-      const token = getToken()
       let baseUrl = baseApi
 
       if (!baseUrl || baseUrl.startsWith('/')) {
@@ -198,7 +199,24 @@ export default {
 
       baseUrl = baseUrl.replace(/^http:/i, 'ws:').replace(/^https:/i, 'wss:')
       const url = `${baseUrl.replace(/\/$/, '')}/ws/calls`
+      // 优先短效一次性 ticket（/auth/ws-ticket 签发，30 秒有效、单次消费），
+      // 避免长效 JWT 出现在 nginx access.log；取不到 ticket 时回退 token 直连
+      if (ticket) {
+        return `${url}?ticket=${encodeURIComponent(ticket)}`
+      }
+      const token = getToken()
       return token ? `${url}?token=${encodeURIComponent(token)}` : url
+    },
+    async fetchWsTicket() {
+      // 后端该路由在 /api/v1 前缀下，需携带 x-token；失败时由调用方回退
+      const res = await request({
+        url: '/api/v1/auth/ws-ticket',
+        method: 'post'
+      })
+      if (res.code !== 20000 || !res.data?.ticket) {
+        throw new Error('获取 WS ticket 失败')
+      }
+      return res.data.ticket
     },
     connectMonitorWebSocket() {
       if (this.websock && (this.websock.readyState === WebSocket.OPEN || this.websock.readyState === WebSocket.CONNECTING)) {
@@ -209,41 +227,67 @@ export default {
         this.wsPingTimer = null
       }
 
-      const ws = new WebSocket(this.buildMonitorWsUrl())
-      ws.binaryType = 'arraybuffer'
-      ws.onopen = () => {
-        this.wsConnected = true
-        this.emitStatsChange()
-        this.wsRetryDelay = 2000 // 连接成功后重置退避
-        this.wsPingTimer = window.setInterval(() => {
-          if (this.websock && this.websock.readyState === WebSocket.OPEN) {
-            this.websock.send(JSON.stringify({ action: 'ping' }))
+      const openWithTicket = () => {
+        const ws = new WebSocket(this.buildMonitorWsUrl(this.lastWsTicket))
+        ws.binaryType = 'arraybuffer'
+        ws.onopen = () => {
+          this.wsConnected = true
+          this.emitStatsChange()
+          this.wsRetryDelay = 2000 // 连接成功后重置退避
+          this.wsPingTimer = window.setInterval(() => {
+            if (this.websock && this.websock.readyState === WebSocket.OPEN) {
+              this.websock.send(JSON.stringify({ action: 'ping' }))
+            }
+          }, 10000)
+        }
+        ws.onmessage = this.handleMonitorMessage
+        ws.onerror = () => {
+          this.wsConnected = false
+          this.emitStatsChange()
+        }
+        ws.onclose = () => {
+          this.wsConnected = false
+          this.emitStatsChange()
+          if (this.wsPingTimer) {
+            clearInterval(this.wsPingTimer)
+            this.wsPingTimer = null
           }
-        }, 10000)
-      }
-      ws.onmessage = this.handleMonitorMessage
-      ws.onerror = () => {
-        this.wsConnected = false
-        this.emitStatsChange()
-      }
-      ws.onclose = () => {
-        this.wsConnected = false
-        this.emitStatsChange()
-        if (this.wsPingTimer) {
-          clearInterval(this.wsPingTimer)
-          this.wsPingTimer = null
+          this.websock = null
+          if (!this.monitorDestroyed) {
+            // 指数退避重连：2s 起步、上限 30s，避免后端不可用时的无效重连风暴
+            // ticket 为一次性票据，重连前必须重新签发
+            this.lastWsTicket = null
+            const delay = this.wsRetryDelay
+            this.wsRetryDelay = Math.min(delay * 2, 30000)
+            this.wsRetryTimer = window.setTimeout(() => {
+              this.connectMonitorWebSocket()
+            }, delay)
+          }
         }
-        this.websock = null
-        if (!this.monitorDestroyed) {
-          // 指数退避重连：2s 起步、上限 30s，避免后端不可用时的无效重连风暴
-          const delay = this.wsRetryDelay
-          this.wsRetryDelay = Math.min(delay * 2, 30000)
-          this.wsRetryTimer = window.setTimeout(() => {
-            this.connectMonitorWebSocket()
-          }, delay)
-        }
+        this.websock = ws
       }
-      this.websock = ws
+
+      if (this.lastWsTicket) {
+        // 已持有未消费的 ticket 直接使用
+        openWithTicket()
+        return
+      }
+
+      if (!getToken()) {
+        // 未登录：匿名连接，由后端决定可见范围（仅公共房间只读快照）
+        openWithTicket()
+        return
+      }
+
+      // 登录状态：先取短效 ticket，失败（老后端无此路由/网络抖动）回退 token 直连
+      this.fetchWsTicket()
+        .then(ticket => {
+          this.lastWsTicket = ticket
+          openWithTicket()
+        })
+        .catch(() => {
+          openWithTicket()
+        })
     },
     handleMonitorMessage(event) {
       if (typeof event.data === 'string') {

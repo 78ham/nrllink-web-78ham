@@ -23,17 +23,6 @@ export function logout() {
   })
 }
 
-export function addUser(optype, data) {
-  return request({
-    url: '/user/adduser',
-    method: 'post',
-    data: {
-      optype,
-      data
-    }
-  })
-}
-
 export function password(data) {
   return request({
     url: '/user/password',

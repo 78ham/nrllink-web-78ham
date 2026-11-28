@@ -272,6 +272,16 @@ export const asyncRoutes = [
           title: 'rolemgr',
           roles: ['admin']
         }
+      },
+      {
+        path: 'plugins',
+        component: () =>
+          import('@/views/setup/plugins.vue'),
+        name: 'Plugins',
+        meta: {
+          title: 'plugins',
+          roles: ['admin']
+        }
       }
 
     ]

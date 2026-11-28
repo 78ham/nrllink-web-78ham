@@ -24,14 +24,6 @@ export function queryDevice(data) {
   })
 }
 
-export function bindDevice(data) {
-  return request({
-    url: '/device/binddevice',
-    method: 'post',
-    data
-  })
-}
-
 export function changeDeviceAT(data) {
   return request({
     url: '/device/at',
@@ -59,22 +51,6 @@ export function changeDevice1w(data) {
 export function changeDevice2w(data) {
   return request({
     url: '/device/change2w',
-    method: 'post',
-    data
-  })
-}
-
-export function fetchDeviceStats(data) {
-  return request({
-    url: '/device/stats',
-    method: 'post',
-    data
-  })
-}
-
-export function createDevice(data) {
-  return request({
-    url: '/device/create',
     method: 'post',
     data
   })

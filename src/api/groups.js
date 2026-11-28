@@ -28,30 +28,6 @@ export function fetchGroupListMini(data) {
   })
 }
 
-export function fetchMyGroupList(data) {
-  return request({
-    url: '/room/list',
-    method: 'post',
-    data
-  })
-}
-
-export function joinGroup(data) {
-  return request({
-    url: '/group/joinGroup',
-    method: 'post',
-    data
-  })
-}
-
-export function fetchGroupStats(data) {
-  return request({
-    url: '/group/stats',
-    method: 'post',
-    data
-  })
-}
-
 export function createGroup(data) {
   return request({
     url: '/group/create',

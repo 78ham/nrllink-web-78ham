@@ -8,14 +8,6 @@ export function fetchServerList(data) {
   })
 }
 
-export function fetchServerStats(data) {
-  return request({
-    url: '/server/stats',
-    method: 'post',
-    data
-  })
-}
-
 export function createServer(data) {
   return request({
     url: '/server/create',
